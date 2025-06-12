@@ -12,38 +12,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkGreen,
-    primaryContainer = DarkMintGreen,
+    primary = Green,
     onPrimary = White,
+    secondary = DarkMintGreen,
     onPrimaryContainer = White,
-    secondary = DarkGreen,
-    secondaryContainer = DarkMintGreen,
-    onSecondary = White,
-    onSecondaryContainer = MintGreen,
-    background = DarkGrayBackground,
-    onBackground = LightText,
+    onSecondaryContainer = DarkText,
     surface = DarkGrayBackground,
-    onSurface = LightText,
-    surfaceVariant = DarkGrayBackground,
-    onSurfaceVariant = GrayBorder
+    onSurface = White,
+    onSurfaceVariant = NavigationBar,
+    outlineVariant = LightGrayBorder,
+    outline = DarkGrayBorder
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Green,
     onPrimary = White,
-    primaryContainer = MintGreen,
-
+    secondary = MintGreen,
     onPrimaryContainer = DarkText,
-    secondary = Green,
-    secondaryContainer = MintGreen,
-    onSecondary = White,
     onSecondaryContainer = DarkText,
-    background = LightGrayBackground,
-    onBackground = DarkText,
-    surface = White,
+    surface = Surface,
     onSurface = DarkText,
-    surfaceVariant = LightGrayBackground,
-    onSurfaceVariant = Gray
+    onSurfaceVariant = NavigationBar,
+    outlineVariant = LightGrayBorder,
+    outline = Gray
 )
 
 @Composable

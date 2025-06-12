@@ -4,7 +4,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.R
+import com.coding.financialdetective.models.ContentInfo
 import com.coding.financialdetective.models.Expense
+import com.coding.financialdetective.models.LeadInfo
+import com.coding.financialdetective.models.ListItemModel
+import com.coding.financialdetective.models.TrailInfo
+import com.coding.financialdetective.ui.theme.White
+import com.coding.financialdetective.utils.formatNumberWithSpaces
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,10 +41,12 @@ class ExpensesViewModel : ViewModel() {
         return listOf(
             Expense("1", "Аренда квартиры", "Дом", 100000.0, "\uD83C\uDFE1"),
             Expense("2", "Одежда", null, 15000.0, "\uD83D\uDC57"),
-            Expense("3", "На собаку", "Дом", 7500.0, "\uD83D\uDC36"),
-            Expense("4", "Спортзал", "Вики", 8000.0, "\uD83C\uDFCB\uFE0F\u200D♂\uFE0F"),
-            Expense("5", "Медицина", null, 50000.0, "\uD83D\uDC8A"),
-            Expense("6", "Продукты", "Супермаркет", 25000.0, "\uD83C\uDF6D"),
+            Expense("3", "На собаку", "Джек", 7500.0, "\uD83D\uDC36"),
+            Expense("4", "На собаку", "Энни", 7500.0, "\uD83D\uDC36"),
+            Expense("5", "Спортзал", null, 8000.0, "\uD83C\uDFCB\uFE0F\u200D♂\uFE0F"),
+            Expense("6", "Медицина", null, 50000.0, "\uD83D\uDC8A"),
+            Expense("7", "Продукты", "Супермаркет", 25000.0, "\uD83C\uDF6D"),
+            Expense("8", "Ремонт квартиры", null, 40000.0, "РК"),
         )
     }
 }

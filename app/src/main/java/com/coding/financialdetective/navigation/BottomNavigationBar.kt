@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.coding.financialdetective.ui.theme.DarkText
 import com.coding.financialdetective.ui.theme.Gray
 import com.coding.financialdetective.ui.theme.Green
 import com.coding.financialdetective.ui.theme.MintGreen
@@ -45,8 +46,18 @@ fun BottomNavigationBar(navController: NavController) {
                     )
                 },
                 label = {
-                    Text(text = navItem.title)
-                }
+                    Text(
+                        text = navItem.title,
+                        style = if (currentDestination?.route == navItem.screen::class.qualifiedName) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelMedium
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Green,
+                    selectedTextColor = DarkText,
+                    indicatorColor = MintGreen,
+                    unselectedIconColor = Gray,
+                    unselectedTextColor = Gray
+                )
             )
         }
     }

@@ -25,9 +25,9 @@ fun TopBar(
         colors = TopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary, // Green
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer, //DarkText,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant, // Gray,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant, // Gray,
-            scrolledContainerColor = MaterialTheme.colorScheme.primaryContainer
+            navigationIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
+            actionIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
+            scrolledContainerColor = MaterialTheme.colorScheme.secondary
         ),
         title = {
             Text(
@@ -39,7 +39,7 @@ fun TopBar(
         },
         navigationIcon = {
             iconStart?.let { icon ->
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = { TODO() }) {
                     Icon(
                         painter = painterResource(icon),
                         contentDescription = "Localized description"
@@ -49,7 +49,7 @@ fun TopBar(
         },
         actions = {
             iconEnd?.let { icon ->
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = { TODO() }) {
                     Icon(
                         painter = painterResource(icon), //painterResource(R.drawable.ic_history),
                         contentDescription = "Localized description"

@@ -12,7 +12,6 @@ import com.coding.financialdetective.models.ContentInfo
 import com.coding.financialdetective.models.ListItemModel
 import com.coding.financialdetective.models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.ui.screens.incomes_screen.IncomesViewModel
 
 @Composable
 fun SettingsScreen(

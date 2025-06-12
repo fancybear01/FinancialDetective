@@ -5,11 +5,19 @@ import androidx.compose.ui.graphics.Color
 val Green = Color(0xFF2AE881)
 val MintGreen = Color(0xFFD4FAE6)
 val DarkText = Color(0xFF1D1B20)
+
 val Gray = Color(0xFF49454F)
+
 val White = Color(0xFFFFFFFF)
-val LightGrayBackground = Color(0xFFFEF7FF)
-val GrayBorder = Color(0xFFCAC4D0)
-val LightGray = Color(0x3C3C434D)
+val LightGrayBorder = Color(0xFFCAC4D0)
+
+val Surface = Color(0xFFFEF7FF)
+
+val NavigationBar = Color(0xFFF3EDF7)
+
+val LightGray = Color(0xFFECE6F0)
+
+val SwitchColor = Color(0xFF79747E)
 
 val DarkGreen = Color(0xFF1DB66A)
 val DarkMintGreen = Color(0xFF0A3D2C)

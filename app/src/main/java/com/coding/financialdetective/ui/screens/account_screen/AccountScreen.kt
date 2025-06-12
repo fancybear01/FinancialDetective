@@ -13,8 +13,6 @@ import com.coding.financialdetective.models.LeadInfo
 import com.coding.financialdetective.models.ListItemModel
 import com.coding.financialdetective.models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.ui.components.SummaryCard
-import com.coding.financialdetective.ui.screens.incomes_screen.IncomesViewModel
 import com.coding.financialdetective.ui.theme.White
 
 @Composable
@@ -50,13 +48,13 @@ fun AccountScreen(
     Column {
         ListItem(
             model = balanceItem,
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = currencyItem,
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondary,
             addDivider = false,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)

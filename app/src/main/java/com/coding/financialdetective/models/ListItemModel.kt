@@ -23,6 +23,9 @@ data class ContentInfo(
 )
 
 sealed interface TrailInfo {
+    data class Value(
+        val value: String
+    ) : TrailInfo
     data class ValueAndChevron(
         val value: String,
         @DrawableRes val chevronIcon: Int = R.drawable.ic_thin_chevron

@@ -30,6 +30,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.mappers.toListItemModel
 import com.coding.financialdetective.ui.components.ListItem
 import com.coding.financialdetective.ui.components.TopBar
+import com.coding.financialdetective.ui.theme.DarkText
+import com.coding.financialdetective.ui.theme.Gray
+import com.coding.financialdetective.ui.theme.LightGray
 
 @Composable
 fun SpendingItemsScreen(
@@ -96,7 +99,23 @@ fun SearchBar(
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
+            disabledIndicatorColor = Color.Transparent,
+
+            errorIndicatorColor = Color.Transparent,
+
+            focusedContainerColor = LightGray,
+            unfocusedContainerColor = LightGray,
+
+            focusedPlaceholderColor = Gray,
+            unfocusedPlaceholderColor = Gray,
+
+            focusedTextColor = DarkText,
+            unfocusedTextColor = DarkText,
+
+            focusedTrailingIconColor = Gray,
+            unfocusedTrailingIconColor = Gray,
+
+            cursorColor = Gray
         )
     )
 }

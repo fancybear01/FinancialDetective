@@ -1,28 +1,22 @@
 package com.coding.financialdetective.ui.screens.incomes_screen
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.coding.financialdetective.R
 import com.coding.financialdetective.mappers.toListItemModel
+import com.coding.financialdetective.models.ContentInfo
+import com.coding.financialdetective.models.ListItemModel
+import com.coding.financialdetective.models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.ui.components.SummaryCard
-import com.coding.financialdetective.ui.components.TopBar
+import com.coding.financialdetective.utils.formatNumberWithSpaces
 
 @Composable
 fun IncomesScreen(
@@ -30,27 +24,36 @@ fun IncomesScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        item {
-            SummaryCard(
-                label = "Всего",
-                amount = state.totalAmount
-            )
-        }
-
-        itemsIndexed(
-            items = state.incomes,
-            key = { _, income -> income.id }
-        ) { _, income ->
-            val model = income.toListItemModel()
-            ListItem(
-                model = model,
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 72.dp)
-            )
+    Column {
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(
+                    title = "Всего"
+                ),
+                trail = TrailInfo.Value(
+                    value = formatNumberWithSpaces(state.totalAmount) + " ₽"
+                ),
+                onClick = { TODO() }
+            ),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            itemsIndexed(
+                items = state.incomes,
+                key = { _, income -> income.id }
+            ) { _, income ->
+                val model = income.toListItemModel()
+                ListItem(
+                    model = model,
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 72.dp)
+                )
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ import com.coding.financialdetective.utils.formatNumberWithSpaces
 
 @Composable
 fun Expense.toListItemModel(
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    containerColor: Color = MaterialTheme.colorScheme.secondary,
     currencySymbol: String = "₽"
 ): ListItemModel {
     return ListItemModel(
@@ -55,7 +55,7 @@ fun Income.toListItemModel(
 
 @Composable
 fun SpendingItem.toListItemModel(
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    containerColor: Color = MaterialTheme.colorScheme.secondary,
 ): ListItemModel {
     return ListItemModel(
         lead = LeadInfo(

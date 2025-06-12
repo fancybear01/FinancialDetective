@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,18 +31,15 @@ import com.coding.financialdetective.models.ContentInfo
 import com.coding.financialdetective.models.LeadInfo
 import com.coding.financialdetective.models.ListItemModel
 import com.coding.financialdetective.models.TrailInfo
-import com.coding.financialdetective.ui.theme.DarkText
-import com.coding.financialdetective.ui.theme.Gray
-import com.coding.financialdetective.ui.theme.GrayBorder
-import com.coding.financialdetective.ui.theme.LightGray
+import com.coding.financialdetective.ui.theme.SwitchColor
 import com.coding.financialdetective.ui.theme.White
 
 @Composable
 fun ListItem(
     model: ListItemModel,
+    modifier: Modifier = Modifier,
     containerColor: Color = White,
     addDivider: Boolean = true,
-    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -123,15 +117,14 @@ private fun Content(
             Text(
                 text = info.subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.outline
             )
         }
         else {
             Text(
                 text = info.title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.align(Alignment.Start)
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -140,6 +133,13 @@ private fun Content(
 @Composable
 private fun TrailContent(info: TrailInfo) {
     when(info) {
+        is TrailInfo.Value -> {
+            Text(
+                text = info.value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
         is TrailInfo.ValueAndChevron -> {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -163,7 +163,14 @@ private fun TrailContent(info: TrailInfo) {
         is TrailInfo.Switch -> {
             Switch(
                 checked = info.isSwitched,
-                onCheckedChange = info.onSwitch
+                onCheckedChange = info.onSwitch,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.secondary,
+
+                    uncheckedThumbColor = SwitchColor,
+                    uncheckedBorderColor = SwitchColor
+                )
             )
         }
     }
