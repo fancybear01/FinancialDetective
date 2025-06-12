@@ -2,10 +2,17 @@ package com.coding.financialdetective.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Green = Color(0xFF2AE881)
+val MintGreen = Color(0xFFD4FAE6)
+val DarkText = Color(0xFF1D1B20)
+val Gray = Color(0xFF49454F)
+val White = Color(0xFFFFFFFF)
+val LightGrayBackground = Color(0xFFFEF7FF)
+val GrayBorder = Color(0xFFCAC4D0)
+val LightGray = Color(0x3C3C434D)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val DarkGreen = Color(0xFF1DB66A)
+val DarkMintGreen = Color(0xFF0A3D2C)
+val LightText = Color(0xFFE6E1E5)
+val DarkGrayBackground = Color(0xFF1D1B20)
+val DarkGrayBorder = Color(0xFF49454F)
