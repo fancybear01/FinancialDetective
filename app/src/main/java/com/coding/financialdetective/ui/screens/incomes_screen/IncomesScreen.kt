@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.mappers.toListItemModel
-import com.coding.financialdetective.models.ContentInfo
-import com.coding.financialdetective.models.ListItemModel
-import com.coding.financialdetective.models.TrailInfo
+import com.coding.financialdetective.models.domain_models.ContentInfo
+import com.coding.financialdetective.models.domain_models.ListItemModel
+import com.coding.financialdetective.models.domain_models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
 import com.coding.financialdetective.utils.formatNumberWithSpaces
 

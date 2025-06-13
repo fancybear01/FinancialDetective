@@ -1,4 +1,4 @@
-package com.coding.financialdetective.ui.screens.spending_items_screen
+package com.coding.financialdetective.ui.screens.categories_screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -23,20 +21,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.mappers.toListItemModel
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.ui.components.TopBar
 import com.coding.financialdetective.ui.theme.DarkText
 import com.coding.financialdetective.ui.theme.Gray
 import com.coding.financialdetective.ui.theme.LightGray
 
 @Composable
-fun SpendingItemsScreen(
-    viewModel: SpendingItemsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+fun CategoriesScreen(
+    viewModel: CategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }

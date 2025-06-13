@@ -2,8 +2,7 @@ package com.coding.financialdetective.ui.screens.account_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.coding.financialdetective.models.Account
-import com.coding.financialdetective.models.Income
+import com.coding.financialdetective.models.domain_models.Account
 import com.coding.financialdetective.utils.formatNumberWithSpaces
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

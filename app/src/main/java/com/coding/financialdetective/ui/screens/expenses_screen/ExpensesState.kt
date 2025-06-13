@@ -1,6 +1,6 @@
 package com.coding.financialdetective.ui.screens.expenses_screen
 
-import com.coding.financialdetective.models.Expense
+import com.coding.financialdetective.models.domain_models.Expense
 
 data class ExpensesState(
     val totalAmount: Double = 0.0,

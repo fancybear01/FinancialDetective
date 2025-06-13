@@ -1,4 +1,4 @@
-package com.coding.financialdetective.models
+package com.coding.financialdetective.models.domain_models
 
 data class Income(
     val id: String,

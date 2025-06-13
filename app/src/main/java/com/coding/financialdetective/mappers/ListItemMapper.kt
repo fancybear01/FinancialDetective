@@ -3,13 +3,13 @@ package com.coding.financialdetective.mappers
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.coding.financialdetective.models.ContentInfo
-import com.coding.financialdetective.models.Expense
-import com.coding.financialdetective.models.Income
-import com.coding.financialdetective.models.LeadInfo
-import com.coding.financialdetective.models.ListItemModel
-import com.coding.financialdetective.models.SpendingItem
-import com.coding.financialdetective.models.TrailInfo
+import com.coding.financialdetective.models.domain_models.ContentInfo
+import com.coding.financialdetective.models.domain_models.Expense
+import com.coding.financialdetective.models.domain_models.Income
+import com.coding.financialdetective.models.domain_models.LeadInfo
+import com.coding.financialdetective.models.domain_models.ListItemModel
+import com.coding.financialdetective.models.domain_models.Category
+import com.coding.financialdetective.models.domain_models.TrailInfo
 import com.coding.financialdetective.utils.formatNumberWithSpaces
 
 @Composable
@@ -54,7 +54,7 @@ fun Income.toListItemModel(
 }
 
 @Composable
-fun SpendingItem.toListItemModel(
+fun Category.toListItemModel(
     containerColor: Color = MaterialTheme.colorScheme.secondary,
 ): ListItemModel {
     return ListItemModel(

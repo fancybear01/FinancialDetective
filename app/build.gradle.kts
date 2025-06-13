@@ -60,4 +60,8 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.lottie.compose)
+
+    implementation(libs.androidx.core.splashscreen)
 }

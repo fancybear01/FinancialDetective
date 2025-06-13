@@ -2,7 +2,7 @@ package com.coding.financialdetective.ui.screens.incomes_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.coding.financialdetective.models.Income
+import com.coding.financialdetective.models.domain_models.Income
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

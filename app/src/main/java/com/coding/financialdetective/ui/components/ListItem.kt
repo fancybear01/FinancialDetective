@@ -27,10 +27,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.coding.financialdetective.models.ContentInfo
-import com.coding.financialdetective.models.LeadInfo
-import com.coding.financialdetective.models.ListItemModel
-import com.coding.financialdetective.models.TrailInfo
+import com.coding.financialdetective.models.domain_models.ContentInfo
+import com.coding.financialdetective.models.domain_models.LeadInfo
+import com.coding.financialdetective.models.domain_models.ListItemModel
+import com.coding.financialdetective.models.domain_models.TrailInfo
 import com.coding.financialdetective.ui.theme.SwitchColor
 import com.coding.financialdetective.ui.theme.White
 
@@ -85,6 +85,9 @@ fun ListItem(
 
 @Composable
 private fun LeadContent(info: LeadInfo) {
+    val isText = info.emoji.all { it.isLetterOrDigit() }
+
+    val fontSize = if (isText) 10.sp else 16.sp
     Box(
         modifier = Modifier
             .size(24.dp)
@@ -94,7 +97,7 @@ private fun LeadContent(info: LeadInfo) {
     ) {
         Text(
             text = info.emoji,
-            fontSize = 16.sp,
+            fontSize = fontSize,
             textAlign = TextAlign.Center
         )
     }

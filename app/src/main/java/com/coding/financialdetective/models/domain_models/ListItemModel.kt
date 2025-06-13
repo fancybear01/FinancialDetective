@@ -1,8 +1,7 @@
-package com.coding.financialdetective.models
+package com.coding.financialdetective.models.domain_models
 
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.coding.financialdetective.R
 
 data class ListItemModel(

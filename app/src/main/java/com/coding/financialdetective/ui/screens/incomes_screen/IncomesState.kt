@@ -1,7 +1,6 @@
 package com.coding.financialdetective.ui.screens.incomes_screen
 
-import com.coding.financialdetective.models.Expense
-import com.coding.financialdetective.models.Income
+import com.coding.financialdetective.models.domain_models.Income
 
 data class IncomesState(
     val totalAmount: Double = 0.0,

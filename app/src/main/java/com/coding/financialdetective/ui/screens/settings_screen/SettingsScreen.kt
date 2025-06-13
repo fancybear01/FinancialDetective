@@ -8,9 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.coding.financialdetective.R
-import com.coding.financialdetective.models.ContentInfo
-import com.coding.financialdetective.models.ListItemModel
-import com.coding.financialdetective.models.TrailInfo
+import com.coding.financialdetective.models.domain_models.ContentInfo
+import com.coding.financialdetective.models.domain_models.ListItemModel
+import com.coding.financialdetective.models.domain_models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
 
 @Composable
