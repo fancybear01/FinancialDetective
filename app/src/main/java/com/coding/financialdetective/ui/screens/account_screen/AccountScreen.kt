@@ -8,10 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.coding.financialdetective.models.domain_models.ContentInfo
-import com.coding.financialdetective.models.domain_models.LeadInfo
-import com.coding.financialdetective.models.domain_models.ListItemModel
-import com.coding.financialdetective.models.domain_models.TrailInfo
+import com.coding.financialdetective.models.ui_models.ContentInfo
+import com.coding.financialdetective.models.ui_models.LeadInfo
+import com.coding.financialdetective.models.ui_models.ListItemModel
+import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
 import com.coding.financialdetective.ui.theme.White
 
@@ -30,7 +30,7 @@ fun AccountScreen(
             title = "Баланс"
         ),
         trail = TrailInfo.ValueAndChevron(
-            value = "-670 000 ₽"
+            title = "-670 000 ₽"
         ),
         onClick = { TODO() }
     )
@@ -40,7 +40,7 @@ fun AccountScreen(
             title = "Валюта"
         ),
         trail = TrailInfo.ValueAndChevron(
-            value = "₽"
+            title = "₽"
         ),
         onClick = { TODO() }
     )
@@ -48,13 +48,13 @@ fun AccountScreen(
     Column {
         ListItem(
             model = balanceItem,
-            containerColor = MaterialTheme.colorScheme.secondary,
+            containerColorForIcon = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = currencyItem,
-            containerColor = MaterialTheme.colorScheme.secondary,
+            containerColorForIcon = MaterialTheme.colorScheme.secondary,
             addDivider = false,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)

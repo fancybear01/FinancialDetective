@@ -2,7 +2,7 @@ package com.coding.financialdetective.ui.screens.categories_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.coding.financialdetective.models.domain_models.Category
+import com.coding.financialdetective.models.domain_models.CategoryModelOld
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,14 +28,14 @@ class CategoriesViewModel : ViewModel() {
         }
     }
 
-    private fun getFakeSpendingItems(): List<Category> {
+    private fun getFakeSpendingItems(): List<CategoryModelOld> {
         return listOf(
-            Category("1", "Аренда квартиры", "\uD83C\uDFE1"),
-            Category("2", "Одежда", "\uD83D\uDC57"),
-            Category("3", "На собаку", "\uD83D\uDC36"),
-            Category("4", "Спортзал", "\uD83C\uDFCB\uFE0F\u200D♂\uFE0F"),
-            Category("5", "Медицина", "\uD83D\uDC8A"),
-            Category("6", "Продукты", "\uD83C\uDF6D"),
+            CategoryModelOld("1", "Аренда квартиры", "\uD83C\uDFE1"),
+            CategoryModelOld("2", "Одежда", "\uD83D\uDC57"),
+            CategoryModelOld("3", "На собаку", "\uD83D\uDC36"),
+            CategoryModelOld("4", "Спортзал", "\uD83C\uDFCB\uFE0F\u200D♂\uFE0F"),
+            CategoryModelOld("5", "Медицина", "\uD83D\uDC8A"),
+            CategoryModelOld("6", "Продукты", "\uD83C\uDF6D"),
         )
     }
 }

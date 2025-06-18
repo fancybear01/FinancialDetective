@@ -1,4 +1,4 @@
-package com.coding.financialdetective.utils
+package com.coding.financialdetective.core.presentation.util
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols

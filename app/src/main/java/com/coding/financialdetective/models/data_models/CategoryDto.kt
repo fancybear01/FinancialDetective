@@ -1,6 +1,9 @@
 package com.coding.financialdetective.models.data_models
 
-data class Category(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CategoryDto(
     val id: Int,
     val name: String,
     val emoji: String,

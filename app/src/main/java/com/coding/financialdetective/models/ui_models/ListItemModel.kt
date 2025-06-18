@@ -1,4 +1,4 @@
-package com.coding.financialdetective.models.domain_models
+package com.coding.financialdetective.models.ui_models
 
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
@@ -23,10 +23,12 @@ data class ContentInfo(
 
 sealed interface TrailInfo {
     data class Value(
-        val value: String
+        val title: String,
+        val subtitle: String? = null,
     ) : TrailInfo
     data class ValueAndChevron(
-        val value: String,
+        val title: String,
+        val subtitle: String? = null,
         @DrawableRes val chevronIcon: Int = R.drawable.ic_thin_chevron
     ) : TrailInfo
     data class Chevron(

@@ -1,19 +1,37 @@
 package com.coding.financialdetective.navigation
 
+import kotlinx.serialization.Serializable
+
 sealed interface Screen {
+    val route: String
 
-    @kotlinx.serialization.Serializable
-    data object Expenses : Screen
+    @Serializable
+    data object Expenses : Screen {
+        override val route = "expenses"
+    }
 
-    @kotlinx.serialization.Serializable
-    data object Incomes : Screen
+    @Serializable
+    data object Incomes : Screen {
+        override val route = "incomes"
+    }
 
-    @kotlinx.serialization.Serializable
-    data object Account : Screen
+    @Serializable
+    data object Account : Screen {
+        override val route = "account"
+    }
 
-    @kotlinx.serialization.Serializable
-    data object SpendingItems : Screen
+    @Serializable
+    data object SpendingItems : Screen {
+        override val route = "spending_items"
+    }
 
-    @kotlinx.serialization.Serializable
-    data object Settings : Screen
+    @Serializable
+    data object Settings : Screen {
+        override val route = "settings"
+    }
+
+    @Serializable
+    data object MyHistory : Screen {
+        override val route = "history"
+    }
 }

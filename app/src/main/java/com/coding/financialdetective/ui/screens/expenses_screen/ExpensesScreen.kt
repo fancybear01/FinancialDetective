@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.mappers.toListItemModel
-import com.coding.financialdetective.models.domain_models.ContentInfo
-import com.coding.financialdetective.models.domain_models.ListItemModel
-import com.coding.financialdetective.models.domain_models.TrailInfo
+import com.coding.financialdetective.models.ui_models.ContentInfo
+import com.coding.financialdetective.models.ui_models.ListItemModel
+import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.utils.formatNumberWithSpaces
+import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
 
 @Composable
 fun ExpensesScreen(
@@ -34,11 +34,11 @@ fun ExpensesScreen(
                     title = "Всего"
                 ),
                 trail = TrailInfo.Value(
-                    value = formatNumberWithSpaces(state.totalAmount) + " ₽"
+                    title = formatNumberWithSpaces(state.totalAmount) + " ₽"
                 ),
                 onClick = { TODO() }
             ),
-            containerColor = MaterialTheme.colorScheme.secondary,
+            containerColorForIcon = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
@@ -57,7 +57,7 @@ fun ExpensesScreen(
                     model = model,
                     modifier = Modifier
                         .defaultMinSize(minHeight = 72.dp),
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColorForIcon = MaterialTheme.colorScheme.surface
                 )
             }
         }

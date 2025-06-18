@@ -1,4 +1,4 @@
-package com.coding.financialdetective.ui.screens.incomes_screen
+package com.coding.financialdetective.ui.screens.my_history_screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -16,22 +16,20 @@ import com.coding.financialdetective.models.ui_models.ContentInfo
 import com.coding.financialdetective.models.ui_models.ListItemModel
 import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.ui.components.ListItem
-import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
 
 @Composable
-fun IncomesScreen(
-    viewModel: IncomesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+fun MyHistoryScreen(
+    viewModel: MyHistoryViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
     Column {
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(
-                    title = "Всего"
+                    title = "Начало"
                 ),
                 trail = TrailInfo.Value(
-                    title = formatNumberWithSpaces(state.totalAmount) + " ₽"
+                    title = state.periodStart
                 ),
                 onClick = { TODO() }
             ),
@@ -39,19 +37,47 @@ fun IncomesScreen(
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(
+                    title = "Конец"
+                ),
+                trail = TrailInfo.Value(
+                    title = state.periodEnd
+                ),
+                onClick = { TODO() }
+            ),
+            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+        )
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(
+                    title = "Сумма"
+                ),
+                trail = TrailInfo.Value(
+                    title = state.totalAmount
+                ),
+                onClick = { TODO() }
+            ),
+            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp),
+            addDivider = false
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             itemsIndexed(
-                items = state.incomes,
-                key = { _, income -> income.id }
-            ) { _, income ->
-                val model = income.toListItemModel()
+                items = state.listItems,
+                key = { _, item -> item.id }
+            ) { _, transaction ->
                 ListItem(
-                    model = model,
+                    model = transaction.toListItemModel(),
                     modifier = Modifier
-                        .defaultMinSize(minHeight = 72.dp)
+                        .defaultMinSize(minHeight = 70.dp)
                 )
             }
         }

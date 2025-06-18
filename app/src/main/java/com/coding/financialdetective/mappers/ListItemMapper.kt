@@ -3,14 +3,15 @@ package com.coding.financialdetective.mappers
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.coding.financialdetective.models.domain_models.ContentInfo
+import com.coding.financialdetective.models.ui_models.ContentInfo
 import com.coding.financialdetective.models.domain_models.Expense
 import com.coding.financialdetective.models.domain_models.Income
-import com.coding.financialdetective.models.domain_models.LeadInfo
-import com.coding.financialdetective.models.domain_models.ListItemModel
-import com.coding.financialdetective.models.domain_models.Category
-import com.coding.financialdetective.models.domain_models.TrailInfo
-import com.coding.financialdetective.utils.formatNumberWithSpaces
+import com.coding.financialdetective.models.ui_models.LeadInfo
+import com.coding.financialdetective.models.ui_models.ListItemModel
+import com.coding.financialdetective.models.domain_models.CategoryModelOld
+import com.coding.financialdetective.models.ui_models.TrailInfo
+import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
+import com.coding.financialdetective.models.ui_models.TransactionUi
 
 @Composable
 fun Expense.toListItemModel(
@@ -27,7 +28,7 @@ fun Expense.toListItemModel(
             subtitle = this.subcategory
         ),
         trail = TrailInfo.ValueAndChevron(
-            value = formatNumberWithSpaces(this.amount) + " " + currencySymbol
+            title = formatNumberWithSpaces(this.amount) + " " + currencySymbol
         ),
         onClick = {
             TODO()
@@ -45,7 +46,7 @@ fun Income.toListItemModel(
             title = this.value
         ),
         trail = TrailInfo.ValueAndChevron(
-            value = formatNumberWithSpaces(this.amount) + " " + currencySymbol
+            title = formatNumberWithSpaces(this.amount) + " " + currencySymbol
         ),
         onClick = {
             TODO()
@@ -54,7 +55,7 @@ fun Income.toListItemModel(
 }
 
 @Composable
-fun Category.toListItemModel(
+fun CategoryModelOld.toListItemModel(
     containerColor: Color = MaterialTheme.colorScheme.secondary,
 ): ListItemModel {
     return ListItemModel(
@@ -64,6 +65,28 @@ fun Category.toListItemModel(
         ),
         content = ContentInfo(
             title = this.name
+        ),
+        onClick = {
+            TODO()
+        }
+    )
+}
+
+@Composable
+fun TransactionUi.toListItemModel(
+    containerColor: Color = MaterialTheme.colorScheme.secondary
+): ListItemModel {
+    return ListItemModel(
+        lead = LeadInfo(
+            emoji = this.categoryEmoji,
+            containerColor = containerColor
+        ),
+        content = ContentInfo(
+            title = this.comment
+        ),
+        trail = TrailInfo.ValueAndChevron(
+            title = this.formattedAmount,
+            subtitle = this.formattedDate
         ),
         onClick = {
             TODO()
