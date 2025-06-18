@@ -12,7 +12,6 @@ import com.coding.financialdetective.models.domain_models.Transaction
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.statement.HttpResponse
 
 class RemoteTransactionDataSource(
     private val httpClient: HttpClient

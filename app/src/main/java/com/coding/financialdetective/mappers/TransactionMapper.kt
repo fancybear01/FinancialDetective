@@ -6,6 +6,7 @@ import com.coding.financialdetective.models.data_models.TransactionResponseDto
 import com.coding.financialdetective.models.domain_models.Transaction
 import com.coding.financialdetective.models.ui_models.TransactionUi
 import java.time.ZonedDateTime
+import java.util.Locale
 
 fun TransactionResponseDto.toDomain(): Transaction {
     return Transaction(
@@ -27,6 +28,10 @@ fun Transaction.toUiModel(): TransactionUi {
         categoryEmoji = this.category.emoji,
         comment = this.comment,
         formattedAmount = formatNumberWithSpaces(this.amount) + " " + this.account.currency,
-        formattedDate = this.transactionDate.format(DateTimeFormatter.ofPattern("HH:mm"))
+        formattedDate = this.transactionDate.format(
+            DateTimeFormatter.ofPattern("dd MMMM HH:mm").withLocale(
+                Locale("ru")
+            )
+        )
     )
 }

@@ -1,5 +1,6 @@
 package com.coding.financialdetective.ui.screens.categories_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,14 +36,16 @@ fun CategoriesScreen(
     viewModel: CategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
 
         SearchBar(
-            query = searchQuery,
+            query = state.searchQuery,
             onQueryChange = { newQuery ->
-                searchQuery = newQuery
+                viewModel.onSearchQueryChanged(newQuery)
             }
         )
         HorizontalDivider(
@@ -55,10 +58,10 @@ fun CategoriesScreen(
         ) {
 
             itemsIndexed(
-                items = state.results,
-                key = { _, result -> result.id }
-            ) { _, result ->
-                val model = result.toListItemModel()
+                items = state.listItems,
+                key = { _, category -> category.id }
+            ) { _, category ->
+                val model = category.toListItemModel()
                 ListItem(
                     model = model,
                     modifier = Modifier

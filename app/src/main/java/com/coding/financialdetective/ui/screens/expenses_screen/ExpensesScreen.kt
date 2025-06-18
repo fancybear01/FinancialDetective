@@ -38,7 +38,7 @@ fun ExpensesScreen(
                 ),
                 onClick = { TODO() }
             ),
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
@@ -57,7 +57,7 @@ fun ExpensesScreen(
                     model = model,
                     modifier = Modifier
                         .defaultMinSize(minHeight = 72.dp),
-                    containerColorForIcon = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             }
         }

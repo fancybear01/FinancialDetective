@@ -1,5 +1,6 @@
 package com.coding.financialdetective.ui.screens.my_history_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +23,10 @@ fun MyHistoryScreen(
     viewModel: MyHistoryViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    Column {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(
@@ -33,7 +37,7 @@ fun MyHistoryScreen(
                 ),
                 onClick = { TODO() }
             ),
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
@@ -47,7 +51,7 @@ fun MyHistoryScreen(
                 ),
                 onClick = { TODO() }
             ),
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
@@ -61,7 +65,7 @@ fun MyHistoryScreen(
                 ),
                 onClick = { TODO() }
             ),
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp),
             addDivider = false

@@ -1,9 +1,10 @@
 package com.coding.financialdetective.ui.screens.categories_screen
 
-import com.coding.financialdetective.models.domain_models.CategoryModelOld
+import com.coding.financialdetective.models.ui_models.CategoryUi
 
 data class CategoriesState(
     val searchQuery: String = "",
-    var results: List<CategoryModelOld> = emptyList(),
-    val isLoading: Boolean = false
+    var listItems: List<CategoryUi> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
 )

@@ -13,7 +13,7 @@ data class ListItemModel(
 
 data class LeadInfo(
     val emoji: String,
-    val containerColor: Color
+    val containerColorForIcon: Color
 )
 
 data class ContentInfo(

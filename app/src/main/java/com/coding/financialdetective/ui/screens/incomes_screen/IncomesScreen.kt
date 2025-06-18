@@ -35,7 +35,7 @@ fun IncomesScreen(
                 ),
                 onClick = { TODO() }
             ),
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )

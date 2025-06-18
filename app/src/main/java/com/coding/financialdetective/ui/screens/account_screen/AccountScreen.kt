@@ -24,7 +24,7 @@ fun AccountScreen(
     val balanceItem = ListItemModel(
         lead = LeadInfo(
             emoji = "💰",
-            containerColor = White
+            containerColorForIcon = White
         ),
         content = ContentInfo(
             title = "Баланс"
@@ -48,13 +48,13 @@ fun AccountScreen(
     Column {
         ListItem(
             model = balanceItem,
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = currencyItem,
-            containerColorForIcon = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.secondary,
             addDivider = false,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)

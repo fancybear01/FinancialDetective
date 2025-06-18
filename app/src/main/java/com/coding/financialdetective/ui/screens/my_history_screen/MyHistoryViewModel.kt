@@ -18,9 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import java.util.Locale
 
 class MyHistoryViewModel : ViewModel() {
@@ -36,7 +34,7 @@ class MyHistoryViewModel : ViewModel() {
         loadInitialTransactions(1)
     }
 
-    fun loadInitialTransactions(accountId: Int) {
+    private fun loadInitialTransactions(accountId: Int) {
         val today = LocalDate.now()
         val startOfMonth = today.withDayOfMonth(1)
         val startDate = startOfMonth.toString()
@@ -45,7 +43,7 @@ class MyHistoryViewModel : ViewModel() {
         loadTransactionsForPeriod(accountId = accountId, startDate = startDate, endDate = endDate)
     }
 
-    fun loadTransactionsForPeriod(
+    private fun loadTransactionsForPeriod(
         accountId: Int,
         startDate: String,
         endDate: String
@@ -69,7 +67,7 @@ class MyHistoryViewModel : ViewModel() {
                     ).replaceFirstChar { it.titlecase(Locale("ru")) }
 
                     val currentTime = LocalDateTime.now()
-                    val formattedEnd = currentTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale("ru")))
+                    val formattedEnd = currentTime.format(DateTimeFormatter.ofPattern("dd MMMM HH:mm", Locale("ru")))
 
                     _state.update {
                         it.copy(

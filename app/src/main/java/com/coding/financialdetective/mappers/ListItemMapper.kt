@@ -11,17 +11,18 @@ import com.coding.financialdetective.models.ui_models.ListItemModel
 import com.coding.financialdetective.models.domain_models.CategoryModelOld
 import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
+import com.coding.financialdetective.models.ui_models.CategoryUi
 import com.coding.financialdetective.models.ui_models.TransactionUi
 
 @Composable
 fun Expense.toListItemModel(
-    containerColor: Color = MaterialTheme.colorScheme.secondary,
+    containerColorForIcon: Color = MaterialTheme.colorScheme.secondary,
     currencySymbol: String = "₽"
 ): ListItemModel {
     return ListItemModel(
         lead = LeadInfo(
             emoji = this.emoji,
-            containerColor = containerColor
+            containerColorForIcon = containerColorForIcon
         ),
         content = ContentInfo(
             title = this.category,
@@ -55,16 +56,20 @@ fun Income.toListItemModel(
 }
 
 @Composable
-fun CategoryModelOld.toListItemModel(
-    containerColor: Color = MaterialTheme.colorScheme.secondary,
+fun TransactionUi.toListItemModel(
+    containerColorForIcon: Color = MaterialTheme.colorScheme.secondary
 ): ListItemModel {
     return ListItemModel(
         lead = LeadInfo(
-            emoji = this.emoji,
-            containerColor = containerColor
+            emoji = this.categoryEmoji,
+            containerColorForIcon = containerColorForIcon
         ),
         content = ContentInfo(
-            title = this.name
+            title = this.comment
+        ),
+        trail = TrailInfo.ValueAndChevron(
+            title = this.formattedAmount,
+            subtitle = this.formattedDate
         ),
         onClick = {
             TODO()
@@ -73,20 +78,16 @@ fun CategoryModelOld.toListItemModel(
 }
 
 @Composable
-fun TransactionUi.toListItemModel(
-    containerColor: Color = MaterialTheme.colorScheme.secondary
+fun CategoryUi.toListItemModel(
+    containerColorForIcon: Color = MaterialTheme.colorScheme.secondary
 ): ListItemModel {
     return ListItemModel(
         lead = LeadInfo(
-            emoji = this.categoryEmoji,
-            containerColor = containerColor
+            emoji = this.emoji,
+            containerColorForIcon = containerColorForIcon
         ),
         content = ContentInfo(
-            title = this.comment
-        ),
-        trail = TrailInfo.ValueAndChevron(
-            title = this.formattedAmount,
-            subtitle = this.formattedDate
+            title = this.name
         ),
         onClick = {
             TODO()

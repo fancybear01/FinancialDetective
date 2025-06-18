@@ -38,12 +38,12 @@ import com.coding.financialdetective.ui.theme.White
 fun ListItem(
     model: ListItemModel,
     modifier: Modifier = Modifier,
-    containerColorForIcon: Color = White,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     addDivider: Boolean = true,
 ) {
     Column(
         modifier = modifier
-            .background(containerColorForIcon)
+            .background(containerColor)
     ) {
 
         Row(
@@ -92,7 +92,7 @@ private fun LeadContent(info: LeadInfo) {
         modifier = Modifier
             .size(24.dp)
             .clip(CircleShape)
-            .background(info.containerColor),
+            .background(info.containerColorForIcon),
         contentAlignment = Alignment.Center
     ) {
         Text(
