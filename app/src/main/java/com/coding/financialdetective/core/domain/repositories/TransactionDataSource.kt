@@ -6,7 +6,7 @@ import com.coding.financialdetective.models.domain_models.Transaction
 
 interface TransactionDataSource {
     suspend fun getTransactionsForPeriod(
-        accountId: Int,
+        accountId: String,
         startDate: String,
         endDate: String
     ): Result<List<Transaction>, NetworkError>

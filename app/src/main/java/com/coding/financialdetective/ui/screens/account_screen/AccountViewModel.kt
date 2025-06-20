@@ -1,40 +1,63 @@
 package com.coding.financialdetective.ui.screens.account_screen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.coding.financialdetective.models.domain_models.Account
-import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
+import com.coding.financialdetective.core.data.remote.RemoteAccountDataSource
+import com.coding.financialdetective.core.domain.repositories.AccountDataSource
+import com.coding.financialdetective.core.domain.util.onError
+import com.coding.financialdetective.core.domain.util.onSuccess
+import com.coding.financialdetective.core.networking.HttpClientFactory
+import com.coding.financialdetective.mappers.toUiModel
+import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AccountViewModel : ViewModel() {
+class AccountViewModel(private val accountId: String) : ViewModel() {
     private val _state = MutableStateFlow(AccountState())
     val state: StateFlow<AccountState> = _state.asStateFlow()
+    private val accountDataSource: AccountDataSource = RemoteAccountDataSource(
+        HttpClientFactory.create(
+            CIO.create()
+        )
+    )
 
     init {
-        loadAccounts()
+        loadAccountById()
     }
 
-    private fun loadAccounts() {
+    private fun loadAccountById() {
         viewModelScope.launch {
-            val fakeAccounts = getFakeAccount()
-            _state.value = AccountState(
-                balance = fakeAccounts.balance
-            )
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            accountDataSource
+                .getAccountById(accountId)
+                .onSuccess { accountResponse ->
+                    val account = accountResponse.toUiModel()
+                    _state.update {
+                        it.copy(
+                            accountName = account.name,
+                            balance = account.balance,
+                            currency = account.currency,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                }
+                .onError {  }
         }
     }
+}
 
-    private fun getFakeAccount(): Account {
-        return Account(
-            id = "1",
-            userId = 1,
-            name = "Сберегательный счет",
-            balance = formatNumberWithSpaces(6700000.0),
-            currency = "RUB",
-            createdAt = "2023-01-01T00:00:00Z",
-            updatedAt = "2023-01-01T00:00:00Z",
-        )
+class AccountViewModelFactory(private val accountId: String) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AccountViewModel(accountId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

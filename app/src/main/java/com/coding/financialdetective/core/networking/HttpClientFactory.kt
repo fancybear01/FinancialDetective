@@ -15,10 +15,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import com.coding.financialdetective.BuildConfig
 
 object HttpClientFactory {
 
-    private var bearerToken: String? = "REDACTED"
+    private var bearerToken: String? = BuildConfig.API_KEY
 
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {

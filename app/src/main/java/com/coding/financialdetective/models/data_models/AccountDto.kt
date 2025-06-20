@@ -1,6 +1,9 @@
 package com.coding.financialdetective.models.data_models
 
-data class Account(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AccountDto(
     val id: Int,
     val userId: Int,
     val name: String,

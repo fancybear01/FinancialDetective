@@ -16,18 +16,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.coding.financialdetective.MainViewModel
 import com.coding.financialdetective.R
 import com.coding.financialdetective.navigation.BottomNavigationBar
 import com.coding.financialdetective.navigation.Screen
 import com.coding.financialdetective.ui.components.TopBar
 import com.coding.financialdetective.ui.screens.account_screen.AccountScreen
 import com.coding.financialdetective.ui.screens.categories_screen.CategoriesScreen
-import com.coding.financialdetective.ui.screens.expenses_screen.ExpensesScreen
-import com.coding.financialdetective.ui.screens.incomes_screen.IncomesScreen
+import com.coding.financialdetective.ui.screens.expenses_incomes_screens.ExpensesScreen
+import com.coding.financialdetective.ui.screens.expenses_incomes_screens.IncomesScreen
 import com.coding.financialdetective.ui.screens.my_history_screen.MyHistoryScreen
 import com.coding.financialdetective.ui.screens.settings_screen.SettingsScreen
 
@@ -39,18 +44,27 @@ fun MainScreen() {
 
     val selectedItem = remember { mutableStateOf<Screen>(Screen.Expenses) }
 
-    val currentScreen: Screen? = when (currentDestination?.route) {
-        Screen.Expenses.route -> Screen.Expenses
-        Screen.Incomes.route -> Screen.Incomes
-        Screen.Account.route -> Screen.Account
-        Screen.SpendingItems.route -> Screen.SpendingItems
-        Screen.Settings.route -> Screen.Settings
-        Screen.MyHistory.route -> Screen.MyHistory
+    val currentScreen: Screen? = when {
+        currentDestination?.route?.startsWith(Screen.Expenses.route) == true -> Screen.Expenses
+        currentDestination?.route?.startsWith(Screen.Incomes.route) == true -> Screen.Incomes
+        currentDestination?.route?.startsWith(Screen.Account.route) == true -> Screen.Account
+        currentDestination?.route?.startsWith(Screen.SpendingItems.route) == true -> Screen.SpendingItems
+        currentDestination?.route?.startsWith(Screen.Settings.route) == true -> Screen.Settings
+        currentDestination?.route?.startsWith(Screen.MyHistory.baseRoute) == true -> {
+            val route = currentDestination.route ?: ""
+            val transactionType = if (route.contains('/')) {
+                route.substringAfter('/')
+            } else {
+                "expense"
+            }
+            Screen.MyHistory(transactionType)
+        }
+
         else -> null
     }
 
     LaunchedEffect(currentScreen) {
-        if (currentScreen != null && currentScreen != Screen.MyHistory) {
+        if (currentScreen != null && currentScreen !is Screen.MyHistory) {
             selectedItem.value = currentScreen
         }
     }
@@ -61,23 +75,29 @@ fun MainScreen() {
                 is Screen.Expenses -> TopBar(
                     text = "Расходы сегодня",
                     iconEnd = R.drawable.ic_history,
-                    onEndIconClick = { navController.navigate(Screen.MyHistory.route) }
+                    onEndIconClick = { navController.navigate("${Screen.MyHistory.baseRoute}/expense") }
                 )
+
                 is Screen.Incomes -> TopBar(
                     text = "Доходы сегодня",
-                    iconEnd = R.drawable.ic_history
+                    iconEnd = R.drawable.ic_history,
+                    onEndIconClick = { navController.navigate("${Screen.MyHistory.baseRoute}/income") }
                 )
+
                 is Screen.SpendingItems -> TopBar(text = "Мои статьи")
                 is Screen.Account -> TopBar(
                     text = "Мой счёт",
                     iconEnd = R.drawable.ic_edit
                 )
+
                 is Screen.Settings -> TopBar(text = "Настройки")
                 is Screen.MyHistory -> TopBar(
                     text = "Моя история",
                     iconStart = R.drawable.left_arrow,
+                    iconEnd = R.drawable.ic_analysis,
                     onStartIconClick = { navController.popBackStack() }
                 )
+
                 else -> {}
             }
         },
@@ -96,6 +116,7 @@ fun MainScreen() {
                         Icon(Icons.Default.Add, "Добавить")
                     }
                 }
+
                 else -> {}
             }
         },
@@ -126,8 +147,17 @@ fun MainScreen() {
             composable(Screen.Settings.route) {
                 SettingsScreen()
             }
-            composable(Screen.MyHistory.route) {
-                MyHistoryScreen()
+            composable(
+                route = "${Screen.MyHistory.baseRoute}/{transactionType}",
+                arguments = listOf(
+                    navArgument("transactionType") {
+                        type = NavType.StringType
+                        defaultValue = "expense"
+                    }
+                )) { backStackEntry ->
+                val transactionType =
+                    backStackEntry.arguments?.getString("transactionType") ?: "expense"
+                MyHistoryScreen(transactionType = transactionType)
             }
         }
     }

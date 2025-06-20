@@ -1,8 +1,7 @@
-package com.coding.financialdetective.models.domain_models
+package com.coding.financialdetective.models.ui_models
 
-data class Account(
-    val id: String,
-    val userId: Int,
+data class AccountUi(
+    val id: Int,
     val name: String,
     val balance: String,
     val currency: String,

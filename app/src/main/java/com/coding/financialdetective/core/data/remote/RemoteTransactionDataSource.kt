@@ -17,7 +17,7 @@ class RemoteTransactionDataSource(
     private val httpClient: HttpClient
 ): TransactionDataSource {
     override suspend fun getTransactionsForPeriod(
-        accountId: Int,
+        accountId: String,
         startDate: String,
         endDate: String
     ): Result<List<Transaction>, NetworkError> {

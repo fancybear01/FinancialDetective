@@ -8,6 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.coding.financialdetective.MainViewModel
 import com.coding.financialdetective.models.ui_models.ContentInfo
 import com.coding.financialdetective.models.ui_models.LeadInfo
 import com.coding.financialdetective.models.ui_models.ListItemModel
@@ -16,10 +18,17 @@ import com.coding.financialdetective.ui.components.ListItem
 import com.coding.financialdetective.ui.theme.White
 
 @Composable
-fun AccountScreen(
-    viewModel: AccountViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+fun AccountScreen() {
+    val mainViewModel: MainViewModel = viewModel()
+    val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
+    val accountId = currentAccount?.id ?: ""
+
+    val accountViewModel: AccountViewModel = viewModel(
+        factory = AccountViewModelFactory(accountId.toString()),
+        key = "account_$accountId"
+    )
+
+    val state by accountViewModel.state.collectAsStateWithLifecycle()
 
     val balanceItem = ListItemModel(
         lead = LeadInfo(
@@ -30,7 +39,7 @@ fun AccountScreen(
             title = "Баланс"
         ),
         trail = TrailInfo.ValueAndChevron(
-            title = "-670 000 ₽"
+            title = state.balance
         ),
         onClick = { TODO() }
     )
@@ -40,7 +49,7 @@ fun AccountScreen(
             title = "Валюта"
         ),
         trail = TrailInfo.ValueAndChevron(
-            title = "₽"
+            title = state.currency
         ),
         onClick = { TODO() }
     )

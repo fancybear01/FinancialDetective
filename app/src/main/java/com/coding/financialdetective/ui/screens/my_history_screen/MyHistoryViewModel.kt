@@ -1,7 +1,7 @@
 package com.coding.financialdetective.ui.screens.my_history_screen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.core.data.remote.RemoteTransactionDataSource
 import com.coding.financialdetective.core.domain.repositories.TransactionDataSource
@@ -21,7 +21,15 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MyHistoryViewModel : ViewModel() {
+class MyHistoryViewModel(
+    private val accountId: String,
+    transactionType: String,
+) : ViewModel() {
+    private val categoryTypeToLoad = if (transactionType.equals("income", ignoreCase = true)) {
+        CategoryType.INCOME
+    } else {
+        CategoryType.EXPENSE
+    }
     private val _state = MutableStateFlow(MyHistoryScreenState())
     val state = _state.asStateFlow()
     private val transactionDataSource: TransactionDataSource = RemoteTransactionDataSource(
@@ -31,43 +39,58 @@ class MyHistoryViewModel : ViewModel() {
     )
 
     init {
-        loadInitialTransactions(1)
+        loadInitialTransactions(accountId)
     }
 
-    private fun loadInitialTransactions(accountId: Int) {
+    private fun loadInitialTransactions(accountId: String) {
         val today = LocalDate.now()
         val startOfMonth = today.withDayOfMonth(1)
         val startDate = startOfMonth.toString()
         val endDate = today.toString()
-
+        _state.update { it.copy(startDate = startOfMonth, endDate = today) }
         loadTransactionsForPeriod(accountId = accountId, startDate = startDate, endDate = endDate)
     }
 
+    fun updateStartDate(newStartDate: LocalDate) {
+        _state.update { it.copy(startDate = newStartDate) }
+        loadTransactionsForPeriod("1", newStartDate.toString(), _state.value.endDate.toString())
+    }
+
+    fun updateEndDate(newEndDate: LocalDate) {
+        _state.update { it.copy(endDate = newEndDate) }
+        loadTransactionsForPeriod("1", _state.value.startDate.toString(), newEndDate.toString())
+    }
+
     private fun loadTransactionsForPeriod(
-        accountId: Int,
+        accountId: String,
         startDate: String,
         endDate: String
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            val periodStartDate = try { LocalDate.parse(startDate) } catch (e: Exception) { LocalDate.now() }
+            val periodStartDate = try { LocalDate.parse(startDate) } catch (e: Exception) { LocalDate.now().withDayOfMonth(1) }
+            val periodEndDate = try { LocalDate.parse(endDate) } catch (e: Exception) { LocalDate.now() }
 
             transactionDataSource
                 .getTransactionsForPeriod(accountId, startDate, endDate)
                 .onSuccess { transactions ->
-                    val sortedTransactions = transactions.filter { it.category.type == CategoryType.EXPENSE  }.sortedByDescending { it.transactionDate }
+                    val sortedTransactions = transactions
+                        .filter { it.category.type == categoryTypeToLoad }
+                        .sortedBy { it.transactionDate }
 
                     val total = sortedTransactions.sumOf { it.amount }
 
                     val listItems = sortedTransactions.map { it.toUiModel() }
 
-                    val formattedStart = periodStartDate.format(
-                        DateTimeFormatter.ofPattern("LLLL yyyy", Locale("ru"))
-                    ).replaceFirstChar { it.titlecase(Locale("ru")) }
+                    val startFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale("ru"))
+                    val formattedStart = periodStartDate.format(startFormatter)
 
-                    val currentTime = LocalDateTime.now()
-                    val formattedEnd = currentTime.format(DateTimeFormatter.ofPattern("dd MMMM HH:mm", Locale("ru")))
+                    val formattedEnd = if (periodEndDate.isEqual(LocalDate.now())) {
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMMM HH:mm", Locale("ru")))
+                    } else {
+                        periodEndDate.format(startFormatter)
+                    }
 
                     _state.update {
                         it.copy(
@@ -75,7 +98,9 @@ class MyHistoryViewModel : ViewModel() {
                             listItems = listItems,
                             totalAmount = formatNumberWithSpaces(total) + " ₽",
                             periodStart = formattedStart,
-                            periodEnd = formattedEnd
+                            periodEnd = formattedEnd,
+                            startDate = periodStartDate,
+                            endDate = periodEndDate
                         )
                     }
                 }
@@ -83,5 +108,18 @@ class MyHistoryViewModel : ViewModel() {
 
                 }
         }
+    }
+}
+
+class MyHistoryViewModelFactory(
+    private val accountId: String,
+    private val transactionType: String
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MyHistoryViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MyHistoryViewModel(accountId, transactionType) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

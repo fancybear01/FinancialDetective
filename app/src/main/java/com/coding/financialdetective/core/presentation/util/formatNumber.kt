@@ -6,14 +6,22 @@ import java.util.Locale
 import kotlin.math.roundToLong
 
 fun formatNumberWithSpaces(number: Double): String {
-    val longValue = number.roundToLong()
+    val isInteger = number % 1 == 0.0
 
-    val formatter = DecimalFormat("#,###")
+    val formatter = if (isInteger) {
+        DecimalFormat("#,###")
+    } else {
+        DecimalFormat("#,###.##").apply {
+            minimumFractionDigits = 1
+            maximumFractionDigits = 2
+        }
+    }
 
-    val symbols = DecimalFormatSymbols(Locale.getDefault())
-    symbols.groupingSeparator = ' '
+    val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+        groupingSeparator = ' '
+        decimalSeparator = '.'
+    }
 
     formatter.decimalFormatSymbols = symbols
-
-    return formatter.format(longValue)
+    return formatter.format(number)
 }
