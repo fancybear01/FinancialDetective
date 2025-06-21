@@ -25,10 +25,10 @@ fun TopBar(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     CenterAlignedTopAppBar(
         colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary, // Green
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer, //DarkText,
-            navigationIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
-            actionIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.outline,
+            actionIconContentColor = MaterialTheme.colorScheme.outline,
             scrolledContainerColor = MaterialTheme.colorScheme.secondary
         ),
         title = {
@@ -44,6 +44,7 @@ fun TopBar(
                 IconButton(onClick = onStartIconClick) {
                     Icon(
                         painter = painterResource(icon),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         contentDescription = "Localized description"
                     )
                 }

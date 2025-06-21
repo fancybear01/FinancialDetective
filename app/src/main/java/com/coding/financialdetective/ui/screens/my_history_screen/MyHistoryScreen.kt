@@ -1,12 +1,14 @@
 package com.coding.financialdetective.ui.screens.my_history_screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,10 +33,14 @@ import androidx.compose.runtime.setValue
 import java.time.Instant
 import java.time.ZoneId
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.coding.financialdetective.MainViewModel
+import com.coding.financialdetective.ui.components.FullScreenError
 import com.coding.financialdetective.ui.theme.DarkText
 import com.coding.financialdetective.ui.theme.Gray
 import com.coding.financialdetective.ui.theme.LightGray
@@ -57,6 +63,8 @@ fun MyHistoryScreen(
         key = "history_${accountId}_$transactionType"
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val currentError = state.error
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
@@ -194,70 +202,90 @@ fun MyHistoryScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        ListItem(
-            model = ListItemModel(
-                content = ContentInfo(
-                    title = "Начало"
-                ),
-                trail = TrailInfo.Value(
-                    title = state.periodStart
-                ),
-                onClick = {
-                    showStartDatePicker = true
-                }
-            ),
-            containerColor = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .defaultMinSize(minHeight = 56.dp)
-        )
-        ListItem(
-            model = ListItemModel(
-                content = ContentInfo(
-                    title = "Конец"
-                ),
-                trail = TrailInfo.Value(
-                    title = state.periodEnd
-                ),
-                onClick = {
-                    showStartDatePicker = true
-                }
-            ),
-            containerColor = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .defaultMinSize(minHeight = 56.dp)
-        )
-        ListItem(
-            model = ListItemModel(
-                content = ContentInfo(
-                    title = "Сумма"
-                ),
-                trail = TrailInfo.Value(
-                    title = state.totalAmount
-                ),
-                onClick = { }
-            ),
-            containerColor = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .defaultMinSize(minHeight = 56.dp),
-            addDivider = false
-        )
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            itemsIndexed(
-                items = state.listItems,
-                key = { _, item -> item.id }
-            ) { _, transaction ->
+    when {
+        state.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        currentError != null -> {
+            FullScreenError(
+                errorMessage = currentError.asString(context),
+                onRetryClick = { viewModel.retry() }
+            )
+        }
+
+        else -> {
+
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
                 ListItem(
-                    model = transaction.toListItemModel(),
+                    model = ListItemModel(
+                        content = ContentInfo(
+                            title = "Начало"
+                        ),
+                        trail = TrailInfo.Value(
+                            title = state.periodStart
+                        ),
+                        onClick = {
+                            showStartDatePicker = true
+                        }
+                    ),
+                    containerColor = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
-                        .defaultMinSize(minHeight = 70.dp)
+                        .defaultMinSize(minHeight = 56.dp)
                 )
+                ListItem(
+                    model = ListItemModel(
+                        content = ContentInfo(
+                            title = "Конец"
+                        ),
+                        trail = TrailInfo.Value(
+                            title = state.periodEnd
+                        ),
+                        onClick = {
+                            showEndDatePicker = true
+                        }
+                    ),
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 56.dp)
+                )
+                ListItem(
+                    model = ListItemModel(
+                        content = ContentInfo(
+                            title = "Сумма"
+                        ),
+                        trail = TrailInfo.Value(
+                            title = state.totalAmount
+                        ),
+                        onClick = { }
+                    ),
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 56.dp),
+                    addDivider = false
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    itemsIndexed(
+                        items = state.listItems,
+                        key = { _, item -> item.id }
+                    ) { _, transaction ->
+                        ListItem(
+                            model = transaction.toListItemModel(),
+                            modifier = Modifier
+                                .defaultMinSize(minHeight = 70.dp)
+                        )
+                    }
+                }
             }
         }
     }

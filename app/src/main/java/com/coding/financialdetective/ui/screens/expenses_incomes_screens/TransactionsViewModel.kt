@@ -8,7 +8,7 @@ import com.coding.financialdetective.core.domain.repositories.TransactionDataSou
 import com.coding.financialdetective.core.domain.util.onError
 import com.coding.financialdetective.core.domain.util.onSuccess
 import com.coding.financialdetective.core.networking.HttpClientFactory
-import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
+import com.coding.financialdetective.core.presentation.util.toUiText
 import com.coding.financialdetective.mappers.toUiModel
 import com.coding.financialdetective.models.domain_models.CategoryType
 import com.coding.financialdetective.models.domain_models.Transaction
@@ -50,37 +50,49 @@ class TransactionsViewModel(
                 .onSuccess { items ->
                     transactions = items
                 }
-                .onError {
-
+                .onError { networkError ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = networkError.toUiText()
+                        )
+                    }
                 }
 
             when (transactionType) {
                 TransactionType.EXPENSE -> {
-                    val expenses = transactions.filter { it.category.type == CategoryType.EXPENSE  }
+                    val expenses = transactions.filter { it.category.type == CategoryType.EXPENSE }
                     val total = expenses.sumOf { it.amount }
                     val uiModels = expenses.map { it.toUiModel() }
 
-                    _state.value = TransactionsState(
-                        totalAmount = total,
-                        transactions = uiModels,
-                        isLoading = false
-                    )
+                    _state.update {
+                        it.copy(
+                            totalAmount = total,
+                            transactions = uiModels,
+                            isLoading = false
+                        )
+                    }
                 }
+
                 TransactionType.INCOME -> {
-                    val incomes = transactions.filter { it.category.type == CategoryType.INCOME  }
+                    val incomes = transactions.filter { it.category.type == CategoryType.INCOME }
                     val total = incomes.sumOf { it.amount }
                     val uiModels = incomes.map { it.toUiModel() }
 
-                    _state.value = TransactionsState(
-                        totalAmount = total,
-                        transactions = uiModels,
-                        isLoading = false
-                    )
+                    _state.update {
+                        it.copy(
+                            totalAmount = total,
+                            transactions = uiModels,
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }
     }
-
+    fun retry() {
+        loadTransactions(accountId)
+    }
 }
 
 class TransactionsViewModelFactory(

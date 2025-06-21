@@ -5,7 +5,7 @@ import com.coding.financialdetective.core.domain.util.NetworkError
 import com.coding.financialdetective.core.domain.util.Result
 import com.coding.financialdetective.core.domain.util.map
 import com.coding.financialdetective.core.networking.constructUrl
-import com.coding.financialdetective.core.networking.safeCall
+import com.coding.financialdetective.core.networking.safeCallWithRetry
 import com.coding.financialdetective.mappers.toDomain
 import com.coding.financialdetective.models.data_models.TransactionResponseDto
 import com.coding.financialdetective.models.domain_models.Transaction
@@ -21,7 +21,7 @@ class RemoteTransactionDataSource(
         startDate: String,
         endDate: String
     ): Result<List<Transaction>, NetworkError> {
-        return safeCall<List<TransactionResponseDto>> {
+        return safeCallWithRetry<List<TransactionResponseDto>> {
             httpClient.get(constructUrl("transactions/account/$accountId/period")) {
                 parameter("startDate", startDate)
                 parameter("endDate", endDate)

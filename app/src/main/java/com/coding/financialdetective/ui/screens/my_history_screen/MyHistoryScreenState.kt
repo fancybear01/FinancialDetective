@@ -1,6 +1,7 @@
 package com.coding.financialdetective.ui.screens.my_history_screen
 
 import com.coding.financialdetective.core.domain.util.NetworkError
+import com.coding.financialdetective.core.domain.util.UiText
 import com.coding.financialdetective.models.ui_models.TransactionUi
 import java.time.LocalDate
 
@@ -12,5 +13,5 @@ data class MyHistoryScreenState(
     val periodStart: String = "",
     val periodEnd: String = "",
     val totalAmount: String = "",
-    val error: NetworkError? = null
+    val error: UiText? = null
 )

@@ -9,6 +9,7 @@ import com.coding.financialdetective.core.domain.util.onError
 import com.coding.financialdetective.core.domain.util.onSuccess
 import com.coding.financialdetective.core.networking.HttpClientFactory
 import com.coding.financialdetective.core.presentation.util.formatNumberWithSpaces
+import com.coding.financialdetective.core.presentation.util.toUiText
 import com.coding.financialdetective.mappers.toUiModel
 import com.coding.financialdetective.models.domain_models.CategoryType
 import io.ktor.client.engine.cio.CIO
@@ -39,26 +40,29 @@ class MyHistoryViewModel(
     )
 
     init {
-        loadInitialTransactions(accountId)
-    }
-
-    private fun loadInitialTransactions(accountId: String) {
         val today = LocalDate.now()
         val startOfMonth = today.withDayOfMonth(1)
-        val startDate = startOfMonth.toString()
-        val endDate = today.toString()
         _state.update { it.copy(startDate = startOfMonth, endDate = today) }
-        loadTransactionsForPeriod(accountId = accountId, startDate = startDate, endDate = endDate)
+        reloadData()
     }
 
     fun updateStartDate(newStartDate: LocalDate) {
         _state.update { it.copy(startDate = newStartDate) }
-        loadTransactionsForPeriod("1", newStartDate.toString(), _state.value.endDate.toString())
+        reloadData()
     }
 
     fun updateEndDate(newEndDate: LocalDate) {
         _state.update { it.copy(endDate = newEndDate) }
-        loadTransactionsForPeriod("1", _state.value.startDate.toString(), newEndDate.toString())
+        reloadData()
+    }
+
+    private fun reloadData() {
+        val currentState = _state.value
+        loadTransactionsForPeriod(
+            accountId = accountId,
+            startDate = currentState.startDate.toString(),
+            endDate = currentState.endDate.toString()
+        )
     }
 
     private fun loadTransactionsForPeriod(
@@ -67,10 +71,18 @@ class MyHistoryViewModel(
         endDate: String
     ) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null, listItems = emptyList(), totalAmount = "") }
 
-            val periodStartDate = try { LocalDate.parse(startDate) } catch (e: Exception) { LocalDate.now().withDayOfMonth(1) }
-            val periodEndDate = try { LocalDate.parse(endDate) } catch (e: Exception) { LocalDate.now() }
+            val periodStartDate = try {
+                LocalDate.parse(startDate)
+            } catch (e: Exception) {
+                LocalDate.now().withDayOfMonth(1)
+            }
+            val periodEndDate = try {
+                LocalDate.parse(endDate)
+            } catch (e: Exception) {
+                LocalDate.now()
+            }
 
             transactionDataSource
                 .getTransactionsForPeriod(accountId, startDate, endDate)
@@ -83,11 +95,12 @@ class MyHistoryViewModel(
 
                     val listItems = sortedTransactions.map { it.toUiModel() }
 
-                    val startFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale("ru"))
+                    val startFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale("ru"))
                     val formattedStart = periodStartDate.format(startFormatter)
 
                     val formattedEnd = if (periodEndDate.isEqual(LocalDate.now())) {
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMMM HH:mm", Locale("ru")))
+                        LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale("ru")))
                     } else {
                         periodEndDate.format(startFormatter)
                     }
@@ -104,10 +117,19 @@ class MyHistoryViewModel(
                         )
                     }
                 }
-                .onError {
-
+                .onError { networkError ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = networkError.toUiText()
+                        )
+                    }
                 }
         }
+    }
+
+    fun retry() {
+        reloadData()
     }
 }
 

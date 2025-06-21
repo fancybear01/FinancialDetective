@@ -8,6 +8,7 @@ import com.coding.financialdetective.core.domain.repositories.AccountDataSource
 import com.coding.financialdetective.core.domain.util.onError
 import com.coding.financialdetective.core.domain.util.onSuccess
 import com.coding.financialdetective.core.networking.HttpClientFactory
+import com.coding.financialdetective.core.presentation.util.toUiText
 import com.coding.financialdetective.mappers.toUiModel
 import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +18,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountViewModel(private val accountId: String) : ViewModel() {
+
     private val _state = MutableStateFlow(AccountState())
     val state: StateFlow<AccountState> = _state.asStateFlow()
+
     private val accountDataSource: AccountDataSource = RemoteAccountDataSource(
         HttpClientFactory.create(
             CIO.create()
@@ -47,8 +50,19 @@ class AccountViewModel(private val accountId: String) : ViewModel() {
                         )
                     }
                 }
-                .onError {  }
+                .onError { networkError ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = networkError.toUiText()
+                        )
+                    }
+                }
         }
+    }
+
+    fun retry() {
+        loadAccountById()
     }
 }
 

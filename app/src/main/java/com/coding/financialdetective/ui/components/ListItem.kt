@@ -32,7 +32,6 @@ import com.coding.financialdetective.models.ui_models.LeadInfo
 import com.coding.financialdetective.models.ui_models.ListItemModel
 import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.ui.theme.SwitchColor
-import com.coding.financialdetective.ui.theme.White
 
 @Composable
 fun ListItem(
@@ -110,7 +109,7 @@ private fun Content(
 ) {
 
     Column(modifier = modifier) {
-        if (info.subtitle != null) {
+        if (!info.subtitle.isNullOrEmpty()) {
             Text(
                 text = info.title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -137,7 +136,7 @@ private fun TrailContent(trailInfo: TrailInfo) {
     when (trailInfo) {
         is TrailInfo.Value -> {
             Column(horizontalAlignment = Alignment.End) {
-                if (trailInfo.subtitle != null) {
+                if (!trailInfo.subtitle.isNullOrEmpty()) {
                     Text(
                         text = trailInfo.title,
                         style = MaterialTheme.typography.bodyLarge,
@@ -165,7 +164,7 @@ private fun TrailContent(trailInfo: TrailInfo) {
         is TrailInfo.ValueAndChevron -> {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(horizontalAlignment = Alignment.End) {
-                    if (trailInfo.subtitle != null) {
+                    if (!trailInfo.subtitle.isNullOrEmpty()) {
                         Text(
                             text = trailInfo.title,
                             style = MaterialTheme.typography.bodyLarge,

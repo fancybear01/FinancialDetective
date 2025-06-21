@@ -29,7 +29,7 @@ fun TransactionUi.toListItemModel(
             subtitle = if (showDate) this.formattedDate else null,
         ),
         onClick = {
-            TODO()
+            /* TODO() */
         }
     )
 }
@@ -47,7 +47,7 @@ fun CategoryUi.toListItemModel(
             title = this.name
         ),
         onClick = {
-            TODO()
+            /* TODO() */
         }
     )
 }

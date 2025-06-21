@@ -4,19 +4,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.coding.financialdetective.ui.theme.DarkText
-import com.coding.financialdetective.ui.theme.Gray
-import com.coding.financialdetective.ui.theme.Green
-import com.coding.financialdetective.ui.theme.MintGreen
 
 @Composable
 fun BottomNavigationBar(

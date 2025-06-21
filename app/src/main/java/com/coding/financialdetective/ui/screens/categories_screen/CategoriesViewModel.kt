@@ -7,6 +7,7 @@ import com.coding.financialdetective.core.domain.repositories.CategoriesDataSour
 import com.coding.financialdetective.core.domain.util.onError
 import com.coding.financialdetective.core.domain.util.onSuccess
 import com.coding.financialdetective.core.networking.HttpClientFactory
+import com.coding.financialdetective.core.presentation.util.toUiText
 import com.coding.financialdetective.mappers.toUiModel
 import com.coding.financialdetective.models.ui_models.CategoryUi
 import io.ktor.client.engine.cio.CIO
@@ -24,10 +25,13 @@ class CategoriesViewModel : ViewModel() {
             CIO.create()
         )
     )
+
     private var fullCategoriesList: List<CategoryUi> = emptyList()
+
     init {
         loadSpendingItems()
     }
+
     fun onSearchQueryChanged(query: String) {
         _state.update { it.copy(searchQuery = query) }
 
@@ -41,6 +45,7 @@ class CategoriesViewModel : ViewModel() {
 
         _state.update { it.copy(listItems = filteredList) }
     }
+
     private fun loadSpendingItems() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
@@ -58,7 +63,18 @@ class CategoriesViewModel : ViewModel() {
                         )
                     }
                 }
-                .onError {  }
+                .onError { networkError ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = networkError.toUiText()
+                        )
+                    }
+                }
         }
+    }
+
+    fun retry() {
+        loadSpendingItems()
     }
 }

@@ -15,13 +15,13 @@ import com.coding.financialdetective.ui.theme.FinancialDetectiveTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<MainViewModel>()
+    private val mainViewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen().apply {
             setKeepOnScreenCondition{
-                !viewModel.isReady.value
+                !mainViewModel.isReady.value
             }
             setOnExitAnimationListener { screen ->
                 val zoomX = ObjectAnimator.ofFloat(
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             FinancialDetectiveTheme {
-                MainScreen()
+                MainScreen(mainViewModel = mainViewModel)
             }
         }
     }

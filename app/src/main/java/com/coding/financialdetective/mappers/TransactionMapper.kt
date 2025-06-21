@@ -29,7 +29,7 @@ fun Transaction.toUiModel(): TransactionUi {
         comment = this.comment,
         formattedAmount = formatNumberWithSpaces(this.amount) + " " + this.account.currency,
         formattedDate = this.transactionDate.format(
-            DateTimeFormatter.ofPattern("dd MMMM HH:mm").withLocale(
+            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm").withLocale(
                 Locale("ru")
             )
         )
