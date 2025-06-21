@@ -27,18 +27,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.coding.financialdetective.models.domain_models.ContentInfo
-import com.coding.financialdetective.models.domain_models.LeadInfo
-import com.coding.financialdetective.models.domain_models.ListItemModel
-import com.coding.financialdetective.models.domain_models.TrailInfo
+import com.coding.financialdetective.models.ui_models.ContentInfo
+import com.coding.financialdetective.models.ui_models.LeadInfo
+import com.coding.financialdetective.models.ui_models.ListItemModel
+import com.coding.financialdetective.models.ui_models.TrailInfo
 import com.coding.financialdetective.ui.theme.SwitchColor
-import com.coding.financialdetective.ui.theme.White
 
 @Composable
 fun ListItem(
     model: ListItemModel,
     modifier: Modifier = Modifier,
-    containerColor: Color = White,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     addDivider: Boolean = true,
 ) {
     Column(
@@ -54,7 +53,7 @@ fun ListItem(
                     horizontal = 16.dp,
                     vertical = 8.dp
                 ),
-                verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             model.lead?.let { leadInfo ->
                 LeadContent(info = leadInfo)
@@ -71,7 +70,7 @@ fun ListItem(
 
             model.trail?.let { trailInfo ->
                 Spacer(modifier = Modifier.width(16.dp))
-                TrailContent(info = trailInfo)
+                TrailContent(trailInfo = trailInfo)
             }
         }
         if (addDivider) {
@@ -92,7 +91,7 @@ private fun LeadContent(info: LeadInfo) {
         modifier = Modifier
             .size(24.dp)
             .clip(CircleShape)
-            .background(info.containerColor),
+            .background(info.containerColorForIcon),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -110,7 +109,7 @@ private fun Content(
 ) {
 
     Column(modifier = modifier) {
-        if (info.subtitle != null) {
+        if (!info.subtitle.isNullOrEmpty()) {
             Text(
                 text = info.title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -122,8 +121,7 @@ private fun Content(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline
             )
-        }
-        else {
+        } else {
             Text(
                 text = info.title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -134,39 +132,80 @@ private fun Content(
 }
 
 @Composable
-private fun TrailContent(info: TrailInfo) {
-    when(info) {
+private fun TrailContent(trailInfo: TrailInfo) {
+    when (trailInfo) {
         is TrailInfo.Value -> {
-            Text(
-                text = info.value,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                if (!trailInfo.subtitle.isNullOrEmpty()) {
+                    Text(
+                        text = trailInfo.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.End,
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = trailInfo.subtitle,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.End,
+                    )
+                } else {
+                    Text(
+                        text = trailInfo.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.End,
+                    )
+                }
+            }
         }
+
         is TrailInfo.ValueAndChevron -> {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = info.value,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    if (!trailInfo.subtitle.isNullOrEmpty()) {
+                        Text(
+                            text = trailInfo.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.End,
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = trailInfo.subtitle,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.End,
+                        )
+                    } else {
+                        Text(
+                            text = trailInfo.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                }
                 Spacer(Modifier.width(16.dp))
                 Icon(
-                    painter = painterResource(info.chevronIcon),
+                    painter = painterResource(trailInfo.chevronIcon),
                     contentDescription = null,
                 )
             }
         }
+
         is TrailInfo.Chevron -> {
             Icon(
-                painter = painterResource(info.chevronIcon),
+                painter = painterResource(trailInfo.chevronIcon),
                 contentDescription = null,
             )
         }
+
         is TrailInfo.Switch -> {
             Switch(
-                checked = info.isSwitched,
-                onCheckedChange = info.onSwitch,
+                checked = trailInfo.isSwitched,
+                onCheckedChange = trailInfo.onSwitch,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.secondary,

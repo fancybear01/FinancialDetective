@@ -1,5 +1,7 @@
 package com.coding.financialdetective.ui.screens.categories_screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,11 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.mappers.toListItemModel
+import com.coding.financialdetective.ui.components.FullScreenError
 import com.coding.financialdetective.ui.components.ListItem
 import com.coding.financialdetective.ui.theme.DarkText
 import com.coding.financialdetective.ui.theme.Gray
@@ -35,37 +41,58 @@ fun CategoriesScreen(
     viewModel: CategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
-
-    Column {
-
-        SearchBar(
-            query = searchQuery,
-            onQueryChange = { newQuery ->
-                searchQuery = newQuery
+    val context = LocalContext.current
+    val currentError = state.error
+    when {
+        state.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        )
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp
-        )
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
+        }
 
-            itemsIndexed(
-                items = state.results,
-                key = { _, result -> result.id }
-            ) { _, result ->
-                val model = result.toListItemModel()
-                ListItem(
-                    model = model,
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 72.dp)
+        currentError != null -> {
+            FullScreenError(
+                errorMessage = currentError.asString(context),
+                onRetryClick = { viewModel.retry() }
+            )
+        }
+
+        else -> {
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+
+                SearchBar(
+                    query = state.searchQuery,
+                    onQueryChange = { newQuery ->
+                        viewModel.onSearchQueryChanged(newQuery)
+                    }
                 )
-            }
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    thickness = 1.dp
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                ) {
 
+                    itemsIndexed(
+                        items = state.listItems,
+                        key = { _, category -> category.id }
+                    ) { _, category ->
+                        val model = category.toListItemModel()
+                        ListItem(
+                            model = model,
+                            modifier = Modifier
+                                .defaultMinSize(minHeight = 72.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

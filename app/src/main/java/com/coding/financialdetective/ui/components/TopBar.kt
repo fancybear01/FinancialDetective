@@ -18,15 +18,17 @@ import androidx.compose.ui.text.style.TextOverflow
 fun TopBar(
     text: String,
     iconStart: Int? = null,
-    iconEnd: Int? = null
+    iconEnd: Int? = null,
+    onStartIconClick: () -> Unit = {},
+    onEndIconClick: () -> Unit = {}
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     CenterAlignedTopAppBar(
         colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary, // Green
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer, //DarkText,
-            navigationIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
-            actionIconContentColor = MaterialTheme.colorScheme.outline, // Gray,
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.outline,
+            actionIconContentColor = MaterialTheme.colorScheme.outline,
             scrolledContainerColor = MaterialTheme.colorScheme.secondary
         ),
         title = {
@@ -39,9 +41,10 @@ fun TopBar(
         },
         navigationIcon = {
             iconStart?.let { icon ->
-                IconButton(onClick = { TODO() }) {
+                IconButton(onClick = onStartIconClick) {
                     Icon(
                         painter = painterResource(icon),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         contentDescription = "Localized description"
                     )
                 }
@@ -49,7 +52,7 @@ fun TopBar(
         },
         actions = {
             iconEnd?.let { icon ->
-                IconButton(onClick = { TODO() }) {
+                IconButton(onClick = onEndIconClick) {
                     Icon(
                         painter = painterResource(icon), //painterResource(R.drawable.ic_history),
                         contentDescription = "Localized description"

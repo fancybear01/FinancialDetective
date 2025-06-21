@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Financial detective</string>
+    <string name="error_request_timeout">Время выполнения запроса истекло.</string>
+    <string name="error_too_many_requests">К сожалению, похоже, что ваша квота превышена.</string>
+    <string name="error_no_internet">Не удалось подключиться к серверу, пожалуйста, проверьте ваше интернет-соединение.</string>
+    <string name="error_unknown">Что-то пошло не так. Пожалуйста, повторите попытку позже.</string>
+    <string name="error_serialization">Не удалось сериализовать или десериализовать данные..</string>
+    <string name="error_server_error">Сервер не может обработать ваш запрос.</string>
+    <string name="error_bad_request">Неверный запрос. Пожалуйста, проверьте данные и попробуйте снова.</string>
+    <string name="error_unauthorized">Требуется авторизация</string>
+    <string name="error_forbidden">Доступ запрещен.</string>
+    <string name="error_not_found">Ресурс не найден.</string>
+</resources>

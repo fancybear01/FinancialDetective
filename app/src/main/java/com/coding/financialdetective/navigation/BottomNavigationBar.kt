@@ -4,59 +4,46 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.coding.financialdetective.ui.theme.DarkText
-import com.coding.financialdetective.ui.theme.Gray
-import com.coding.financialdetective.ui.theme.Green
-import com.coding.financialdetective.ui.theme.MintGreen
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
+fun BottomNavigationBar(
+    navController: NavController,
+    selectedItem: Screen
+) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) {
-        NavBarItems.BarItems.forEach { navItem ->
+        NavBarItems.BarItems.forEach { item ->
             NavigationBarItem(
-                selected = currentDestination?.route == navItem.screen::class.qualifiedName,
+                selected = selectedItem.route == item.screen.route,
                 onClick = {
-                    navController.navigate(navItem.screen) {
-                        launchSingleTop = true
-                        restoreState = true
+                    navController.navigate(item.screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 },
                 icon = {
                     Icon(
-                        painter = painterResource(id = navItem.image),
-                        contentDescription = navItem.title,
-                        tint = if (currentDestination?.route == navItem.screen::class.qualifiedName) Green else Gray
+                        painter = painterResource(id = item.image),
+                        contentDescription = item.title
                     )
                 },
-                label = {
-                    Text(
-                        text = navItem.title,
-                        style = if (currentDestination?.route == navItem.screen::class.qualifiedName) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelMedium
-                    )
-                },
+                label = { Text(item.title) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Green,
-                    selectedTextColor = DarkText,
-                    indicatorColor = MintGreen,
-                    unselectedIconColor = Gray,
-                    unselectedTextColor = Gray
+                    indicatorColor = MaterialTheme.colorScheme.secondary,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedTextColor = MaterialTheme.colorScheme.outline,
+                    unselectedIconColor = MaterialTheme.colorScheme.outline
                 )
             )
         }

@@ -1,8 +1,5 @@
 package com.coding.financialdetective.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import com.coding.financialdetective.R
 
 object NavBarItems {
@@ -24,12 +21,12 @@ object NavBarItems {
         ),
         BarItem(
             title = "Статьи",
-            image = R.drawable.ic_spending_items,
+            image = R.drawable.ic_categories,
             screen = Screen.SpendingItems
         ),
         BarItem(
             title = "Настройки",
-            image = R.drawable.is_settings,
+            image = R.drawable.ic_settings,
             screen = Screen.Settings
         )
     )

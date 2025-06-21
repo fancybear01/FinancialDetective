@@ -1,19 +1,34 @@
 package com.coding.financialdetective.navigation
 
-sealed interface Screen {
+import com.coding.financialdetective.navigation.Screen.MyHistory.Companion.baseRoute
+import kotlinx.serialization.Serializable
 
-    @kotlinx.serialization.Serializable
+sealed interface Screen {
+    val route: String
+        get() = when (this) {
+            is MyHistory -> baseRoute
+            else -> this::class.simpleName ?: ""
+        }
+
+    @Serializable
     data object Expenses : Screen
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Incomes : Screen
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Account : Screen
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object SpendingItems : Screen
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object Settings : Screen
+
+    @Serializable
+    data class MyHistory(val transactionType: String) : Screen {
+        companion object {
+            const val baseRoute = "MyHistory"
+        }
+    }
 }
