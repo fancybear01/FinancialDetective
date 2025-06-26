@@ -7,15 +7,15 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.coding.financialdetective.ui.screens.MainScreen
-import com.coding.financialdetective.ui.theme.FinancialDetectiveTheme
+import com.coding.financialdetective.core_ui.navigation.App
+import com.coding.financialdetective.core_ui.theme.FinancialDetectiveTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel by viewModels<MainViewModel>()
+    private val mainViewModel: MainViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,7 +50,8 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             FinancialDetectiveTheme {
-                MainScreen(mainViewModel = mainViewModel)
+//                MainScreen(mainViewModel = mainViewModel)
+                App()
             }
         }
     }
