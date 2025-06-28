@@ -40,7 +40,11 @@ import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
 import com.coding.financialdetective.core_ui.common.list_item.toListItemModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DatePickerColors
+import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +59,6 @@ fun MyHistoryScreen() {
         }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val context = LocalContext.current
-        val currentError = state.error
 
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
@@ -101,184 +104,145 @@ fun MyHistoryScreen() {
         )
 
         if (showStartDatePicker) {
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = state.startDate
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
+            MyHistoryDatePickerDialog(
+                initialDate = state.startDate,
+                onDismiss = { showStartDatePicker = false },
+                onConfirm = { selectedDate -> viewModel.updateStartDate(selectedDate) },
+                colors = myDatePickerColors,
+                buttonColors = myButtonColors
             )
-            DatePickerDialog(
-                onDismissRequest = { showStartDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                val selectedDate = Instant.ofEpochMilli(millis)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                                viewModel.updateStartDate(selectedDate)
-                            }
-                            showStartDatePicker = false
-                        },
-                        colors = myButtonColors
-                    ) {
-                        Text(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelLarge,
-                            text = "OK"
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showStartDatePicker = false }) {
-                        Text(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelLarge,
-                            text = "Отмена"
-                        )
-                    }
-                },
-                colors = myDatePickerColors
-            ) {
-                DatePicker(
-                    state = datePickerState,
-                    colors = myDatePickerColors
-                )
-            }
         }
 
         if (showEndDatePicker) {
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = state.endDate
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
+            MyHistoryDatePickerDialog(
+                initialDate = state.endDate,
+                onDismiss = { showEndDatePicker = false },
+                onConfirm = { selectedDate -> viewModel.updateEndDate(selectedDate) },
+                colors = myDatePickerColors,
+                buttonColors = myButtonColors
             )
-            DatePickerDialog(
-                onDismissRequest = { showEndDatePicker = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                val selectedDate = Instant.ofEpochMilli(millis)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                                viewModel.updateEndDate(selectedDate)
-                            }
-                            showEndDatePicker = false
-                        }
-                    ) {
-                        Text(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelLarge,
-                            text = "OK"
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showEndDatePicker = false }) {
-                        Text(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelLarge,
-                            text = "Отмена"
-                        )
-                    }
-                },
-                colors = myDatePickerColors
-            ) {
-                DatePicker(
-                    state = datePickerState,
-                    colors = myDatePickerColors
-                )
-            }
         }
 
         when {
             state.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-
-            currentError != null -> {
+            state.error != null -> {
                 FullScreenError(
-                    errorMessage = currentError.asString(context),
-                    onRetryClick = { viewModel.retry() }
+                    errorMessage = state.error!!.asString(context),
+                    onRetryClick = viewModel::retry
                 )
             }
-
             else -> {
-
-                Column(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    ListItem(
-                        model = ListItemModel(
-                            content = ContentInfo(
-                                title = "Начало"
-                            ),
-                            trail = TrailInfo.Value(
-                                title = state.periodStart
-                            ),
-                            onClick = {
-                                showStartDatePicker = true
-                            }
-                        ),
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 56.dp)
-                    )
-                    ListItem(
-                        model = ListItemModel(
-                            content = ContentInfo(
-                                title = "Конец"
-                            ),
-                            trail = TrailInfo.Value(
-                                title = state.periodEnd
-                            ),
-                            onClick = {
-                                showEndDatePicker = true
-                            }
-                        ),
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 56.dp)
-                    )
-                    ListItem(
-                        model = ListItemModel(
-                            content = ContentInfo(
-                                title = "Сумма"
-                            ),
-                            trail = TrailInfo.Value(
-                                title = state.totalAmount
-                            ),
-                            onClick = { }
-                        ),
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 56.dp),
-                        addDivider = false
-                    )
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        itemsIndexed(
-                            items = state.listItems,
-                            key = { _, item -> item.id }
-                        ) { _, transaction ->
-                            ListItem(
-                                model = transaction.toListItemModel(),
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 70.dp)
-                            )
-                        }
-                    }
-                }
+                MyHistoryContent(
+                    state = state,
+                    onStartDateClick = { showStartDatePicker = true },
+                    onEndDateClick = { showEndDatePicker = true },
+                    onTransactionClick = { /* TODO() */ },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun MyHistoryContent(
+    state: MyHistoryState,
+    onStartDateClick: () -> Unit,
+    onEndDateClick: () -> Unit,
+    onTransactionClick: (TransactionUi) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.background(MaterialTheme.colorScheme.surface)
+    ) {
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(title = "Начало"),
+                trail = TrailInfo.Value(title = state.periodStart),
+                onClick = onStartDateClick
+            ),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.defaultMinSize(minHeight = 56.dp)
+        )
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(title = "Конец"),
+                trail = TrailInfo.Value(title = state.periodEnd),
+                onClick = onEndDateClick
+            ),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.defaultMinSize(minHeight = 56.dp)
+        )
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(title = "Сумма"),
+                trail = TrailInfo.Value(title = state.totalAmount),
+                onClick = {}
+            ),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.defaultMinSize(minHeight = 56.dp),
+            addDivider = false
+        )
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(
+                items = state.listItems,
+                key = { item -> item.id }
+            ) { item ->
+                ListItem(
+                    model = item.toListItemModel(),
+                    modifier = Modifier.defaultMinSize(minHeight = 70.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MyHistoryDatePickerDialog(
+    initialDate: LocalDate,
+    onDismiss: () -> Unit,
+    onConfirm: (LocalDate) -> Unit,
+    colors: DatePickerColors,
+    buttonColors: ButtonColors
+) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val selectedDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        onConfirm(selectedDate)
+                    }
+                    onDismiss()
+                },
+                colors = buttonColors
+            ) {
+                Text(text = "OK", style = MaterialTheme.typography.labelLarge)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = buttonColors) {
+                Text(text = "Отмена", style = MaterialTheme.typography.labelLarge)
+            }
+        },
+        colors = colors
+    ) {
+        DatePicker(state = datePickerState, colors = colors)
     }
 }

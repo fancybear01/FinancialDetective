@@ -58,46 +58,60 @@ fun AccountScreen() {
             }
 
             else -> {
-                val balanceItem = ListItemModel(
-                    lead = LeadInfo(
-                        emoji = "💰",
-                        containerColorForIcon = White
-                    ),
-                    content = ContentInfo(
-                        title = "Баланс"
-                    ),
-                    trail = TrailInfo.ValueAndChevron(
-                        title = "${state.balance} ${state.currency}"
-                    ),
-                    onClick = { /* TODO() */ }
+                AccountContent(
+                    state = state,
+                    onBalanceClick = { /* TODO: Обработка нажатия на баланс */ },
+                    onCurrencyClick = { /* TODO: Обработка нажатия на валюту */ }
                 )
-
-                val currencyItem = ListItemModel(
-                    content = ContentInfo(
-                        title = "Валюта"
-                    ),
-                    trail = TrailInfo.ValueAndChevron(
-                        title = state.currency
-                    ),
-                    onClick = { /* TODO() */ }
-                )
-
-                Column {
-                    ListItem(
-                        model = balanceItem,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 56.dp)
-                    )
-                    ListItem(
-                        model = currencyItem,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        addDivider = false,
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 56.dp)
-                    )
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun AccountContent(
+    state: AccountState,
+    onBalanceClick: () -> Unit,
+    onCurrencyClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val balanceItem = ListItemModel(
+        lead = LeadInfo(
+            emoji = "💰",
+            containerColorForIcon = White
+        ),
+        content = ContentInfo(
+            title = "Баланс"
+        ),
+        trail = TrailInfo.ValueAndChevron(
+            title = "${state.balance} ${state.currency}"
+        ),
+        onClick = onBalanceClick
+    )
+
+    val currencyItem = ListItemModel(
+        content = ContentInfo(
+            title = "Валюта"
+        ),
+        trail = TrailInfo.ValueAndChevron(
+            title = state.currency
+        ),
+        onClick = onCurrencyClick
+    )
+
+    Column(modifier = modifier) {
+        ListItem(
+            model = balanceItem,
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+        )
+        ListItem(
+            model = currencyItem,
+            containerColor = MaterialTheme.colorScheme.secondary,
+            addDivider = false,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+        )
     }
 }

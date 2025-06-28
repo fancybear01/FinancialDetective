@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -59,38 +60,50 @@ fun CategoriesScreen() {
         }
 
         else -> {
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
+            CategoriesContent(
+                searchQuery = state.searchQuery,
+                categories = state.listItems,
+                onQueryChange = viewModel::onSearchQueryChanged,
+                onCategoryClick = { /* TODO() */ },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
 
-                SearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = { newQuery ->
-                        viewModel.onSearchQueryChanged(newQuery)
-                    }
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    thickness = 1.dp
-                )
-                LazyColumn(
+@Composable
+private fun CategoriesContent(
+    searchQuery: String,
+    categories: List<CategoryUi>,
+    onQueryChange: (String) -> Unit,
+    onCategoryClick: (CategoryUi) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = onQueryChange
+        )
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(
+                items = categories,
+                key = { category -> category.id }
+            ) { category ->
+                val model = category.toListItemModel()
+                ListItem(
+                    model = model,
                     modifier = Modifier
-                        .fillMaxSize(),
-                ) {
-
-                    itemsIndexed(
-                        items = state.listItems,
-                        key = { _, category -> category.id }
-                    ) { _, category ->
-                        val model = category.toListItemModel()
-                        ListItem(
-                            model = model,
-                            modifier = Modifier
-                                .defaultMinSize(minHeight = 72.dp)
-                        )
-                    }
-                }
+                        .defaultMinSize(minHeight = 72.dp)
+                )
             }
         }
     }

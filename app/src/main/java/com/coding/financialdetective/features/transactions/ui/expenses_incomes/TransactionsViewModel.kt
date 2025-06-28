@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.toUiText
+import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
 import com.coding.financialdetective.features.categories.domain.model.CategoryType
 import com.coding.financialdetective.features.transactions.domain.model.Transaction
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
@@ -12,6 +13,8 @@ import com.coding.financialdetective.features.transactions.domain.repository.Tra
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -19,7 +22,8 @@ import java.time.LocalDate
 class TransactionsViewModel(
     private val repository: TransactionRepository,
     private val accountId: String,
-    private val transactionType: TransactionType
+    private val transactionType: TransactionType,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TransactionsState())
@@ -27,6 +31,20 @@ class TransactionsViewModel(
 
     init {
         loadTransactions(accountId)
+        observeConnectivity()
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            connectivityObserver.isConnected
+                .drop(1)
+                .debounce(1000)
+                .collect { connected ->
+                    if (connected && state.value.error != null) {
+                        retry()
+                    }
+                }
+        }
     }
 
     private fun loadTransactions(accountId: String) {

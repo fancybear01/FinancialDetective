@@ -7,11 +7,14 @@ import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.core_ui.util.toUiText
+import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
 import com.coding.financialdetective.features.categories.domain.model.CategoryType
 import com.coding.financialdetective.features.transactions.domain.repository.TransactionRepository
 import com.coding.financialdetective.features.transactions.ui.expenses_incomes.toUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -21,7 +24,8 @@ import java.util.Locale
 class MyHistoryViewModel(
     private val repository: TransactionRepository,
     private val accountId: String,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val isIncome: Boolean = savedStateHandle.get<Boolean>("isIncome") ?: false
@@ -32,7 +36,7 @@ class MyHistoryViewModel(
         CategoryType.EXPENSE
     }
 
-    private val _state = MutableStateFlow(MyHistoryScreenState())
+    private val _state = MutableStateFlow(MyHistoryState())
     val state = _state.asStateFlow()
 
     init {
@@ -40,6 +44,20 @@ class MyHistoryViewModel(
         val startOfMonth = today.withDayOfMonth(1)
         _state.update { it.copy(startDate = startOfMonth, endDate = today) }
         reloadData()
+        observeConnectivity()
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            connectivityObserver.isConnected
+                .drop(1)
+                .debounce(1000)
+                .collect { connected ->
+                    if (connected && state.value.error != null) {
+                        retry()
+                    }
+                }
+        }
     }
 
     fun updateStartDate(newStartDate: LocalDate) {

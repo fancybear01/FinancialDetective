@@ -15,7 +15,8 @@ val transactionsModule = module {
         TransactionsViewModel(
             repository = get(),
             accountId = accountId,
-            transactionType = transactionType
+            transactionType = transactionType,
+            connectivityObserver = get()
         )
     }
 
@@ -26,7 +27,8 @@ val transactionsModule = module {
         MyHistoryViewModel(
             repository = get(),
             accountId = accountId,
-            savedStateHandle = get()
+            savedStateHandle = get(),
+            connectivityObserver = get()
         )
     }
 }

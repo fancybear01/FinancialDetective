@@ -10,7 +10,8 @@ import org.koin.dsl.module
 val categoryModule = module {
     viewModel {
         CategoriesViewModel(
-            repository = get()
+            repository = get(),
+            connectivityObserver = get()
         )
     }
 

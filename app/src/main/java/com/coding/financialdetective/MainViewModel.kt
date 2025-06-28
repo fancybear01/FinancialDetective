@@ -3,7 +3,6 @@ package com.coding.financialdetective
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
-import com.coding.financialdetective.data.util.NetworkError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.core_ui.util.UiEvent
@@ -17,6 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 
 class MainViewModel(
@@ -41,13 +42,26 @@ class MainViewModel(
     private val _eventChannel = Channel<UiEvent>()
     val events = _eventChannel.receiveAsFlow()
 
+    private var initialLoadDone = false
+
     init {
         loadAccounts()
         _isReady.value = true
+
+        viewModelScope.launch {
+            isConnected
+                .drop(1)
+                .debounce(1000)
+                .collect { connected ->
+                    if (connected) {
+                        loadAccounts(true)
+                    }
+                }
+        }
     }
 
     fun loadAccounts(isForceRefresh: Boolean = false) {
-        if (currentAccount.value != null && !isForceRefresh) {
+        if (currentAccount.value != null && !isForceRefresh && initialLoadDone) {
             return
         }
 
@@ -58,10 +72,9 @@ class MainViewModel(
                     _currentAccount.value = accounts.firstOrNull()
                 }
                 .onError { error ->
-                    if (error != NetworkError.NO_INTERNET) {
-                        _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
-                    }
+                    _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
                 }
+            initialLoadDone = true
         }
     }
 }

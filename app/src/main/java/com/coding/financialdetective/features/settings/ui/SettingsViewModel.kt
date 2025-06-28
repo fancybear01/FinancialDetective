@@ -20,6 +20,4 @@ class SettingsViewModel : ViewModel() {
     private fun loadInitialSettings() {
 
     }
-
-
 }

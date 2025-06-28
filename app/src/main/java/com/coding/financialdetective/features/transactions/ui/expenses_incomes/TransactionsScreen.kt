@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,6 +24,7 @@ import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
 import com.coding.financialdetective.core_ui.common.list_item.toListItemModel
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
+import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -51,41 +52,59 @@ fun TransactionsScreen(
         }
 
         else -> {
-            Column {
-                ListItem(
-                    model = ListItemModel(
-                        content = ContentInfo(
-                            title = "Всего"
-                        ),
-                        trail = TrailInfo.Value(
-                            title = formatNumberWithSpaces(state.totalAmount) + " ₽"
-                        ),
-                        onClick = { /* ... */ }
-                    ),
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 56.dp)
-                )
+            TransactionsContent(
+                totalAmount = state.totalAmount,
+                transactions = state.transactions,
+                onTotalClick = {
+                    // TODO()
+                },
+                onTransactionClick = { transaction ->
+                    // TODO()
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
 
-                LazyColumn(
+@Composable
+private fun TransactionsContent(
+    totalAmount: Double,
+    transactions: List<TransactionUi>,
+    onTotalClick: () -> Unit,
+    onTransactionClick: (TransactionUi) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        ListItem(
+            model = ListItemModel(
+                content = ContentInfo(
+                    title = "Всего"
+                ),
+                trail = TrailInfo.Value(
+                    title = formatNumberWithSpaces(totalAmount) + " ₽"
+                ),
+                onClick = onTotalClick
+            ),
+            containerColor = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(
+                items = transactions,
+                key = { transaction -> transaction.id }
+            ) { transaction ->
+                val model = transaction.toListItemModel(showDate = false)
+                ListItem(
+                    model = model,
                     modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    itemsIndexed(
-                        items = state.transactions,
-                        key = { _, transaction -> transaction.id }
-                    ) { _, transaction ->
-                        val model = transaction.toListItemModel(
-                            showDate = false
-                        )
-                        ListItem(
-                            model = model,
-                            modifier = Modifier
-                                .defaultMinSize(minHeight = 70.dp),
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    }
-                }
+                        .defaultMinSize(minHeight = 70.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             }
         }
     }

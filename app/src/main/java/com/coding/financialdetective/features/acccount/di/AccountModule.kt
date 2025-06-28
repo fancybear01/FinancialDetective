@@ -11,7 +11,8 @@ val accountModule = module {
     viewModel { (accountId: String) ->
         AccountViewModel(
             repository = get(),
-            accountId = accountId
+            accountId = accountId,
+            connectivityObserver = get()
         )
     }
 

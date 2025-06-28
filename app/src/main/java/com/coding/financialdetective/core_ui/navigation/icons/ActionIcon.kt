@@ -32,12 +32,12 @@ sealed class ActionIcon(
     )
 
     data object ExpensesHistoryAction : ActionIcon(
-        iconResId = R.drawable.ic_history,
+        iconResId = R.drawable.ic_analysis,
         routeResId = R.string.expenses_history_route
     )
 
     data object IncomesHistoryAction : ActionIcon(
-        iconResId = R.drawable.ic_history,
+        iconResId = R.drawable.ic_analysis,
         routeResId = R.string.incomes_history_route
     )
 }

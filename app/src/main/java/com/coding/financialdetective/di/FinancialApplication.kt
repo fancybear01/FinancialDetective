@@ -3,6 +3,7 @@ package com.coding.financialdetective.di
 import android.app.Application
 import com.coding.financialdetective.features.acccount.di.accountModule
 import com.coding.financialdetective.features.categories.di.categoryModule
+import com.coding.financialdetective.features.settings.di.settingsModule
 import com.coding.financialdetective.features.transactions.di.transactionsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -19,7 +20,8 @@ class FinancialApplication : Application() {
                 networkModule,
                 accountModule,
                 categoryModule,
-                transactionsModule
+                transactionsModule,
+                settingsModule
             )
         }
     }
