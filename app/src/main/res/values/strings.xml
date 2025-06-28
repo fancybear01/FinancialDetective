@@ -1,4 +1,45 @@
 <resources>
+
+    <string name="expenses_route">expenses</string>
+    <string name="incomes_route">incomes</string>
+    <string name="account_route">account</string>
+    <string name="categories_route">categories</string>
+    <string name="settings_route">settings</string>
+    <string name="expenses_history_route">history/false</string>
+    <string name="incomes_history_route">history/true</string>
+
+    <string name="expenses_header">Расходы сегодня</string>
+    <string name="expenses_icon">Расходы</string>
+    <string name="incomes_header">Доходы сегодня</string>
+    <string name="incomes_icon">Доходы</string>
+    <string name="wallet_header">Мой счет</string>
+    <string name="wallet_icon">Счет</string>
+    <string name="articles_header">Мои статьи</string>
+    <string name="articles_icon">Статьи</string>
+    <string name="settings_header">Настройки</string>
+    <string name="settings_icon">Настройки</string>
+    <string name="history_header">Моя история</string>
+
+    <string name="settings_dark_theme">Тёмная тема</string>
+    <string name="settings_main_color">Основной цвет</string>
+    <string name="settings_sounds">Звуки</string>
+    <string name="settings_haptics">Хаптики</string>
+    <string name="settings_code_password">Код пароль</string>
+    <string name="settings_sync">Синхронизация</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_about_app">О программе</string>
+
+    <string name="articles_find">Найти статью</string>
+    <string name="in_total">Всего</string>
+    <string name="balance">Баланс</string>
+    <string name="currency">Валюта</string>
+    <string name="expenses_history_begin_date">Начало</string>
+    <string name="expenses_history_end_date">Конец</string>
+    <string name="clear">Очистить</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">Ок</string>
+    <string name="no_internet">Отсутствует подключение к интернету</string>
+
     <string name="app_name">Financial detective</string>
     <string name="error_request_timeout">The request timed out.</string>
     <string name="error_too_many_requests">Oops, it seems like your quota is exceeded.</string>

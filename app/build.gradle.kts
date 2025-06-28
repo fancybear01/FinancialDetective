@@ -73,4 +73,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.bundles.ktor)
+
+    implementation(libs.bundles.koin)
 }
