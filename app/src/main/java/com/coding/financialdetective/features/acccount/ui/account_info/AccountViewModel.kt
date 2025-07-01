@@ -1,4 +1,4 @@
-package com.coding.financialdetective.features.acccount.ui
+package com.coding.financialdetective.features.acccount.ui.account_info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,7 +1,7 @@
 package com.coding.financialdetective.features.acccount.domain.model
 
 data class Account(
-    val id: Int,
+    val id: String,
     val userId: Int,
     val name: String,
     val balance: Double,

@@ -19,6 +19,8 @@ val LightGray = Color(0xFFECE6F0)
 
 val SwitchColor = Color(0xFF79747E)
 
+val Cancel = Color(0xFFE46962)
+
 val DarkGreen = Color(0xFF1DB66A)
 val DarkMintGreen = Color(0xFF0A3D2C)
 val LightText = Color(0xFFE6E1E5)

@@ -162,26 +162,25 @@ private fun MyHistoryContent(
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Начало"),
-                trail = TrailInfo.Value(title = state.periodStart),
-                onClick = onStartDateClick
+                trail = TrailInfo.Value(title = state.periodStart)
             ),
+            onClick = onStartDateClick,
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Конец"),
-                trail = TrailInfo.Value(title = state.periodEnd),
-                onClick = onEndDateClick
+                trail = TrailInfo.Value(title = state.periodEnd)
             ),
+            onClick = onEndDateClick,
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Сумма"),
-                trail = TrailInfo.Value(title = state.totalAmount),
-                onClick = {}
+                trail = TrailInfo.Value(title = state.totalAmount)
             ),
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp),

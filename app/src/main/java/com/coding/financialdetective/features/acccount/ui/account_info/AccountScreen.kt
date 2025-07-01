@@ -1,4 +1,4 @@
-package com.coding.financialdetective.features.acccount.ui
+package com.coding.financialdetective.features.acccount.ui.account_info
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +85,7 @@ private fun AccountContent(
         ),
         trail = TrailInfo.ValueAndChevron(
             title = "${state.balance} ${state.currency}"
-        ),
-        onClick = onBalanceClick
+        )
     )
 
     val currencyItem = ListItemModel(
@@ -96,7 +95,6 @@ private fun AccountContent(
         trail = TrailInfo.ValueAndChevron(
             title = state.currency
         ),
-        onClick = onCurrencyClick
     )
 
     Column(modifier = modifier) {

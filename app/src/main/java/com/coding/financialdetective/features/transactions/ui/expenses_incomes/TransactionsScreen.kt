@@ -83,8 +83,7 @@ private fun TransactionsContent(
                 ),
                 trail = TrailInfo.Value(
                     title = formatNumberWithSpaces(totalAmount) + " ₽"
-                ),
-                onClick = onTotalClick
+                )
             ),
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier

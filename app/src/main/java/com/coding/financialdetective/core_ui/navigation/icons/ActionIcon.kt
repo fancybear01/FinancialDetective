@@ -28,7 +28,7 @@ sealed class ActionIcon(
 
     data object AccountAction : ActionIcon(
         iconResId = R.drawable.ic_edit,
-        routeResId = R.string.expenses_route
+        routeResId = R.string.edit_account_route
     )
 
     data object ExpensesHistoryAction : ActionIcon(
@@ -39,5 +39,10 @@ sealed class ActionIcon(
     data object IncomesHistoryAction : ActionIcon(
         iconResId = R.drawable.ic_analysis,
         routeResId = R.string.incomes_history_route
+    )
+
+    data object EditAccountAction : ActionIcon(
+        iconResId = R.drawable.ic_confirm,
+        routeResId = R.string.account_route
     )
 }

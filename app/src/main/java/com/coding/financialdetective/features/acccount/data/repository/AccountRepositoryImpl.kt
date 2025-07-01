@@ -6,6 +6,7 @@ import com.coding.financialdetective.features.acccount.domain.model.Account
 import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.data.util.map
 import com.coding.financialdetective.features.acccount.data.mapper.toDomain
+import com.coding.financialdetective.features.acccount.data.remote.dto.AccountResponseDto
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
 import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
 
@@ -21,5 +22,20 @@ class AccountRepositoryImpl(
 
     override suspend fun getAccountById(id: String): Result<AccountResponse, NetworkError> {
         return remoteDataSource.getAccountById(id).map { it.toDomain() }
+    }
+
+    override suspend fun updateAccount(
+        accountId: String,
+        name: String,
+        balance: Double,
+        currency: String
+    ): Result<Unit, NetworkError> {
+        return remoteDataSource
+            .updateAccount(
+                accountId = accountId,
+                name = name,
+                balance = balance,
+                currency = currency
+            )
     }
 }

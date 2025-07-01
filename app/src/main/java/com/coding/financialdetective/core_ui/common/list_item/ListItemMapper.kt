@@ -23,10 +23,7 @@ fun TransactionUi.toListItemModel(
         trail = TrailInfo.ValueAndChevron(
             title = this.formattedAmount,
             subtitle = if (showDate) this.formattedDate else null,
-        ),
-        onClick = {
-            /* TODO() */
-        }
+        )
     )
 }
 
@@ -41,9 +38,6 @@ fun CategoryUi.toListItemModel(
         ),
         content = ContentInfo(
             title = this.name
-        ),
-        onClick = {
-            /* TODO() */
-        }
+        )
     )
 }

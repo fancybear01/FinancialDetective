@@ -10,16 +10,16 @@ import com.coding.financialdetective.features.acccount.domain.model.AccountRespo
 
 fun AccountBriefDto.toDomain(): AccountBrief {
     return AccountBrief(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         balance = this.balance.toDouble(),
-        currency = this.currency.replace("RUB", "₽").replace("USD", "$").replace("EUR", "€"),
+        currency = this.currency,
     )
 }
 
 fun AccountDto.toDomain(): Account {
     return Account(
-        id = this.id,
+        id = this.id.toString(),
         userId = this.userId,
         name = this.name,
         balance = this.balance.toDouble(),
@@ -31,10 +31,10 @@ fun AccountDto.toDomain(): Account {
 
 fun AccountResponseDto.toDomain(): AccountResponse {
     return AccountResponse(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         balance = this.balance.toDouble(),
-        currency = this.currency.replace("RUB", "₽").replace("USD", "$").replace("EUR", "€"),
+        currency = this.currency,
         incomeStats = this.incomeStats.map { incomeStat -> incomeStat.toDomain() },
         expenseStats = this.expenseStats.map { expenseStat -> expenseStat.toDomain() },
         createdAt = this.createdAt,

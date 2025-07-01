@@ -1,5 +1,9 @@
 package com.coding.financialdetective
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
@@ -42,9 +46,21 @@ class MainViewModel(
     private val _eventChannel = Channel<UiEvent>()
     val events = _eventChannel.receiveAsFlow()
 
+    private val _navigationChannel = Channel<NavigationEvent>()
+    val navigationEvents = _navigationChannel.receiveAsFlow()
+
+    var onTopBarActionClick by mutableStateOf<(() -> Unit)?>(null)
+        private set
+
+    fun setTopBarAction(action: (() -> Unit)?) {
+        onTopBarActionClick = action
+    }
+
     private var initialLoadDone = false
 
     init {
+        val instanceId = System.identityHashCode(this)
+        Log.d("VIEW_MODEL_INSTANCE", "MainViewModel INIT. Instance ID: $instanceId")
         loadAccounts()
         _isReady.value = true
 
@@ -77,4 +93,14 @@ class MainViewModel(
             initialLoadDone = true
         }
     }
+
+    fun navigateBack() {
+        viewModelScope.launch {
+            _navigationChannel.send(NavigationEvent.NavigateBack)
+        }
+    }
+}
+
+sealed class NavigationEvent {
+    data object NavigateBack : NavigationEvent()
 }
