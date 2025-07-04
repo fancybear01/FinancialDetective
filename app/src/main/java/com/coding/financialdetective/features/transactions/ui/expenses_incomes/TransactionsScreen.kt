@@ -61,7 +61,6 @@ fun TransactionsScreen(
         else -> {
             val currencySymbol = Currency.fromCode(state.currency).symbol
 
-            Log.d("CURRENCY_DEBUG", "TransactionsScreen is passing symbol to content. State currency code: '${state.currency}', Resulting symbol: '$currencySymbol'")
 
             TransactionsContent(
                 totalAmount = state.totalAmount,
@@ -89,7 +88,6 @@ private fun TransactionsContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Log.d("CURRENCY_DEBUG", "TransactionsContent received currency for display: '$currency'")
 
         ListItem(
             model = ListItemModel(
@@ -113,7 +111,6 @@ private fun TransactionsContent(
                 key = { transaction -> transaction.id }
             ) { transaction ->
                 val model = transaction.toListItemModel(showDate = false)
-                Log.d("CURRENCY", "Currency in items $currency")
                 ListItem(
                     model = model,
                     modifier = Modifier
@@ -127,7 +124,6 @@ private fun TransactionsContent(
 
 @Composable
 fun ExpensesScreen() {
-    Log.d("LIFECYCLE_DEBUG", "ExpensesScreen Composable executing")
 
     val mainViewModel: MainViewModel = koinViewModel()
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
@@ -165,7 +161,6 @@ fun ExpensesScreen() {
 
 @Composable
 fun IncomesScreen() {
-    Log.d("LIFECYCLE_DEBUG", "IncomesSreen Composable executing")
 
     val mainViewModel: MainViewModel = koinViewModel()
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
@@ -198,6 +193,5 @@ fun IncomesScreen() {
                 viewModel.retry(account.currency)
             }
         )
-
     }
 }

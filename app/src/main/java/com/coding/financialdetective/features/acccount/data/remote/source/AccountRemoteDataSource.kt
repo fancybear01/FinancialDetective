@@ -1,6 +1,5 @@
 package com.coding.financialdetective.features.acccount.data.remote.source
 
-import android.util.Log
 import com.coding.financialdetective.data.remote.service.constructUrl
 import com.coding.financialdetective.data.remote.service.safeCallWithRetry
 import com.coding.financialdetective.data.util.NetworkError
@@ -11,7 +10,6 @@ import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.features.acccount.data.remote.dto.AccountResponseDto
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
-import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
@@ -38,7 +36,6 @@ class AccountRemoteDataSource(
         balance: Double,
         currency: String
     ): Result<Unit, NetworkError> {
-        Log.d("UPDATE_ACCOUNT_TAG", "Updating account: $accountId, Name: $name, Balance: $balance, Currency: $currency")
         return safeCallWithRetry<Unit> {
             httpClient.put(constructUrl("accounts/$accountId")) {
                 contentType(ContentType.Application.Json)

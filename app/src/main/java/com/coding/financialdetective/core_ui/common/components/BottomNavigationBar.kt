@@ -1,6 +1,5 @@
 package com.coding.financialdetective.core_ui.common.components
 
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar

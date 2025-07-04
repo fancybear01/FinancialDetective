@@ -106,7 +106,6 @@ fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // Этот Composable теперь чистый и зависит только от стабильных параметров
     NavHost(
         navController = navController,
         startDestination = stringResource(Screen.Expenses.routeResId),
@@ -163,14 +162,12 @@ fun App() {
         topBar = {
             Column {
                 AppTopBar(navController)
-                // Этот Composable вызывает рекомпозицию Scaffold, но не должен влиять на контент
                 ConnectionError(!isConnected)
             }
         },
         bottomBar = { AppBottomNavigationBar(navController) },
         floatingActionButton = { AppFloatingActionButton(navController) }
     ) { innerPadding ->
-        // Вызываем наш новый, стабильный Composable
         AppNavHost(
             navController = navController,
             modifier = Modifier.padding(innerPadding)

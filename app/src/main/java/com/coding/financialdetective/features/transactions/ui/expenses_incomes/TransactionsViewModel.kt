@@ -7,8 +7,6 @@ import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.toUiText
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
-import com.coding.financialdetective.features.acccount.domain.model.Currency
-import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
 import com.coding.financialdetective.features.categories.domain.model.CategoryType
 import com.coding.financialdetective.features.transactions.domain.model.Transaction
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
@@ -38,7 +36,6 @@ class TransactionsViewModel(
     private var lastUsedCurrency: String? = null
 
     init {
-        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) INIT")
         observeConnectivity()
     }
 
@@ -120,17 +117,10 @@ class TransactionsViewModel(
     }
 
     fun refresh(currency: String) {
-        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) REFRESH called. Currency: $currency")
         _state.update {
-            Log.d("CURRENCY_DEBUG", "ViewModel state is being updated. Old currency: ${it.currency}, New currency: $currency")
             it.copy(isLoading = true, currency = currency)
         }
 
         loadTransactions(accountId, currency)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) CLEARED")
     }
 }

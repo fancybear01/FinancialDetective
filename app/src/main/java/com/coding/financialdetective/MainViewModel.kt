@@ -1,6 +1,5 @@
 package com.coding.financialdetective
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,6 +23,9 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 
+/**
+ * Основная view model приложения.
+ */
 class MainViewModel(
     private val repository: AccountRepository,
     private val connectivityObserver: ConnectivityObserver
@@ -60,7 +62,6 @@ class MainViewModel(
 
     init {
         val instanceId = System.identityHashCode(this)
-        Log.d("VIEW_MODEL_INSTANCE", "MainViewModel INIT. Instance ID: $instanceId")
         loadAccounts()
         _isReady.value = true
 
@@ -119,12 +120,6 @@ class MainViewModel(
 
     fun triggerAccountUpdate() {
         _accountUpdateTrigger.value++
-    }
-
-    fun navigateBack() {
-        viewModelScope.launch {
-            _navigationChannel.send(NavigationEvent.NavigateBack)
-        }
     }
 }
 

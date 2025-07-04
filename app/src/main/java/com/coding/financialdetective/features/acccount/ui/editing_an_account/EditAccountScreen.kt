@@ -51,9 +51,11 @@ import com.coding.financialdetective.MainViewModel
 import com.coding.financialdetective.R
 import com.coding.financialdetective.core_ui.common.FullScreenError
 import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
+import com.coding.financialdetective.core_ui.common.list_item.LeadInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
+import com.coding.financialdetective.core_ui.theme.White
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import kotlinx.coroutines.launch
@@ -204,6 +206,10 @@ fun EditAccountContent(
     ) {
         ListItem(
             model = ListItemModel(
+                lead = LeadInfo(
+                    emoji = "💰",
+                    containerColorForIcon = MaterialTheme.colorScheme.secondary
+                ),
                 content = ContentInfo(
                     title = "Название"
                 ),

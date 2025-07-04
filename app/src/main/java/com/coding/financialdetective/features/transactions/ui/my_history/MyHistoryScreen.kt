@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 
@@ -56,26 +57,15 @@ import java.time.LocalDate
 fun MyHistoryScreen() {
     val mainViewModel: MainViewModel = koinViewModel()
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-    val accountId = currentAccount?.id
+    val account = currentAccount
 
-    if (accountId != null) {
-        val viewModel: MyHistoryViewModel = koinViewModel(key = "my_history_$accountId") {
-            parametersOf(accountId.toString())
+    if (account != null) {
+        val viewModel: MyHistoryViewModel = koinViewModel(key = "my_history_${account.id}") {
+            parametersOf(account.id)
         }
 
-        LaunchedEffect(Unit) {
-            val account = mainViewModel.currentAccount.value
-            if (account != null) {
-                viewModel.onAccountUpdated(account.currency)
-            }
-
-            snapshotFlow { mainViewModel.currentAccount.value to mainViewModel.accountUpdateTrigger.value }
-                .drop(1)
-                .collect { (newAccount, _) ->
-                    if (newAccount != null) {
-                        viewModel.onAccountUpdated(newAccount.currency)
-                    }
-                }
+        LaunchedEffect(key1 = account.id, key2 = account.currency) {
+            viewModel.onAccountUpdated(account.currency)
         }
 
         val state by viewModel.state.collectAsStateWithLifecycle()

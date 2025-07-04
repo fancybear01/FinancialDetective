@@ -5,7 +5,7 @@ import com.coding.financialdetective.features.transactions.ui.model.TransactionU
 import java.time.LocalDate
 
 data class MyHistoryState(
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val listItems: List<TransactionUi> = emptyList(),
     val startDate: LocalDate = LocalDate.now().withDayOfMonth(1),
     val endDate: LocalDate = LocalDate.now(),

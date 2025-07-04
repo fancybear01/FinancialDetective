@@ -41,7 +41,8 @@ sealed class Screen(
         routeResId = R.string.account_route,
         titleResId = R.string.wallet_header,
         action = ActionIcon.AccountAction,
-        bottomNavigationIcon = BottomNavigationIcon.AccountIcon
+        bottomNavigationIcon = BottomNavigationIcon.AccountIcon,
+        relatedRoutesResIds = listOf(R.string.edit_account_route)
     )
 
     data object Categories : Screen(

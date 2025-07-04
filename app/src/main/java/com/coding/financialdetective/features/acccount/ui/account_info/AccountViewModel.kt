@@ -15,6 +15,13 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel для основного экрана с счётом.
+ *
+ * @param repository Репозиторий для доступа к данным счетов
+ * @param accountId Уникальный идентификатор редактируемого счёта
+ * @param connectivityObserver Наблюдатель за состоянием сетевого подключения
+ */
 class AccountViewModel(
     private val repository: AccountRepository,
     private val accountId: String,

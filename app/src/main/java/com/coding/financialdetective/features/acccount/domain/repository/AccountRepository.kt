@@ -6,6 +6,9 @@ import com.coding.financialdetective.features.acccount.data.remote.dto.AccountRe
 import com.coding.financialdetective.features.acccount.domain.model.Account
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
 
+/**
+ * Репозиторий для работы с счетами.
+ */
 interface AccountRepository {
     suspend fun getAccounts(): Result<List<Account>, NetworkError>
     suspend fun getAccountById(id: String): Result<AccountResponse, NetworkError>

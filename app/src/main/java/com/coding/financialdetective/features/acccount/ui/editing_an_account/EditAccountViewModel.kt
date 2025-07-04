@@ -1,15 +1,12 @@
 package com.coding.financialdetective.features.acccount.ui.editing_an_account
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.core_ui.util.toUiText
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
-import com.coding.financialdetective.data.util.NetworkError
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
-import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
@@ -23,6 +20,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel для экрана редактирования аккаунта.
+ * Управляет состоянием редактирования, загрузкой данных аккаунта и их сохранением.
+ *
+ * @param repository Репозиторий для доступа к данным счетов
+ * @param accountId Уникальный идентификатор редактируемого счёта
+ * @param connectivityObserver Наблюдатель за состоянием сетевого подключения
+ */
 class EditAccountViewModel(
     private val repository: AccountRepository,
     private val accountId: String,
@@ -94,7 +99,6 @@ class EditAccountViewModel(
     }
 
     fun onAccountNameChanged(name: String) {
-        Log.d("VIEW_MODEL_DEBUG", "onAccountNameChanged called with: '$name'")
         _state.update {
             it.copy(
                 accountName = name,
@@ -121,15 +125,6 @@ class EditAccountViewModel(
         val currencyChanged = currency.code != original.currency
 
         val result = nameChanged || balanceChanged || currencyChanged
-
-        Log.d("VIEW_MODEL_DEBUG", """
-        --- Checking for changes ---
-        Original Name: '${original.name}', New Name: '$name', Changed: $nameChanged
-        Original Balance: ${original.balance}, New Balance: $rawBalance, Changed: $balanceChanged
-        Original Currency: '${original.currency}', New Currency: '${currency.code}', Changed: $currencyChanged
-        ----------------------------
-        Total hasChanges: $result
-    """.trimIndent())
 
         return result
     }

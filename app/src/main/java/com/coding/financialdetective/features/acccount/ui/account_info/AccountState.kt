@@ -2,7 +2,10 @@ package com.coding.financialdetective.features.acccount.ui.account_info
 
 import com.coding.financialdetective.core_ui.util.UiText
 
-
+/**
+ * Состояние экрана счёта.
+ * Содержит все данные, необходимые для отображения UI экрана аккаунта.
+ */
 data class AccountState(
     val id: String = "",
     val isLoading: Boolean = false,

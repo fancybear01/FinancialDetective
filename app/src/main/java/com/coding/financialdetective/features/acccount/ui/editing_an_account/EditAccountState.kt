@@ -3,6 +3,10 @@ package com.coding.financialdetective.features.acccount.ui.editing_an_account
 import com.coding.financialdetective.core_ui.util.UiText
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 
+/**
+ * Состояние экрана редактирования счёта.
+ * Содержит все данные, необходимые для отображения UI экрана аккаунта.
+ */
 data class EditAccountState(
     val accountName: String = "",
     val balance: String = "0",
