@@ -38,6 +38,95 @@ import com.coding.financialdetective.features.transactions.ui.my_history.MyHisto
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+//@Composable
+//fun App() {
+//    val navController = rememberNavController()
+//    val hostState = remember { SnackbarHostState() }
+//
+//    val viewModel: MainViewModel = koinViewModel()
+//    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+//    val context = LocalContext.current
+//
+//    LaunchedEffect(key1 = navController) {
+//        launch {
+//            viewModel.events.collect { event ->
+//                when (event) {
+//                    is UiEvent.ShowSnackbar -> {
+//                        hostState.showSnackbar(message = event.message.asString(context))
+//                    }
+//                }
+//            }
+//        }
+//
+//        launch {
+//            viewModel.navigationEvents.collect { event ->
+//                when (event) {
+//                    is NavigationEvent.NavigateBack -> {
+//                        navController.popBackStack()
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    Scaffold(
+//        snackbarHost = { SnackbarHost(hostState = hostState) },
+//        topBar = {
+//            Column {
+//                AppTopBar(navController)
+//                ConnectionError(!isConnected)
+//            }
+//        },
+//        bottomBar = { AppBottomNavigationBar(navController) },
+//        floatingActionButton = { AppFloatingActionButton(navController) }
+//    ) { innerPadding ->
+//        NavHost(
+//            navController = navController,
+//            startDestination = stringResource(Screen.Expenses.routeResId),
+//            modifier = Modifier.padding(innerPadding)
+//        ) {
+//            composable("expenses") { ExpensesScreen() }
+//            composable("incomes") { IncomesScreen() }
+//            composable("account") { AccountScreen() }
+//            composable("categories") { CategoriesScreen() }
+//            composable("settings") { SettingsScreen() }
+//            composable(
+//                route = "history/{isIncome}",
+//                arguments = listOf(navArgument("isIncome") { type = NavType.BoolType })
+//            ) { MyHistoryScreen() }
+//            composable("edit_account") {
+//                EditAccountScreen()
+//            }
+//        }
+//    }
+//}
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    // Этот Composable теперь чистый и зависит только от стабильных параметров
+    NavHost(
+        navController = navController,
+        startDestination = stringResource(Screen.Expenses.routeResId),
+        modifier = modifier
+    ) {
+        composable("expenses") { ExpensesScreen() }
+        composable("incomes") { IncomesScreen() }
+        composable("account") { AccountScreen() }
+        composable("categories") { CategoriesScreen() }
+        composable("settings") { SettingsScreen() }
+        composable(
+            route = "history/{isIncome}",
+            arguments = listOf(navArgument("isIncome") { type = NavType.BoolType })
+        ) { MyHistoryScreen() }
+        composable("edit_account") {
+            EditAccountScreen()
+        }
+    }
+}
+
 @Composable
 fun App() {
     val navController = rememberNavController()
@@ -74,30 +163,18 @@ fun App() {
         topBar = {
             Column {
                 AppTopBar(navController)
+                // Этот Composable вызывает рекомпозицию Scaffold, но не должен влиять на контент
                 ConnectionError(!isConnected)
             }
         },
         bottomBar = { AppBottomNavigationBar(navController) },
         floatingActionButton = { AppFloatingActionButton(navController) }
     ) { innerPadding ->
-        NavHost(
+        // Вызываем наш новый, стабильный Composable
+        AppNavHost(
             navController = navController,
-            startDestination = stringResource(Screen.Expenses.routeResId),
             modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("expenses") { ExpensesScreen() }
-            composable("incomes") { IncomesScreen() }
-            composable("account") { AccountScreen() }
-            composable("categories") { CategoriesScreen() }
-            composable("settings") { SettingsScreen() }
-            composable(
-                route = "history/{isIncome}",
-                arguments = listOf(navArgument("isIncome") { type = NavType.BoolType })
-            ) { MyHistoryScreen() }
-            composable("edit_account") {
-                EditAccountScreen()
-            }
-        }
+        )
     }
 }
 

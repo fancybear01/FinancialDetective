@@ -2,7 +2,7 @@ package com.coding.financialdetective.features.acccount.ui.account_info
 
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
-import com.coding.financialdetective.features.acccount.ui.editing_an_account.Currency
+import com.coding.financialdetective.features.acccount.domain.model.Currency
 
 
 fun AccountResponse.toUiModel(): AccountUi {

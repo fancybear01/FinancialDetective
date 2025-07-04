@@ -3,12 +3,14 @@ package com.coding.financialdetective.core_ui.common.components
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.coding.financialdetective.core_ui.navigation.currentRouteAsState
 import com.coding.financialdetective.core_ui.navigation.screens
 
@@ -16,7 +18,7 @@ import com.coding.financialdetective.core_ui.navigation.screens
 fun AppBottomNavigationBar(navController: NavController) {
     val currentDestination = navController.currentRouteAsState()
 
-    BottomAppBar {
+    NavigationBar  {
         screens.forEach { screen ->
             val screenRoute = screen.getRoute()
 
@@ -51,8 +53,11 @@ fun AppBottomNavigationBar(navController: NavController) {
                 ),
                 onClick = {
                     navController.navigate(screenRoute) {
-                        popUpTo(navController.graph.startDestinationId)
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 }
             )

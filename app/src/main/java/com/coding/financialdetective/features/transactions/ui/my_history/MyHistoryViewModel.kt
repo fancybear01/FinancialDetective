@@ -43,8 +43,12 @@ class MyHistoryViewModel(
         val today = LocalDate.now()
         val startOfMonth = today.withDayOfMonth(1)
         _state.update { it.copy(startDate = startOfMonth, endDate = today) }
-        reloadData()
         observeConnectivity()
+    }
+
+    fun onAccountUpdated(currencyCode: String) {
+        _state.update { it.copy(currencyCode = currencyCode) }
+        reloadData()
     }
 
     private fun observeConnectivity() {
@@ -53,8 +57,10 @@ class MyHistoryViewModel(
                 .drop(1)
                 .debounce(1000)
                 .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry()
+                    val lastUsedCurrency = state.value.currencyCode
+
+                    if (lastUsedCurrency.isNotEmpty()) {
+                        retry(lastUsedCurrency)
                     }
                 }
         }
@@ -105,7 +111,7 @@ class MyHistoryViewModel(
                         it.copy(
                             isLoading = false,
                             listItems = listItems,
-                            totalAmount = formatNumberWithSpaces(total) + " ₽",
+                            totalAmount = formatNumberWithSpaces(total),
                             periodStart = formattedStart,
                             periodEnd = formattedEnd,
                             startDate = startDate,
@@ -124,7 +130,7 @@ class MyHistoryViewModel(
         }
     }
 
-    fun retry() {
-        reloadData()
+    fun retry(currencyCode: String) {
+        onAccountUpdated(currencyCode)
     }
 }

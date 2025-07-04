@@ -74,4 +74,8 @@ class AccountViewModel(
     fun retry() {
         loadAccountById()
     }
+
+    fun refresh() {
+        loadAccountById()
+    }
 }

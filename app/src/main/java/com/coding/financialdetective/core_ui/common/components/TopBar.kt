@@ -54,20 +54,20 @@ fun AppTopBar(navController: NavController) {
         actions = {
             if (action != null) {
 
-                val isEnabled: Boolean
-                val onClickAction: () -> Unit
+                val actionRoute = action.getRoute()
 
-                if (currentScreen is Screen.EditAccount) {
-                    isEnabled = onTopBarAction != null
-                    onClickAction = {
-                        Log.d("AppTopBar", "Клик по кнопке сохранения!")
-                        onTopBarAction?.invoke()
+                val onClickAction = {
+                    var shouldNavigate = true
+                    if (onTopBarAction != null) {
+                        shouldNavigate = onTopBarAction.invoke()
                     }
-                } else {
-                    isEnabled = true
-                    val actionRoute = action.getRoute()
-                    onClickAction = { navController.navigate(actionRoute) }
+
+                    if (shouldNavigate) {
+                        navController.navigate(actionRoute)
+                    }
                 }
+
+                val isEnabled = (currentScreen !is Screen.EditAccount) || (onTopBarAction != null)
 
                 IconButton(
                     onClick = onClickAction,

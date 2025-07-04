@@ -14,12 +14,3 @@ fun CategoryDto.toDomain(): Category {
         type = if (this.isIncome) CategoryType.INCOME else CategoryType.EXPENSE
     )
 }
-
-fun Category.toUiModel(): CategoryUi {
-    return CategoryUi(
-        id = this.id,
-        name = this.name,
-        emoji = this.emoji,
-        type = this.type
-    )
-}

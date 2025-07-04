@@ -21,7 +21,7 @@ fun TransactionUi.toListItemModel(
             subtitle = this.comment
         ),
         trail = TrailInfo.ValueAndChevron(
-            title = this.formattedAmount,
+            title = "${this.formattedAmount} ${this.currency}",
             subtitle = if (showDate) this.formattedDate else null,
         )
     )

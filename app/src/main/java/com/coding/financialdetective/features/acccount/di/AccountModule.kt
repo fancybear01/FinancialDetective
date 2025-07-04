@@ -2,9 +2,9 @@ package com.coding.financialdetective.features.acccount.di
 
 import com.coding.financialdetective.features.acccount.data.remote.source.AccountRemoteDataSource
 import com.coding.financialdetective.features.acccount.data.repository.AccountRepositoryImpl
+import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
 import com.coding.financialdetective.features.acccount.ui.account_info.AccountViewModel
-import com.coding.financialdetective.features.acccount.ui.editing_an_account.Currency
 import com.coding.financialdetective.features.acccount.ui.editing_an_account.EditAccountViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module

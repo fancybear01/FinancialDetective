@@ -1,11 +1,14 @@
 package com.coding.financialdetective.features.transactions.ui.expenses_incomes
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.toUiText
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
+import com.coding.financialdetective.features.acccount.domain.model.Currency
+import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
 import com.coding.financialdetective.features.categories.domain.model.CategoryType
 import com.coding.financialdetective.features.transactions.domain.model.Transaction
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.UUID
 
 class TransactionsViewModel(
     private val repository: TransactionRepository,
@@ -29,8 +33,12 @@ class TransactionsViewModel(
     private val _state = MutableStateFlow(TransactionsState())
     val state: StateFlow<TransactionsState> = _state.asStateFlow()
 
+    private val viewModelId = UUID.randomUUID().toString().substring(0, 5)
+
+    private var lastUsedCurrency: String? = null
+
     init {
-        loadTransactions(accountId)
+        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) INIT")
         observeConnectivity()
     }
 
@@ -47,9 +55,10 @@ class TransactionsViewModel(
         }
     }
 
-    private fun loadTransactions(accountId: String) {
+    private fun loadTransactions(accountId: String, currency: String) {
+        this.lastUsedCurrency = currency
+
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
 
             val today = LocalDate.now().toString()
             var transactions = emptyList<Transaction>()
@@ -68,7 +77,6 @@ class TransactionsViewModel(
                     }
                     return@launch
                 }
-
             when (transactionType) {
                 TransactionType.EXPENSE -> {
                     val expenses = transactions.filter { it.category.type == CategoryType.EXPENSE }
@@ -101,7 +109,28 @@ class TransactionsViewModel(
         }
     }
 
-    fun retry() {
-        loadTransactions(accountId)
+    private fun retry() {
+        lastUsedCurrency?.let { currency ->
+            loadTransactions(accountId, currency)
+        }
+    }
+
+    fun retry(currency: String) {
+        refresh(currency)
+    }
+
+    fun refresh(currency: String) {
+        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) REFRESH called. Currency: $currency")
+        _state.update {
+            Log.d("CURRENCY_DEBUG", "ViewModel state is being updated. Old currency: ${it.currency}, New currency: $currency")
+            it.copy(isLoading = true, currency = currency)
+        }
+
+        loadTransactions(accountId, currency)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("LIFECYCLE_DEBUG", "TransactionsViewModel ($viewModelId) CLEARED")
     }
 }

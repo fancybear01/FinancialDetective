@@ -12,5 +12,6 @@ data class MyHistoryState(
     val periodStart: String = "",
     val periodEnd: String = "",
     val totalAmount: String = "",
+    val currencyCode: String = "",
     val error: UiText? = null
 )

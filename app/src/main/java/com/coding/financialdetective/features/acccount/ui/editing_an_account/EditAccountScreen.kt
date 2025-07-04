@@ -54,6 +54,8 @@ import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
+import com.coding.financialdetective.data.util.onSuccess
+import com.coding.financialdetective.features.acccount.domain.model.Currency
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -81,21 +83,32 @@ fun EditAccountScreen() {
         var showNameDialog by remember { mutableStateOf(false) }
         var showBalanceDialog by remember { mutableStateOf(false) }
 
-        LaunchedEffect(state.isSaved) {
-            if (state.isSaved) {
-                mainViewModel.loadAccounts(isForceRefresh = true)
-                mainViewModel.navigateBack()
+        LaunchedEffect(Unit) {
+            viewModel.saveSuccessEvent.collect {
+                mainViewModel.onAccountManuallyUpdated(
+                    accountId = accountId,
+                    newName = state.accountName,
+                    newBalance = state.rawBalance,
+                    newCurrencyCode = state.selectedCurrency.code
+                )
             }
         }
 
-        DisposableEffect(state.hasChanges) {
-            val action = if (state.hasChanges) {
-                { viewModel.saveChanges() }
+        LaunchedEffect(state.hasChanges) {
+            val action: (() -> Boolean)? = if (state.hasChanges) {
+                {
+                    scope.launch {
+                        viewModel.saveChanges()
+                    }
+                    true
+                }
             } else {
                 null
             }
             mainViewModel.setTopBarAction(action)
+        }
 
+        DisposableEffect(Unit) {
             onDispose {
                 mainViewModel.setTopBarAction(null)
             }
