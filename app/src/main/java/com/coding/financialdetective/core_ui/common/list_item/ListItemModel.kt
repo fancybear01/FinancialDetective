@@ -7,8 +7,7 @@ import com.coding.financialdetective.R
 data class ListItemModel(
     val lead: LeadInfo? = null,
     val content: ContentInfo,
-    val trail: TrailInfo? = null,
-    val onClick: () -> Unit = {}
+    val trail: TrailInfo? = null
 )
 
 data class LeadInfo(

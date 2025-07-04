@@ -1,5 +1,6 @@
 package com.coding.financialdetective.data.remote.service
 
+import android.util.Log
 import com.coding.financialdetective.data.util.NetworkError
 import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
@@ -11,10 +12,16 @@ suspend inline fun <reified T> responseToResult(
 ): Result<T, NetworkError> {
     return when(response.status.value) {
         in 200..299 -> {
-            try {
-                Result.Success(response.body<T>())
-            } catch(e: NoTransformationFoundException) {
-                Result.Error(NetworkError.SERIALIZATION)
+            if (T::class == Unit::class) {
+                @Suppress("UNCHECKED_CAST")
+                Result.Success(Unit as T)
+            } else {
+                try {
+                    Result.Success(response.body<T>())
+                } catch (e: Exception) {
+                    Log.e("RESPONSE_PARSING_ERROR", "Failed to parse response body", e)
+                    Result.Error(NetworkError.SERIALIZATION)
+                }
             }
         }
         400 -> Result.Error(NetworkError.BAD_REQUEST)

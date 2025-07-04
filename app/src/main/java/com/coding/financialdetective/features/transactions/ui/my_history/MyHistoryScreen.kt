@@ -1,5 +1,6 @@
 package com.coding.financialdetective.features.transactions.ui.my_history
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,12 @@ import org.koin.core.parameter.parametersOf
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DatePickerColors
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,12 +57,17 @@ import java.time.LocalDate
 fun MyHistoryScreen() {
     val mainViewModel: MainViewModel = koinViewModel()
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-    val accountId = currentAccount?.id
+    val account = currentAccount
 
-    if (accountId != null) {
-        val viewModel: MyHistoryViewModel = koinViewModel {
-            parametersOf(accountId.toString())
+    if (account != null) {
+        val viewModel: MyHistoryViewModel = koinViewModel(key = "my_history_${account.id}") {
+            parametersOf(account.id)
         }
+
+        LaunchedEffect(key1 = account.id, key2 = account.currency) {
+            viewModel.onAccountUpdated(account.currency)
+        }
+
         val state by viewModel.state.collectAsStateWithLifecycle()
         val context = LocalContext.current
 
@@ -132,7 +143,10 @@ fun MyHistoryScreen() {
             state.error != null -> {
                 FullScreenError(
                     errorMessage = state.error!!.asString(context),
-                    onRetryClick = viewModel::retry
+                    onRetryClick = {
+                        val newCurrencyCode = currentAccount?.currency ?: ""
+                        viewModel.retry(newCurrencyCode)
+                    }
                 )
             }
             else -> {
@@ -156,32 +170,33 @@ private fun MyHistoryContent(
     onTransactionClick: (TransactionUi) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val currencySymbol = Currency.fromCode(state.currencyCode).symbol
+
     Column(
         modifier = modifier.background(MaterialTheme.colorScheme.surface)
     ) {
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Начало"),
-                trail = TrailInfo.Value(title = state.periodStart),
-                onClick = onStartDateClick
+                trail = TrailInfo.Value(title = state.periodStart)
             ),
+            onClick = onStartDateClick,
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Конец"),
-                trail = TrailInfo.Value(title = state.periodEnd),
-                onClick = onEndDateClick
+                trail = TrailInfo.Value(title = state.periodEnd)
             ),
+            onClick = onEndDateClick,
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp)
         )
         ListItem(
             model = ListItemModel(
                 content = ContentInfo(title = "Сумма"),
-                trail = TrailInfo.Value(title = state.totalAmount),
-                onClick = {}
+                trail = TrailInfo.Value(title = "${state.totalAmount} $currencySymbol")
             ),
             containerColor = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.defaultMinSize(minHeight = 56.dp),

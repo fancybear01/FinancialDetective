@@ -1,5 +1,6 @@
 package com.coding.financialdetective.features.transactions.ui.expenses_incomes
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.util.onError
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.UUID
 
 class TransactionsViewModel(
     private val repository: TransactionRepository,
@@ -29,8 +31,11 @@ class TransactionsViewModel(
     private val _state = MutableStateFlow(TransactionsState())
     val state: StateFlow<TransactionsState> = _state.asStateFlow()
 
+    private val viewModelId = UUID.randomUUID().toString().substring(0, 5)
+
+    private var lastUsedCurrency: String? = null
+
     init {
-        loadTransactions(accountId)
         observeConnectivity()
     }
 
@@ -47,9 +52,10 @@ class TransactionsViewModel(
         }
     }
 
-    private fun loadTransactions(accountId: String) {
+    private fun loadTransactions(accountId: String, currency: String) {
+        this.lastUsedCurrency = currency
+
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
 
             val today = LocalDate.now().toString()
             var transactions = emptyList<Transaction>()
@@ -68,7 +74,6 @@ class TransactionsViewModel(
                     }
                     return@launch
                 }
-
             when (transactionType) {
                 TransactionType.EXPENSE -> {
                     val expenses = transactions.filter { it.category.type == CategoryType.EXPENSE }
@@ -101,7 +106,21 @@ class TransactionsViewModel(
         }
     }
 
-    fun retry() {
-        loadTransactions(accountId)
+    private fun retry() {
+        lastUsedCurrency?.let { currency ->
+            loadTransactions(accountId, currency)
+        }
+    }
+
+    fun retry(currency: String) {
+        refresh(currency)
+    }
+
+    fun refresh(currency: String) {
+        _state.update {
+            it.copy(isLoading = true, currency = currency)
+        }
+
+        loadTransactions(accountId, currency)
     }
 }

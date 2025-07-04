@@ -8,6 +8,7 @@
     <string name="settings_route">settings</string>
     <string name="expenses_history_route">history/false</string>
     <string name="incomes_history_route">history/true</string>
+    <string name="edit_account_route">edit_account</string>
 
     <string name="expenses_header">Расходы сегодня</string>
     <string name="expenses_icon">Расходы</string>

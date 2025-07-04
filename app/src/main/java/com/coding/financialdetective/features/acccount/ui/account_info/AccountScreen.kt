@@ -1,4 +1,4 @@
-package com.coding.financialdetective.features.acccount.ui
+package com.coding.financialdetective.features.acccount.ui.account_info
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +23,7 @@ import com.coding.financialdetective.core_ui.common.list_item.LeadInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
+import com.coding.financialdetective.core_ui.navigation.Screen
 import com.coding.financialdetective.core_ui.theme.White
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -29,6 +33,8 @@ fun AccountScreen() {
     val mainViewModel: MainViewModel = koinViewModel()
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
 
+    val updateTrigger by mainViewModel.accountUpdateTrigger.collectAsStateWithLifecycle()
+
     val accountId = currentAccount?.id
 
     if (accountId != null) {
@@ -36,6 +42,10 @@ fun AccountScreen() {
             key = "account_$accountId",
             parameters = { parametersOf(accountId.toString()) }
         )
+
+        LaunchedEffect(accountId, updateTrigger) {
+            accountViewModel.refresh()
+        }
 
         val state by accountViewModel.state.collectAsStateWithLifecycle()
         val context = LocalContext.current
@@ -85,8 +95,7 @@ private fun AccountContent(
         ),
         trail = TrailInfo.ValueAndChevron(
             title = "${state.balance} ${state.currency}"
-        ),
-        onClick = onBalanceClick
+        )
     )
 
     val currencyItem = ListItemModel(
@@ -96,7 +105,6 @@ private fun AccountContent(
         trail = TrailInfo.ValueAndChevron(
             title = state.currency
         ),
-        onClick = onCurrencyClick
     )
 
     Column(modifier = modifier) {

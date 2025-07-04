@@ -1,5 +1,8 @@
 package com.coding.financialdetective
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
@@ -20,6 +23,9 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 
+/**
+ * Основная view model приложения.
+ */
 class MainViewModel(
     private val repository: AccountRepository,
     private val connectivityObserver: ConnectivityObserver
@@ -42,9 +48,20 @@ class MainViewModel(
     private val _eventChannel = Channel<UiEvent>()
     val events = _eventChannel.receiveAsFlow()
 
+    private val _navigationChannel = Channel<NavigationEvent>()
+    val navigationEvents = _navigationChannel.receiveAsFlow()
+
+    var onTopBarActionClick by mutableStateOf<(() -> Boolean)?>(null)
+        private set
+
+    fun setTopBarAction(action: (() -> Boolean)?) {
+        onTopBarActionClick = action
+    }
+
     private var initialLoadDone = false
 
     init {
+        val instanceId = System.identityHashCode(this)
         loadAccounts()
         _isReady.value = true
 
@@ -70,6 +87,9 @@ class MainViewModel(
                 .getAccounts()
                 .onSuccess { accounts ->
                     _currentAccount.value = accounts.firstOrNull()
+                    if (isForceRefresh) {
+                        triggerAccountUpdate()
+                    }
                 }
                 .onError { error ->
                     _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
@@ -77,4 +97,32 @@ class MainViewModel(
             initialLoadDone = true
         }
     }
+
+    fun onAccountManuallyUpdated(
+        accountId: String,
+        newName: String,
+        newBalance: Double,
+        newCurrencyCode: String
+    ) {
+        val current = _currentAccount.value
+        if (current?.id == accountId) {
+            _currentAccount.value = current.copy(
+                name = newName,
+                balance = newBalance,
+                currency = newCurrencyCode
+            )
+            triggerAccountUpdate()
+        }
+    }
+
+    private val _accountUpdateTrigger = MutableStateFlow(0)
+    val accountUpdateTrigger: StateFlow<Int> = _accountUpdateTrigger.asStateFlow()
+
+    fun triggerAccountUpdate() {
+        _accountUpdateTrigger.value++
+    }
+}
+
+sealed class NavigationEvent {
+    data object NavigateBack : NavigationEvent()
 }

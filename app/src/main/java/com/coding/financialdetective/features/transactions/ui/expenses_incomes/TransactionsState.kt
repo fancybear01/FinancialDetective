@@ -6,6 +6,7 @@ import com.coding.financialdetective.features.transactions.ui.model.TransactionU
 data class TransactionsState(
     val totalAmount: Double = 0.0,
     val transactions: List<TransactionUi> = emptyList(),
+    val currency: String = "",
     val isLoading: Boolean = true,
     val error: UiText? = null,
 )

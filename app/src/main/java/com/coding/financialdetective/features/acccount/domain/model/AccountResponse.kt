@@ -1,7 +1,7 @@
 package com.coding.financialdetective.features.acccount.domain.model
 
 data class AccountResponse(
-    val id: Int,
+    val id: String,
     val name: String,
     val balance: Double,
     val currency: String,

@@ -41,7 +41,8 @@ sealed class Screen(
         routeResId = R.string.account_route,
         titleResId = R.string.wallet_header,
         action = ActionIcon.AccountAction,
-        bottomNavigationIcon = BottomNavigationIcon.AccountIcon
+        bottomNavigationIcon = BottomNavigationIcon.AccountIcon,
+        relatedRoutesResIds = listOf(R.string.edit_account_route)
     )
 
     data object Categories : Screen(
@@ -69,6 +70,14 @@ sealed class Screen(
         action = ActionIcon.IncomesHistoryAction,
         backNavigationIcon = BackNavigationIcon.IncomesHistoryBack
     )
+
+    data object EditAccount : Screen(
+        routeResId = R.string.edit_account_route,
+        titleResId = R.string.wallet_header,
+        action = ActionIcon.EditAccountAction,
+        backNavigationIcon = BackNavigationIcon.EditAccountBack
+    )
+
 }
 
 fun getScreen(route: String): Screen {
@@ -80,6 +89,7 @@ fun getScreen(route: String): Screen {
         "settings" -> Screen.Settings
         "history/false" -> Screen.ExpensesHistory
         "history/true" -> Screen.IncomesHistory
+        "edit_account" -> Screen.EditAccount
         else -> Screen.Expenses
     }
 }

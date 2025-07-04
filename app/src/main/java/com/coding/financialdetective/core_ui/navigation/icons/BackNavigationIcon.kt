@@ -25,4 +25,9 @@ sealed class BackNavigationIcon(
         iconResId = R.drawable.left_arrow,
         routeResId = R.string.incomes_route
     )
+
+    data object EditAccountBack : BackNavigationIcon(
+        iconResId = R.drawable.ic_cancel,
+        routeResId = R.string.account_route
+    )
 }

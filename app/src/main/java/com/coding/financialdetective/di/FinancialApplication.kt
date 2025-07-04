@@ -9,6 +9,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
 
+/**
+ * Реализация инъекии зависимостей приложения с помощью Koin.
+ */
 class FinancialApplication : Application() {
     override fun onCreate() {
         super.onCreate()

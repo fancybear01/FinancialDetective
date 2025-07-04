@@ -28,7 +28,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = DarkText,
     onSurfaceVariant = NavigationBar,
     outlineVariant = LightGrayBorder,
-    outline = Gray
+    outline = Gray,
+    error = Cancel
 )
 
 @Composable

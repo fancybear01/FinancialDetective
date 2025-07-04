@@ -32,6 +32,7 @@ fun SettingsScreen(
                         }
                     )
                 ),
+                onClick = {},
                 modifier = Modifier
                     .defaultMinSize(minHeight = 56.dp)
             )
@@ -46,11 +47,9 @@ fun SettingsScreen(
             ListItem(
                 model = ListItemModel(
                     content = ContentInfo(title = title),
-                    trail = TrailInfo.Chevron(R.drawable.ic_thick_chevron),
-                    onClick = {
-
-                    }
+                    trail = TrailInfo.Chevron(R.drawable.ic_thick_chevron)
                 ),
+                onClick = {},
                 modifier = Modifier
                     .defaultMinSize(minHeight = 56.dp)
             )

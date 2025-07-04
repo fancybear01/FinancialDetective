@@ -1,8 +1,10 @@
 package com.coding.financialdetective.features.transactions.ui.my_history
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.coding.financialdetective.core_ui.util.UiText
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
@@ -43,51 +45,52 @@ class MyHistoryViewModel(
         val today = LocalDate.now()
         val startOfMonth = today.withDayOfMonth(1)
         _state.update { it.copy(startDate = startOfMonth, endDate = today) }
-        reloadData()
         observeConnectivity()
     }
 
-    private fun observeConnectivity() {
-        viewModelScope.launch {
-            connectivityObserver.isConnected
-                .drop(1)
-                .debounce(1000)
-                .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry()
-                    }
-                }
-        }
+    fun onAccountUpdated(currencyCode: String) {
+        loadData(newCurrency = currencyCode)
     }
 
     fun updateStartDate(newStartDate: LocalDate) {
-        _state.update { it.copy(startDate = newStartDate) }
-        reloadData()
+        loadData(newStartDate = newStartDate)
     }
 
     fun updateEndDate(newEndDate: LocalDate) {
-        _state.update { it.copy(endDate = newEndDate) }
-        reloadData()
+        loadData(newEndDate = newEndDate)
     }
 
-    private fun reloadData() {
-        loadTransactionsForPeriod(
-            accountId = accountId,
-            startDate = _state.value.startDate,
-            endDate = _state.value.endDate
-        )
+    fun retry(currencyCode: String) {
+        loadData(newCurrency = currencyCode)
     }
 
-    private fun loadTransactionsForPeriod(
-        accountId: String,
-        startDate: LocalDate,
-        endDate: LocalDate
+    private fun loadData(
+        newStartDate: LocalDate = state.value.startDate,
+        newEndDate: LocalDate = state.value.endDate,
+        newCurrency: String = state.value.currencyCode
     ) {
+        if (newCurrency.isBlank()) {
+            return
+        }
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    startDate = newStartDate,
+                    endDate = newEndDate,
+                    currencyCode = newCurrency
+                )
+            }
+
+            val currentState = state.value
 
             repository
-                .getTransactionsForPeriod(accountId, startDate.toString(), endDate.toString())
+                .getTransactionsForPeriod(
+                    accountId,
+                    currentState.startDate.toString(),
+                    currentState.endDate.toString()
+                )
                 .onSuccess { transactions ->
                     val sortedTransactions = transactions
                         .filter { it.category.type == categoryTypeToLoad }
@@ -98,22 +101,21 @@ class MyHistoryViewModel(
 
                     val startFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
                     val endFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
-                    val formattedStart = startDate.format(startFormatter)
-                    val formattedEnd = endDate.format(endFormatter)
+                    val formattedStart = currentState.startDate.format(startFormatter)
+                    val formattedEnd = currentState.endDate.format(endFormatter)
 
                     _state.update {
                         it.copy(
                             isLoading = false,
                             listItems = listItems,
-                            totalAmount = formatNumberWithSpaces(total) + " ₽",
+                            totalAmount = formatNumberWithSpaces(total),
                             periodStart = formattedStart,
-                            periodEnd = formattedEnd,
-                            startDate = startDate,
-                            endDate = endDate
+                            periodEnd = formattedEnd
                         )
                     }
                 }
                 .onError { networkError ->
+                    Log.e("MyHistoryVM", "Error from repository: ${networkError}")
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -124,7 +126,17 @@ class MyHistoryViewModel(
         }
     }
 
-    fun retry() {
-        reloadData()
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            connectivityObserver.isConnected
+                .drop(1)
+                .debounce(1000)
+                .collect { connected ->
+                    if (connected && state.value.error != null) {
+                        retry(state.value.currencyCode)
+                    }
+                }
+        }
     }
 }

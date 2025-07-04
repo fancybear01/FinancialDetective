@@ -50,7 +50,6 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             FinancialDetectiveTheme {
-//                MainScreen(mainViewModel = mainViewModel)
                 App()
             }
         }

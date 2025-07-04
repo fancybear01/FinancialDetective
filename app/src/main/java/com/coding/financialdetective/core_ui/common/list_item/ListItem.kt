@@ -1,7 +1,9 @@
 package com.coding.financialdetective.core_ui.common.list_item
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +21,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +35,7 @@ import com.coding.financialdetective.core_ui.theme.SwitchColor
 @Composable
 fun ListItem(
     model: ListItemModel,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     addDivider: Boolean = true,
@@ -44,7 +48,7 @@ fun ListItem(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .clickable(onClick = model.onClick)
+                .optionalClickable(onClick = onClick)
                 .padding(
                     horizontal = 16.dp,
                     vertical = 8.dp
@@ -212,4 +216,18 @@ private fun TrailContent(trailInfo: TrailInfo) {
             )
         }
     }
+}
+
+@Composable
+fun Modifier.optionalClickable(onClick: (() -> Unit)?): Modifier {
+    if (onClick == null) {
+        return this
+    }
+    return this.then(
+        Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = LocalIndication.current,
+            onClick = onClick
+        )
+    )
 }

@@ -21,12 +21,9 @@ fun TransactionUi.toListItemModel(
             subtitle = this.comment
         ),
         trail = TrailInfo.ValueAndChevron(
-            title = this.formattedAmount,
+            title = "${this.formattedAmount} ${this.currency}",
             subtitle = if (showDate) this.formattedDate else null,
-        ),
-        onClick = {
-            /* TODO() */
-        }
+        )
     )
 }
 
@@ -41,9 +38,6 @@ fun CategoryUi.toListItemModel(
         ),
         content = ContentInfo(
             title = this.name
-        ),
-        onClick = {
-            /* TODO() */
-        }
+        )
     )
 }

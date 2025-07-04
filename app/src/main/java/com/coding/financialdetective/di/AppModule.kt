@@ -10,10 +10,5 @@ import org.koin.dsl.module
 val appModule = module {
     single<ConnectivityObserver> { AndroidConnectivityObserver(androidContext()) }
 
-    viewModel {
-        MainViewModel(
-            repository = get(),
-            connectivityObserver = get()
-        )
-    }
+    single { MainViewModel(get(), get()) }
 }
