@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -38,45 +37,56 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.coding.financialdetective.MainViewModel
 import com.coding.financialdetective.R
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.common.FullScreenError
 import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
 import com.coding.financialdetective.core_ui.common.list_item.LeadInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
-import com.coding.financialdetective.core_ui.theme.White
-import com.coding.financialdetective.data.util.onSuccess
+import com.coding.financialdetective.core_ui.navigation.LocalMainViewModel
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAccountScreen() {
-    val mainViewModel: MainViewModel = koinViewModel()
+    val mainViewModel = LocalMainViewModel.current
+
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
     val accountId = currentAccount?.id
 
     if (accountId != null) {
-        val viewModel: EditAccountViewModel = koinViewModel(
+        val context = LocalContext.current
+        val editAccountViewModelFactory = remember(accountId) {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return context.appComponent
+                        .accountFeatureComponent()
+                        .create(accountId)
+                        .editAccountViewModelFactory()
+                        .create(accountId) as T
+                }
+            }
+        }
+
+        val viewModel: EditAccountViewModel = daggerViewModel(
             key = "edit_account_$accountId",
-            parameters = { parametersOf(accountId) }
+            factory = editAccountViewModelFactory
         )
 
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val context = LocalContext.current
 
         val scope = rememberCoroutineScope()
 
@@ -93,21 +103,20 @@ fun EditAccountScreen() {
                     newBalance = state.rawBalance,
                     newCurrencyCode = state.selectedCurrency.code
                 )
+                mainViewModel.navigateBack()
             }
         }
 
         LaunchedEffect(state.hasChanges) {
-            val action: (() -> Boolean)? = if (state.hasChanges) {
-                {
+            if (state.hasChanges) {
+                mainViewModel.setTopBarAction {
                     scope.launch {
                         viewModel.saveChanges()
                     }
-                    true
                 }
             } else {
-                null
+                mainViewModel.setTopBarAction(null)
             }
-            mainViewModel.setTopBarAction(action)
         }
 
         DisposableEffect(Unit) {
@@ -190,7 +199,6 @@ fun EditAccountScreen() {
         }
     }
 }
-
 
 
 @Composable

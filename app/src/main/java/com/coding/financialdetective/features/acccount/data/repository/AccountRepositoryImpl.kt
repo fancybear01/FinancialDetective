@@ -6,11 +6,11 @@ import com.coding.financialdetective.features.acccount.domain.model.Account
 import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.data.util.map
 import com.coding.financialdetective.features.acccount.data.mapper.toDomain
-import com.coding.financialdetective.features.acccount.data.remote.dto.AccountResponseDto
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
 import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
+import javax.inject.Inject
 
-class AccountRepositoryImpl(
+class AccountRepositoryImpl @Inject constructor(
     private val remoteDataSource: AccountRemoteDataSource
 ) : AccountRepository {
 

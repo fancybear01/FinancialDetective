@@ -9,28 +9,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.coding.financialdetective.MainViewModel
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.common.FullScreenError
 import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
 import com.coding.financialdetective.core_ui.common.list_item.LeadInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
-import com.coding.financialdetective.core_ui.navigation.Screen
+import com.coding.financialdetective.core_ui.navigation.LocalMainViewModel
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.core_ui.theme.White
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AccountScreen() {
-    val mainViewModel: MainViewModel = koinViewModel()
+
+    val mainViewModel = LocalMainViewModel.current
+
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
 
     val updateTrigger by mainViewModel.accountUpdateTrigger.collectAsStateWithLifecycle()
@@ -38,9 +40,24 @@ fun AccountScreen() {
     val accountId = currentAccount?.id
 
     if (accountId != null) {
-        val accountViewModel: AccountViewModel = koinViewModel(
+
+        val context = LocalContext.current
+        val accountViewModelFactory = remember(accountId) {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return context.appComponent
+                        .accountFeatureComponent()
+                        .create(accountId)
+                        .accountViewModelFactory()
+                        .create(accountId) as T
+                }
+            }
+        }
+
+        val accountViewModel: AccountViewModel = daggerViewModel(
             key = "account_$accountId",
-            parameters = { parametersOf(accountId.toString()) }
+            factory = accountViewModelFactory
         )
 
         LaunchedEffect(accountId, updateTrigger) {
@@ -48,7 +65,6 @@ fun AccountScreen() {
         }
 
         val state by accountViewModel.state.collectAsStateWithLifecycle()
-        val context = LocalContext.current
         val currentError = state.error
 
         when {

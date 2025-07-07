@@ -1,13 +1,11 @@
 package com.coding.financialdetective.features.transactions.ui.my_history
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -39,37 +37,60 @@ import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
 import com.coding.financialdetective.core_ui.common.list_item.toListItemModel
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DatePickerColors
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.coding.financialdetective.appComponent
+import com.coding.financialdetective.core_ui.navigation.LocalMainViewModel
+import com.coding.financialdetective.core_ui.navigation.LocalNavController
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyHistoryScreen() {
-    val mainViewModel: MainViewModel = koinViewModel()
+    val mainViewModel = LocalMainViewModel.current
+
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
     val account = currentAccount
 
+    val navController = LocalNavController.current
+    val navBackStackEntry = navController.currentBackStackEntry
+    val isIncome = navBackStackEntry?.arguments?.getBoolean("isIncome") ?: false
+
     if (account != null) {
-        val viewModel: MyHistoryViewModel = koinViewModel(key = "my_history_${account.id}") {
-            parametersOf(account.id)
+        val context = LocalContext.current
+        val myHistoryViewModelFactory = remember(account.id, isIncome) {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return context.appComponent
+                        .transactionFeatureComponent()
+                        .create(account.id)
+                        .myHistoryViewModelFactory()
+                        .create(account.id, isIncome) as T
+                }
+            }
         }
+
+        val viewModel: MyHistoryViewModel = daggerViewModel(
+            key = "my_history_${account.id}",
+            factory = myHistoryViewModelFactory
+        )
 
         LaunchedEffect(key1 = account.id, key2 = account.currency) {
             viewModel.onAccountUpdated(account.currency)
         }
 
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val context = LocalContext.current
 
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }

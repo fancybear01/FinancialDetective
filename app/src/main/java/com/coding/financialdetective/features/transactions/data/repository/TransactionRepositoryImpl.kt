@@ -7,8 +7,9 @@ import com.coding.financialdetective.features.transactions.data.mapper.toDomain
 import com.coding.financialdetective.features.transactions.data.remote.source.TransactionRemoteDataSource
 import com.coding.financialdetective.features.transactions.domain.model.Transaction
 import com.coding.financialdetective.features.transactions.domain.repository.TransactionRepository
+import javax.inject.Inject
 
-class TransactionRepositoryImpl(
+class TransactionRepositoryImpl @Inject constructor(
     private val remoteDataSource: TransactionRemoteDataSource
 ) : TransactionRepository {
     override suspend fun getTransactionsForPeriod(

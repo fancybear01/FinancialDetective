@@ -14,8 +14,9 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CategoriesViewModel(
+class CategoriesViewModel @Inject constructor(
     private val repository: CategoryRepository,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {

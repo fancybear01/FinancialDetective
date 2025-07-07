@@ -6,18 +6,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.coding.financialdetective.R
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
-import org.koin.androidx.compose.koinViewModel
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel = koinViewModel()
-) {
+fun SettingsScreen() {
+    val viewModel: SettingsViewModel = daggerViewModel(
+        factory = LocalContext.current.appComponent.viewModelFactory()
+    )
+
     val state by viewModel.state.collectAsState()
 
     LazyColumn {

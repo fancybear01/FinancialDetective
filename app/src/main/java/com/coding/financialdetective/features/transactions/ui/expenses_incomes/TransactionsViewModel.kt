@@ -11,6 +11,9 @@ import com.coding.financialdetective.features.categories.domain.model.CategoryTy
 import com.coding.financialdetective.features.transactions.domain.model.Transaction
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
 import com.coding.financialdetective.features.transactions.domain.repository.TransactionRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,17 +24,20 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
 
-class TransactionsViewModel(
+class TransactionsViewModel @AssistedInject constructor(
     private val repository: TransactionRepository,
-    private val accountId: String,
-    private val transactionType: TransactionType,
+    @Assisted private val accountId: String,
+    @Assisted private val transactionType: TransactionType,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(accountId: String, transactionType: TransactionType): TransactionsViewModel
+    }
+
     private val _state = MutableStateFlow(TransactionsState())
     val state: StateFlow<TransactionsState> = _state.asStateFlow()
-
-    private val viewModelId = UUID.randomUUID().toString().substring(0, 5)
 
     private var lastUsedCurrency: String? = null
 

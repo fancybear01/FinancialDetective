@@ -12,17 +12,22 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.coding.financialdetective.MainViewModel
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.navigation.Screen
 import com.coding.financialdetective.core_ui.navigation.currentRouteAsState
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.core_ui.navigation.getScreen
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppTopBar(navController: NavController) {
-    val mainViewModel: MainViewModel = koinViewModel()
+fun AppTopBar(
+    navController: NavController,
+    onTopBarAction: (() -> Unit)?
+) {
 
     val currentDestination = navController.currentRouteAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -32,7 +37,10 @@ fun AppTopBar(navController: NavController) {
     val action = currentScreen.action
     val backNavigation = currentScreen.backNavigationIcon
 
-    val onTopBarAction = mainViewModel.onTopBarActionClick
+    val mainViewModel: MainViewModel = daggerViewModel(
+        factory = LocalContext.current.appComponent.viewModelFactory()
+    )
+
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -57,17 +65,17 @@ fun AppTopBar(navController: NavController) {
                 val actionRoute = action.getRoute()
 
                 val onClickAction = {
-                    var shouldNavigate = true
-                    if (onTopBarAction != null) {
-                        shouldNavigate = onTopBarAction.invoke()
-                    }
-
-                    if (shouldNavigate) {
+                    onTopBarAction?.invoke()
+                    if (currentScreen !is Screen.EditAccount) {
                         navController.navigate(actionRoute)
                     }
                 }
 
-                val isEnabled = (currentScreen !is Screen.EditAccount) || (onTopBarAction != null)
+                val isEnabled = if (currentScreen is Screen.EditAccount) {
+                    onTopBarAction != null
+                } else {
+                    true
+                }
 
                 IconButton(
                     onClick = onClickAction,

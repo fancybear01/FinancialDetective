@@ -1,5 +1,6 @@
 package com.coding.financialdetective.features.acccount.ui.editing_an_account
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
@@ -7,9 +8,13 @@ import com.coding.financialdetective.core_ui.util.toUiText
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
 import com.coding.financialdetective.data.util.onError
 import com.coding.financialdetective.data.util.onSuccess
+import com.coding.financialdetective.di.AccountId
 import com.coding.financialdetective.features.acccount.domain.model.AccountResponse
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,11 +33,16 @@ import kotlinx.coroutines.launch
  * @param accountId Уникальный идентификатор редактируемого счёта
  * @param connectivityObserver Наблюдатель за состоянием сетевого подключения
  */
-class EditAccountViewModel(
+class EditAccountViewModel @AssistedInject constructor(
     private val repository: AccountRepository,
-    private val accountId: String,
+    @Assisted private val accountId: String,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(accountId: String): EditAccountViewModel
+    }
 
     private val _state = MutableStateFlow(EditAccountState())
     val state: StateFlow<EditAccountState> = _state.asStateFlow()

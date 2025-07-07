@@ -8,8 +8,9 @@ import com.coding.financialdetective.features.transactions.data.remote.dto.Trans
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import javax.inject.Inject
 
-class TransactionRemoteDataSource(
+class TransactionRemoteDataSource @Inject constructor(
     private val httpClient: HttpClient
 ) {
     suspend fun getTransactionsForPeriod(

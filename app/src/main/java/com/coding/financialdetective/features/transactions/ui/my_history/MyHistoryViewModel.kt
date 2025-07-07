@@ -10,9 +10,13 @@ import com.coding.financialdetective.data.util.onSuccess
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.core_ui.util.toUiText
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
+import com.coding.financialdetective.di.IsIncome
 import com.coding.financialdetective.features.categories.domain.model.CategoryType
 import com.coding.financialdetective.features.transactions.domain.repository.TransactionRepository
 import com.coding.financialdetective.features.transactions.ui.expenses_incomes.toUiModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
@@ -23,14 +27,17 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MyHistoryViewModel(
+class MyHistoryViewModel @AssistedInject constructor(
     private val repository: TransactionRepository,
-    private val accountId: String,
-    savedStateHandle: SavedStateHandle,
+    @Assisted private val accountId: String,
+    @Assisted private val isIncome: Boolean,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val isIncome: Boolean = savedStateHandle.get<Boolean>("isIncome") ?: false
+    @AssistedFactory
+    interface Factory {
+        fun create(accountId: String, isIncome: Boolean): MyHistoryViewModel
+    }
 
     private val categoryTypeToLoad = if (isIncome) {
         CategoryType.INCOME

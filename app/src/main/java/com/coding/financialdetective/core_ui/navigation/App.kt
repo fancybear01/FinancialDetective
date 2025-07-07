@@ -6,6 +6,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -19,8 +20,12 @@ import androidx.navigation.navArgument
 import com.coding.financialdetective.MainViewModel
 import com.coding.financialdetective.features.acccount.ui.account_info.AccountScreen
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.coding.financialdetective.NavigationEvent
@@ -36,70 +41,15 @@ import com.coding.financialdetective.features.transactions.ui.expenses_incomes.E
 import com.coding.financialdetective.features.transactions.ui.expenses_incomes.IncomesScreen
 import com.coding.financialdetective.features.transactions.ui.my_history.MyHistoryScreen
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
-//@Composable
-//fun App() {
-//    val navController = rememberNavController()
-//    val hostState = remember { SnackbarHostState() }
-//
-//    val viewModel: MainViewModel = koinViewModel()
-//    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
-//    val context = LocalContext.current
-//
-//    LaunchedEffect(key1 = navController) {
-//        launch {
-//            viewModel.events.collect { event ->
-//                when (event) {
-//                    is UiEvent.ShowSnackbar -> {
-//                        hostState.showSnackbar(message = event.message.asString(context))
-//                    }
-//                }
-//            }
-//        }
-//
-//        launch {
-//            viewModel.navigationEvents.collect { event ->
-//                when (event) {
-//                    is NavigationEvent.NavigateBack -> {
-//                        navController.popBackStack()
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    Scaffold(
-//        snackbarHost = { SnackbarHost(hostState = hostState) },
-//        topBar = {
-//            Column {
-//                AppTopBar(navController)
-//                ConnectionError(!isConnected)
-//            }
-//        },
-//        bottomBar = { AppBottomNavigationBar(navController) },
-//        floatingActionButton = { AppFloatingActionButton(navController) }
-//    ) { innerPadding ->
-//        NavHost(
-//            navController = navController,
-//            startDestination = stringResource(Screen.Expenses.routeResId),
-//            modifier = Modifier.padding(innerPadding)
-//        ) {
-//            composable("expenses") { ExpensesScreen() }
-//            composable("incomes") { IncomesScreen() }
-//            composable("account") { AccountScreen() }
-//            composable("categories") { CategoriesScreen() }
-//            composable("settings") { SettingsScreen() }
-//            composable(
-//                route = "history/{isIncome}",
-//                arguments = listOf(navArgument("isIncome") { type = NavType.BoolType })
-//            ) { MyHistoryScreen() }
-//            composable("edit_account") {
-//                EditAccountScreen()
-//            }
-//        }
-//    }
-//}
+
+val LocalNavController = staticCompositionLocalOf<NavHostController> {
+    error("No NavController provided")
+}
+
+val LocalMainViewModel = staticCompositionLocalOf<MainViewModel> {
+    error("No MainViewModel provided")
+}
 
 @Composable
 fun AppNavHost(
@@ -127,54 +77,60 @@ fun AppNavHost(
 }
 
 @Composable
-fun App() {
-    val navController = rememberNavController()
-    val hostState = remember { SnackbarHostState() }
+fun App(mainViewModel: MainViewModel) {
+    CompositionLocalProvider(LocalMainViewModel provides mainViewModel) {
+        val navController = rememberNavController()
+        CompositionLocalProvider(LocalNavController provides navController) {
+            val hostState = remember { SnackbarHostState() }
 
-    val viewModel: MainViewModel = koinViewModel()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+            val isConnected by mainViewModel.isConnected.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = navController) {
-        launch {
-            viewModel.events.collect { event ->
-                when (event) {
-                    is UiEvent.ShowSnackbar -> {
-                        hostState.showSnackbar(message = event.message.asString(context))
+            val context = LocalContext.current
+
+            LaunchedEffect(key1 = navController) {
+                launch {
+                    mainViewModel.events.collect { event ->
+                        when (event) {
+                            is UiEvent.ShowSnackbar -> {
+                                hostState.showSnackbar(message = event.message.asString(context))
+                            }
+                        }
+                    }
+                }
+
+                launch {
+                    mainViewModel.navigationEvents.collect { event ->
+                        when (event) {
+                            is NavigationEvent.NavigateBack -> {
+                                navController.popBackStack()
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        launch {
-            viewModel.navigationEvents.collect { event ->
-                when (event) {
-                    is NavigationEvent.NavigateBack -> {
-                        navController.popBackStack()
+            Scaffold(
+                snackbarHost = { SnackbarHost(hostState = hostState) },
+                topBar = {
+                    Column {
+                        AppTopBar(
+                            navController = navController,
+                            onTopBarAction = mainViewModel.onTopBarActionClick
+                        )
+                        ConnectionError(!isConnected)
                     }
-                }
+                },
+                bottomBar = { AppBottomNavigationBar(navController) },
+                floatingActionButton = { AppFloatingActionButton(navController) }
+            ) { innerPadding ->
+                AppNavHost(
+                    navController = navController,
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
-    }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = hostState) },
-        topBar = {
-            Column {
-                AppTopBar(navController)
-                ConnectionError(!isConnected)
-            }
-        },
-        bottomBar = { AppBottomNavigationBar(navController) },
-        floatingActionButton = { AppFloatingActionButton(navController) }
-    ) { innerPadding ->
-        AppNavHost(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding)
-        )
     }
 }
-
 @Composable
 fun NavController.currentRouteAsState(): String {
     val navBackStackEntry by currentBackStackEntryAsState()
@@ -187,3 +143,9 @@ fun NavController.currentRouteAsState(): String {
         routePattern ?: stringResource(Screen.Expenses.routeResId)
     }
 }
+
+@Composable
+inline fun <reified T : ViewModel> daggerViewModel(
+    key: String? = null,
+    factory: ViewModelProvider.Factory
+): T = viewModel(modelClass = T::class.java, key = key, factory = factory)

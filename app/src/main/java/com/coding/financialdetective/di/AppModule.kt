@@ -1,14 +1,16 @@
 package com.coding.financialdetective.di
 
-import com.coding.financialdetective.MainViewModel
+import android.content.Context
 import com.coding.financialdetective.data.remote.connectivity.AndroidConnectivityObserver
 import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
-import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.dsl.module
+import dagger.Module
+import dagger.Provides
 
-val appModule = module {
-    single<ConnectivityObserver> { AndroidConnectivityObserver(androidContext()) }
-
-    single { MainViewModel(get(), get()) }
+@Module
+object AppModule {
+    @Provides
+    @AppScope
+    fun provideConnectivityObserver(context: Context): ConnectivityObserver {
+        return AndroidConnectivityObserver(context)
+    }
 }

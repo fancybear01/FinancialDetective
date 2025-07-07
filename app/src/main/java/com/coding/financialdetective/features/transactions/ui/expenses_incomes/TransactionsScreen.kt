@@ -18,21 +18,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.financialdetective.MainViewModel
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.common.FullScreenError
 import com.coding.financialdetective.core_ui.common.list_item.ContentInfo
 import com.coding.financialdetective.core_ui.common.list_item.ListItem
 import com.coding.financialdetective.core_ui.common.list_item.ListItemModel
 import com.coding.financialdetective.core_ui.common.list_item.TrailInfo
 import com.coding.financialdetective.core_ui.common.list_item.toListItemModel
+import com.coding.financialdetective.core_ui.navigation.LocalMainViewModel
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.core_ui.util.formatNumberWithSpaces
 import com.coding.financialdetective.features.acccount.domain.model.Currency
 import com.coding.financialdetective.features.transactions.domain.model.TransactionType
 import com.coding.financialdetective.features.transactions.ui.model.TransactionUi
 import kotlinx.coroutines.flow.drop
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun TransactionsScreen(
@@ -125,17 +128,32 @@ private fun TransactionsContent(
 @Composable
 fun ExpensesScreen() {
 
-    val mainViewModel: MainViewModel = koinViewModel()
+    val mainViewModel = LocalMainViewModel.current
+
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
 
     val account = currentAccount
 
     if (account != null) {
-        val viewModel: TransactionsViewModel = koinViewModel(
-            key = "expenses_${account.id}"
-        ) {
-            parametersOf(account.id, TransactionType.EXPENSE)
+        val context = LocalContext.current
+
+        val transactionsViewModelFactory = remember(account.id) {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return context.appComponent
+                        .transactionFeatureComponent()
+                        .create(account.id)
+                        .transactionsViewModelFactory()
+                        .create(account.id, TransactionType.EXPENSE) as T
+                }
+            }
         }
+
+        val viewModel: TransactionsViewModel = daggerViewModel(
+            key = "expenses_${account.id}",
+            factory = transactionsViewModelFactory
+        )
 
         LaunchedEffect(Unit) {
 
@@ -162,17 +180,32 @@ fun ExpensesScreen() {
 @Composable
 fun IncomesScreen() {
 
-    val mainViewModel: MainViewModel = koinViewModel()
+    val mainViewModel = LocalMainViewModel.current
+
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
 
     val account = currentAccount
 
     if (account != null) {
-        val viewModel: TransactionsViewModel = koinViewModel(
-            key = "incomes_${account.id}"
-        ) {
-            parametersOf(account.id, TransactionType.INCOME)
+        val context = LocalContext.current
+
+        val transactionsViewModelFactory = remember(account.id) {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return context.appComponent
+                        .transactionFeatureComponent()
+                        .create(account.id)
+                        .transactionsViewModelFactory()
+                        .create(account.id, TransactionType.EXPENSE) as T
+                }
+            }
         }
+
+        val viewModel: TransactionsViewModel = daggerViewModel(
+            key = "expenses_${account.id}",
+            factory = transactionsViewModelFactory
+        )
 
         LaunchedEffect(Unit) {
 

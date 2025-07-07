@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,16 +27,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.coding.financialdetective.appComponent
 import com.coding.financialdetective.core_ui.common.FullScreenError
 import com.coding.financialdetective.core_ui.common.list_item.toListItemModel
+import com.coding.financialdetective.core_ui.navigation.daggerViewModel
 import com.coding.financialdetective.core_ui.theme.DarkText
 import com.coding.financialdetective.core_ui.theme.Gray
 import com.coding.financialdetective.core_ui.theme.LightGray
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CategoriesScreen() {
-    val viewModel: CategoriesViewModel = koinViewModel()
+    val viewModel: CategoriesViewModel = daggerViewModel(
+        factory = LocalContext.current.appComponent.viewModelFactory()
+    )
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current

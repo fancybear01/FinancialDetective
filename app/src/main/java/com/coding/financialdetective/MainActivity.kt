@@ -7,16 +7,23 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModelProvider
 import com.coding.financialdetective.core_ui.navigation.App
 import com.coding.financialdetective.core_ui.theme.FinancialDetectiveTheme
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel: MainViewModel by viewModel()
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val mainViewModel: MainViewModel by viewModels { viewModelFactory }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as FinancialApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen().apply {
@@ -50,7 +57,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             FinancialDetectiveTheme {
-                App()
+                App(mainViewModel = mainViewModel)
             }
         }
     }

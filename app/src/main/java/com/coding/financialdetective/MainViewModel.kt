@@ -1,5 +1,6 @@
 package com.coding.financialdetective
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,11 +23,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 /**
  * Основная view model приложения.
  */
-class MainViewModel(
+class MainViewModel @Inject constructor(
     private val repository: AccountRepository,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
@@ -51,11 +53,17 @@ class MainViewModel(
     private val _navigationChannel = Channel<NavigationEvent>()
     val navigationEvents = _navigationChannel.receiveAsFlow()
 
-    var onTopBarActionClick by mutableStateOf<(() -> Boolean)?>(null)
+    var onTopBarActionClick by mutableStateOf<(() -> Unit)?>(null)
         private set
 
-    fun setTopBarAction(action: (() -> Boolean)?) {
+    fun setTopBarAction(action: (() -> Unit)?) {
         onTopBarActionClick = action
+    }
+
+    fun navigateBack() {
+        viewModelScope.launch {
+            _navigationChannel.send(NavigationEvent.NavigateBack)
+        }
     }
 
     private var initialLoadDone = false

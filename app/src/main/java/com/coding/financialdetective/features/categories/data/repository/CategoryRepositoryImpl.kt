@@ -7,8 +7,9 @@ import com.coding.financialdetective.features.categories.domain.repository.Categ
 import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.data.util.map
 import com.coding.financialdetective.features.categories.data.mapper.toDomain
+import javax.inject.Inject
 
-class CategoryRepositoryImpl(
+class CategoryRepositoryImpl @Inject constructor(
     private val remoteDataSource: CategoryRemoteDataSource
 ) : CategoryRepository {
     override suspend fun getCategories(): Result<List<Category>, NetworkError> {

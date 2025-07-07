@@ -14,8 +14,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import java.util.Locale
+import javax.inject.Inject
 
-class AccountRemoteDataSource(
+class AccountRemoteDataSource @Inject constructor(
     private val httpClient: HttpClient
 ) {
     suspend fun getAccounts(): Result<List<AccountDto>, NetworkError> {

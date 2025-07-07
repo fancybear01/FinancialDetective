@@ -7,8 +7,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import com.coding.financialdetective.data.util.Result
 import com.coding.financialdetective.features.categories.data.remote.dto.CategoryDto
+import javax.inject.Inject
 
-class CategoryRemoteDataSource(
+class CategoryRemoteDataSource @Inject constructor(
     private val httpClient: HttpClient
 ) {
     suspend fun getCategories(): Result<List<CategoryDto>, NetworkError> {
