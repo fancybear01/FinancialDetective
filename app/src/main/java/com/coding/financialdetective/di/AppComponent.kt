@@ -2,6 +2,8 @@ package com.coding.financialdetective.di
 
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
+import com.coding.core.di.AppDependencies
+import com.coding.core.di.AppScope
 import com.coding.financialdetective.MainActivity
 import dagger.BindsInstance
 import dagger.Component
@@ -15,18 +17,14 @@ import dagger.Component
         ViewModelModule::class
     ]
 )
-interface AppComponent {
+interface AppComponent : AppDependencies {
 
     @Component.Factory
     interface Factory {
         fun create(@BindsInstance context: Context): AppComponent
     }
 
-    fun viewModelFactory(): ViewModelProvider.Factory
-
-    fun accountFeatureComponent(): AccountFeatureComponent.Factory
-
-    fun transactionFeatureComponent(): TransactionFeatureComponent.Factory
+    override fun viewModelFactory(): ViewModelProvider.Factory
 
     fun inject(activity: MainActivity)
 }

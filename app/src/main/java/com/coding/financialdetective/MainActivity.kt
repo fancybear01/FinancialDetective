@@ -12,7 +12,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import com.coding.financialdetective.core_ui.navigation.App
-import com.coding.financialdetective.core_ui.theme.FinancialDetectiveTheme
+import com.coding.core_ui.theme.FinancialDetectiveTheme
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as FinancialApplication).appComponent.inject(this)
+        (application as FinancialApplication).dependencies.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen().apply {

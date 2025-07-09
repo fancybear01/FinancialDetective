@@ -2,6 +2,7 @@ package com.coding.financialdetective.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.coding.core.di.AppScope
 import javax.inject.Inject
 import javax.inject.Provider
 

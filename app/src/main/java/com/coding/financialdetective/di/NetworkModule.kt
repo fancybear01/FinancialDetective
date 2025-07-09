@@ -1,8 +1,9 @@
 package com.coding.financialdetective.di
 
+import com.coding.core.di.AppScope
+import com.coding.core.data.remote.service.HttpClientFactory
+import com.coding.core.data.remote.service.TokenProvider
 import com.coding.financialdetective.data.remote.service.AppTokenProvider
-import com.coding.financialdetective.data.remote.service.HttpClientFactory
-import com.coding.financialdetective.data.remote.service.TokenProvider
 import dagger.Module
 import dagger.Provides
 import io.ktor.client.HttpClient

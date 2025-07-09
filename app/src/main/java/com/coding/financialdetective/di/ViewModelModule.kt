@@ -2,9 +2,11 @@ package com.coding.financialdetective.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.coding.core.di.AppScope
+import com.coding.core.di.ViewModelKey
 import com.coding.financialdetective.MainViewModel
-import com.coding.financialdetective.features.categories.ui.CategoriesViewModel
-import com.coding.financialdetective.features.settings.ui.SettingsViewModel
+import com.coding.feature_categories.ui.CategoriesViewModel
+import com.coding.feature_settings.ui.SettingsViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap

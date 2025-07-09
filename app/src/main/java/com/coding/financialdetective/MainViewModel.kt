@@ -1,18 +1,18 @@
 package com.coding.financialdetective
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.coding.financialdetective.data.remote.connectivity.ConnectivityObserver
-import com.coding.financialdetective.data.util.onSuccess
-import com.coding.financialdetective.data.util.onError
-import com.coding.financialdetective.core_ui.util.UiEvent
-import com.coding.financialdetective.core_ui.util.toUiText
-import com.coding.financialdetective.features.acccount.domain.model.Account
-import com.coding.financialdetective.features.acccount.domain.repository.AccountRepository
+import com.coding.core.data.remote.connectivity.ConnectivityObserver
+import com.coding.core.data.util.onSuccess
+import com.coding.core.data.util.onError
+import com.coding.core.util.UiEvent
+import com.coding.core_ui.util.toUiText
+import com.coding.core.domain.model.account_models.Account
+import com.coding.core.domain.repository.AccountRepository
+import com.coding.core_ui.navigation.MainViewModelContract
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +31,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val repository: AccountRepository,
     private val connectivityObserver: ConnectivityObserver
-) : ViewModel() {
+) : ViewModel(), MainViewModelContract {
 
     val isConnected = connectivityObserver
         .isConnected
@@ -42,7 +42,7 @@ class MainViewModel @Inject constructor(
         )
 
     private val _currentAccount = MutableStateFlow<Account?>(null)
-    val currentAccount: StateFlow<Account?> = _currentAccount.asStateFlow()
+    override val currentAccount: StateFlow<Account?> = _currentAccount.asStateFlow()
 
     private val _isReady = MutableStateFlow(false)
     val isReady = _isReady.asStateFlow()
@@ -56,11 +56,11 @@ class MainViewModel @Inject constructor(
     var onTopBarActionClick by mutableStateOf<(() -> Unit)?>(null)
         private set
 
-    fun setTopBarAction(action: (() -> Unit)?) {
+    override fun setTopBarAction(action: (() -> Unit)?) {
         onTopBarActionClick = action
     }
 
-    fun navigateBack() {
+    override fun navigateBack() {
         viewModelScope.launch {
             _navigationChannel.send(NavigationEvent.NavigateBack)
         }
@@ -106,7 +106,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onAccountManuallyUpdated(
+    override fun onAccountManuallyUpdated(
         accountId: String,
         newName: String,
         newBalance: Double,
@@ -124,7 +124,7 @@ class MainViewModel @Inject constructor(
     }
 
     private val _accountUpdateTrigger = MutableStateFlow(0)
-    val accountUpdateTrigger: StateFlow<Int> = _accountUpdateTrigger.asStateFlow()
+    override val accountUpdateTrigger: StateFlow<Int> = _accountUpdateTrigger.asStateFlow()
 
     fun triggerAccountUpdate() {
         _accountUpdateTrigger.value++
