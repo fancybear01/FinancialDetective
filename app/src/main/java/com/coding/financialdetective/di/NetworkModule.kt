@@ -1,20 +1,37 @@
 package com.coding.financialdetective.di
 
-import com.coding.financialdetective.data.remote.service.AppTokenProvider
-import com.coding.financialdetective.data.remote.service.HttpClientFactory
-import com.coding.financialdetective.data.remote.service.TokenProvider
+import com.coding.core.di.AppScope
+import com.coding.core.data.remote.service.HttpClientFactory
+import com.coding.core.data.remote.service.TokenProvider
+import com.coding.financialdetective.util.AppTokenProvider
+import dagger.Module
+import dagger.Provides
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
-import org.koin.dsl.module
 import io.ktor.client.engine.cio.CIO
 
-val networkModule = module {
-    single<TokenProvider> { AppTokenProvider() }
+@Module
+object NetworkModule {
+    @Provides
+    @AppScope
+    fun provideTokenProvider(): TokenProvider = AppTokenProvider()
 
-    single<HttpClientEngine> { CIO.create() }
+    @Provides
+    @AppScope
+    fun provideHttpClientEngine(): HttpClientEngine = CIO.create()
 
-    single { HttpClientFactory(get()) }
+    @Provides
+    @AppScope
+    fun provideHttpClientFactory(tokenProvider: TokenProvider): HttpClientFactory {
+        return HttpClientFactory(tokenProvider)
+    }
 
-    single {
-        get<HttpClientFactory>().create(get())
+    @Provides
+    @AppScope
+    fun provideHttpClient(
+        factory: HttpClientFactory,
+        engine: HttpClientEngine
+    ): HttpClient {
+        return factory.create(engine)
     }
 }

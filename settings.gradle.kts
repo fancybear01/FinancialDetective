@@ -21,4 +21,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "Financial detective"
 include(":app")
- 
+include(":core")
+include(":core-ui")
+include(":feature-accounts")
+include(":feature-transactions")
+include(":feature-categories")
+include(":feature-settings")

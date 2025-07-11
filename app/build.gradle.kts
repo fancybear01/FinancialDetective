@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrainsKotlinSerialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -51,14 +52,29 @@ android {
 
 dependencies {
 
+    // all modules
+    implementation(project(":core"))
+    implementation(project(":core-ui"))
+    implementation(project(":feature-accounts"))
+    implementation(project(":feature-transactions"))
+    implementation(project(":feature-categories"))
+    implementation(project(":feature-settings"))
+
+    // Dagger (AppComponent)
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
+
+    // level app
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Ktor (AppComponent creates HttpClient)
+    implementation(libs.bundles.ktor)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,11 +84,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.androidx.core.splashscreen)
-
-    implementation(libs.bundles.ktor)
-
-    implementation(libs.bundles.koin)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 }
