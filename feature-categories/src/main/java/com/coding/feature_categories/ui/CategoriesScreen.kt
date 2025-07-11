@@ -33,6 +33,8 @@ import com.coding.core_ui.theme.DarkText
 import com.coding.core_ui.theme.Gray
 import com.coding.core_ui.theme.LightGray
 import com.coding.core_ui.di.daggerViewModel
+import com.coding.core_ui.model.CategoryUi
+import com.coding.core_ui.model.mapper.toListItemModel
 
 @Composable
 fun CategoriesScreen() {

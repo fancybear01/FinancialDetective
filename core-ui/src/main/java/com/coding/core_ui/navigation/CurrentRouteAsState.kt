@@ -10,11 +10,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun NavController.currentRouteAsState(): String {
     val navBackStackEntry by currentBackStackEntryAsState()
     val routePattern = navBackStackEntry?.destination?.route
-
-    return if (routePattern == "history/{isIncome}") {
-        val isIncome = navBackStackEntry?.arguments?.getBoolean("isIncome")
-        "history/$isIncome"
-    } else {
-        routePattern ?: stringResource(Screen.Expenses.routeResId)
+    return when {
+        routePattern?.startsWith("history/") == true -> {
+            val isIncome = navBackStackEntry?.arguments?.getBoolean("isIncome") ?: false
+            "history/$isIncome"
+        }
+        routePattern?.contains("?") == true -> routePattern.substringBefore('?')
+        else -> routePattern ?: stringResource(Screen.Expenses.routeResId)
     }
 }

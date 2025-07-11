@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,21 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import java.time.Instant
-import java.time.ZoneId
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.coding.core_ui.common.FullScreenError
 import com.coding.core_ui.common.list_item.ContentInfo
@@ -36,20 +25,19 @@ import com.coding.core_ui.common.list_item.ListItem
 import com.coding.core_ui.common.list_item.ListItemModel
 import com.coding.core_ui.common.list_item.TrailInfo
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.DatePickerColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.coding.core.domain.model.account_models.Currency
+import com.coding.core_ui.common.components.CustomDatePickerDialog
 import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.navigation.LocalNavController
 import com.coding.core_ui.di.daggerViewModel
+import com.coding.core_ui.util.buttonColors
+import com.coding.core_ui.util.datePickerColors
 import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
-import com.coding.feature_transactions.ui.expenses_incomes.toListItemModel
-import com.coding.feature_transactions.ui.model.TransactionUi
-import java.time.LocalDate
+import com.coding.core_ui.model.mapper.toListItemModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,48 +84,12 @@ fun MyHistoryScreen() {
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
 
-        val myDatePickerColors = DatePickerDefaults.colors(
-            selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-            selectedDayContentColor = MaterialTheme.colorScheme.onSurface,
-            todayDateBorderColor = MaterialTheme.colorScheme.secondary,
-            todayContentColor = MaterialTheme.colorScheme.onSurface,
-            containerColor = MaterialTheme.colorScheme.secondary,
-            titleContentColor = MaterialTheme.colorScheme.outline,
-            headlineContentColor = MaterialTheme.colorScheme.outline,
-            navigationContentColor = MaterialTheme.colorScheme.outline,
-            dividerColor = MaterialTheme.colorScheme.secondary,
-            subheadContentColor = MaterialTheme.colorScheme.outline,
-            dateTextFieldColors = TextFieldDefaults.colors(
-                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = MaterialTheme.colorScheme.error,
+        val myDatePickerColors = datePickerColors()
 
-                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                focusedPlaceholderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-
-                focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
-                unfocusedTrailingIconColor = MaterialTheme.colorScheme.primary,
-
-                unfocusedLabelColor = MaterialTheme.colorScheme.outline,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
-        )
-
-        val myButtonColors = ButtonDefaults.textButtonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface
-        )
+        val myButtonColors = buttonColors()
 
         if (showStartDatePicker) {
-            MyHistoryDatePickerDialog(
+            CustomDatePickerDialog(
                 initialDate = state.startDate,
                 onDismiss = { showStartDatePicker = false },
                 onConfirm = { selectedDate -> viewModel.updateStartDate(selectedDate) },
@@ -147,7 +99,7 @@ fun MyHistoryScreen() {
         }
 
         if (showEndDatePicker) {
-            MyHistoryDatePickerDialog(
+            CustomDatePickerDialog(
                 initialDate = state.endDate,
                 onDismiss = { showEndDatePicker = false },
                 onConfirm = { selectedDate -> viewModel.updateEndDate(selectedDate) },
@@ -162,6 +114,7 @@ fun MyHistoryScreen() {
                     CircularProgressIndicator()
                 }
             }
+
             state.error != null -> {
                 FullScreenError(
                     errorMessage = state.error!!.asString(context),
@@ -171,12 +124,16 @@ fun MyHistoryScreen() {
                     }
                 )
             }
+
             else -> {
                 MyHistoryContent(
                     state = state,
                     onStartDateClick = { showStartDatePicker = true },
                     onEndDateClick = { showEndDatePicker = true },
-                    onTransactionClick = { /* TODO() */ },
+                    onTransactionClick = { transactionId ->
+                        val route = if (isIncome) "income_details" else "expense_details"
+                        navController.navigate("$route?transactionId=$transactionId")
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -189,7 +146,7 @@ private fun MyHistoryContent(
     state: MyHistoryState,
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit,
-    onTransactionClick: (TransactionUi) -> Unit,
+    onTransactionClick: (transactionId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val currencySymbol = Currency.fromCode(state.currencyCode).symbol
@@ -229,57 +186,13 @@ private fun MyHistoryContent(
             items(
                 items = state.listItems,
                 key = { item -> item.id }
-            ) { item ->
+            ) { transaction ->
                 ListItem(
-                    model = item.toListItemModel(),
+                    model = transaction.toListItemModel(),
+                    onClick = { onTransactionClick(transaction.id) },
                     modifier = Modifier.defaultMinSize(minHeight = 70.dp)
                 )
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MyHistoryDatePickerDialog(
-    initialDate: LocalDate,
-    onDismiss: () -> Unit,
-    onConfirm: (LocalDate) -> Unit,
-    colors: DatePickerColors,
-    buttonColors: ButtonColors
-) {
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialDate
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-    )
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val selectedDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        onConfirm(selectedDate)
-                    }
-                    onDismiss()
-                },
-                colors = buttonColors
-            ) {
-                Text(text = "OK", style = MaterialTheme.typography.labelLarge)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss, colors = buttonColors) {
-                Text(text = "Отмена", style = MaterialTheme.typography.labelLarge)
-            }
-        },
-        colors = colors
-    ) {
-        DatePicker(state = datePickerState, colors = colors)
     }
 }

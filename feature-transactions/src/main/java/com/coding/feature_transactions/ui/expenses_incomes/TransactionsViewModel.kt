@@ -10,6 +10,7 @@ import com.coding.core.domain.model.categories_models.CategoryType
 import com.coding.core.domain.model.transactions_models.Transaction
 import com.coding.core.domain.model.transactions_models.TransactionType
 import com.coding.core.domain.repository.TransactionRepository
+import com.coding.core_ui.model.mapper.toUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

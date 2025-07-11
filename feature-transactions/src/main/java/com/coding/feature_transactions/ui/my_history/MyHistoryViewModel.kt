@@ -10,7 +10,7 @@ import com.coding.core_ui.util.toUiText
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
 import com.coding.core.domain.model.categories_models.CategoryType
 import com.coding.core.domain.repository.TransactionRepository
-import com.coding.feature_transactions.ui.expenses_incomes.toUiModel
+import com.coding.core_ui.model.mapper.toUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -119,7 +119,6 @@ class MyHistoryViewModel @AssistedInject constructor(
                     }
                 }
                 .onError { networkError ->
-                    Log.e("MyHistoryVM", "Error from repository: ${networkError}")
                     _state.update {
                         it.copy(
                             isLoading = false,

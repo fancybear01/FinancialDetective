@@ -1,4 +1,4 @@
-package com.coding.feature_categories.ui
+package com.coding.core_ui.model.mapper
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -7,6 +7,7 @@ import com.coding.core.domain.model.categories_models.Category
 import com.coding.core_ui.common.list_item.ContentInfo
 import com.coding.core_ui.common.list_item.LeadInfo
 import com.coding.core_ui.common.list_item.ListItemModel
+import com.coding.core_ui.model.CategoryUi
 
 fun Category.toUiModel(): CategoryUi {
     return CategoryUi(

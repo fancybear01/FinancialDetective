@@ -9,4 +9,6 @@ import com.coding.core.domain.model.categories_models.Category
  */
 interface CategoryRepository {
     suspend fun getCategories(): Result<List<Category>, NetworkError>
+
+    suspend fun getCategoriesByType(isIncome: Boolean): Result<List<Category>, NetworkError>
 }

@@ -1,4 +1,4 @@
-package com.coding.financialdetective
+package com.coding.financialdetective.app
 
 import android.app.Application
 import com.coding.core_ui.di.AppDependenciesProvider

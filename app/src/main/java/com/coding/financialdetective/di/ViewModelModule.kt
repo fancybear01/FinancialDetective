@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.coding.core.di.AppScope
 import com.coding.core.di.ViewModelKey
-import com.coding.financialdetective.MainViewModel
+import com.coding.financialdetective.app.MainViewModel
 import com.coding.feature_categories.ui.CategoriesViewModel
 import com.coding.feature_settings.ui.SettingsViewModel
 import dagger.Binds

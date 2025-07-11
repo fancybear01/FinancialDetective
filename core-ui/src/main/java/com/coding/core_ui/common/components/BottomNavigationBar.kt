@@ -20,11 +20,11 @@ fun AppBottomNavigationBar(navController: NavController) {
     NavigationBar  {
         screens.forEach { screen ->
             val screenRoute = screen.getRoute()
+            val relatedRoutes = screen.relatedRoutesResIds.map { stringResource(it) }
 
             val bottomNavigationIcon = screen.bottomNavigationIcon!!.getIcon()
             val bottomNavigationLabel = screen.bottomNavigationIcon.getLabel()
 
-            val relatedRoutes = screen.relatedRoutesResIds.map { stringResource(it) }
 
             val isSelected = currentDestination == screenRoute || relatedRoutes.contains(currentDestination)
 

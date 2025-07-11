@@ -1,7 +1,7 @@
-package com.coding.feature_transactions.ui.model
+package com.coding.core_ui.model
 
 data class TransactionUi(
-    val id: Int,
+    val id: String,
     val categoryName: String,
     val categoryEmoji: String,
     val currency: String,

@@ -8,6 +8,8 @@
     <string name="expenses_history_route">history/false</string>
     <string name="incomes_history_route">history/true</string>
     <string name="edit_account_route">edit_account</string>
+    <string name="expense_details_route">expense_details</string>
+    <string name="income_details_route">income_details</string>
 
     <string name="expenses_header">Расходы сегодня</string>
     <string name="expenses_icon">Расходы</string>
@@ -20,6 +22,8 @@
     <string name="settings_header">Настройки</string>
     <string name="settings_icon">Настройки</string>
     <string name="history_header">Моя история</string>
+    <string name="income_details_title">Мои доходы</string>
+    <string name="expense_details_title">Мои расходы</string>
 
     <string name="settings_dark_theme">Тёмная тема</string>
     <string name="settings_main_color">Основной цвет</string>

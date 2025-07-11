@@ -17,13 +17,12 @@ import com.coding.core_ui.navigation.getScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
-    navController: NavController,
-    onTopBarAction: (() -> Unit)?
+    currentScreen: Screen,
+    onNavigateUp: () -> Unit,
+    onActionClick: () -> Unit,
+    isActionEnabled: Boolean
 ) {
-
-    val currentDestination = navController.currentRouteAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    val currentScreen = getScreen(currentDestination)
 
     val title = currentScreen.getTitle()
     val action = currentScreen.action
@@ -43,39 +42,26 @@ fun AppTopBar(
         },
         navigationIcon = {
             if (backNavigation != null) {
-                AppNavigationIcon(navController)
+                AppNavigationIcon(
+                    icon = backNavigation.getIcon(),
+                    onClick = onNavigateUp
+                )
             }
         },
         actions = {
-            if (action != null) {
-
-                val actionRoute = action.getRoute()
-
-                val onClickAction = {
-                    onTopBarAction?.invoke()
-                    if (currentScreen !is Screen.EditAccount) {
-                        navController.navigate(actionRoute)
-                    }
-                }
-
-                val isEnabled = if (currentScreen is Screen.EditAccount) {
-                    onTopBarAction != null
-                } else {
-                    true
-                }
-
+            action?.let { actionIcon ->
                 IconButton(
-                    onClick = onClickAction,
-                    enabled = isEnabled
+                    onClick = onActionClick,
+                    enabled = isActionEnabled
                 ) {
                     Icon(
-                        imageVector = action.getIcon(),
+                        imageVector = actionIcon.getIcon(),
                         contentDescription = title,
-                        tint = MaterialTheme.colorScheme.outline
+                        tint = if (isActionEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.outline
                     )
                 }
             }
         },
-        scrollBehavior = scrollBehavior,
+        scrollBehavior = scrollBehavior
     )
 }

@@ -1,4 +1,4 @@
-package com.coding.feature_transactions.ui.expenses_incomes
+package com.coding.core_ui.model.mapper
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -10,20 +10,20 @@ import com.coding.core_ui.common.list_item.ContentInfo
 import com.coding.core_ui.common.list_item.LeadInfo
 import com.coding.core_ui.common.list_item.ListItemModel
 import java.time.format.DateTimeFormatter
-import com.coding.feature_transactions.ui.model.TransactionUi
+import com.coding.core_ui.model.TransactionUi
 import java.util.Locale
 
 fun Transaction.toUiModel(): TransactionUi {
     val currency = Currency.fromCode(this.account.currency)
     return TransactionUi(
-        id = this.id,
+        id = this.id.toString(),
         categoryName = this.category.name,
         categoryEmoji = this.category.emoji,
         currency = currency.symbol,
         comment = this.comment,
         formattedAmount = formatNumberWithSpaces(this.amount),
         formattedDate = this.transactionDate.format(
-            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm").withLocale(
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withLocale(
                 Locale("ru")
             )
         )

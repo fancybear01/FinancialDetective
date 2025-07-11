@@ -1,4 +1,4 @@
-package com.coding.financialdetective
+package com.coding.financialdetective.app
 
 import android.animation.ObjectAnimator
 import android.os.Bundle
@@ -11,7 +11,6 @@ import androidx.activity.viewModels
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
-import com.coding.financialdetective.core_ui.navigation.App
 import com.coding.core_ui.theme.FinancialDetectiveTheme
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package com.coding.financialdetective.data.remote.service
+package com.coding.financialdetective.util
 
 import com.coding.core.data.remote.service.TokenProvider
 import com.coding.financialdetective.BuildConfig

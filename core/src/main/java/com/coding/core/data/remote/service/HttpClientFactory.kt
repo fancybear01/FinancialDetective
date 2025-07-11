@@ -39,6 +39,8 @@ class HttpClientFactory(private val tokenProvider: TokenProvider) {
             install(ContentNegotiation) {
                 json(
                     json = Json {
+                        prettyPrint = true
+                        isLenient = true
                         ignoreUnknownKeys = true
                         coerceInputValues = true
                     }

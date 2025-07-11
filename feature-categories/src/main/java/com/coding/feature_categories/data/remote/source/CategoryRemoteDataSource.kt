@@ -17,4 +17,10 @@ class CategoryRemoteDataSource @Inject constructor(
             httpClient.get(constructUrl("categories"))
         }
     }
+
+    suspend fun getCategoriesByType(isIncome: Boolean): Result<List<CategoryDto>, NetworkError> {
+        return safeCallWithRetry {
+            httpClient.get(constructUrl("categories/type/$isIncome"))
+        }
+    }
 }

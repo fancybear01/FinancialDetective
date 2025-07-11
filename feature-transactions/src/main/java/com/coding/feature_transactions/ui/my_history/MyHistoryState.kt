@@ -1,7 +1,7 @@
 package com.coding.feature_transactions.ui.my_history
 
 import com.coding.core.util.UiText
-import com.coding.feature_transactions.ui.model.TransactionUi
+import com.coding.core_ui.model.TransactionUi
 import java.time.LocalDate
 
 data class MyHistoryState(

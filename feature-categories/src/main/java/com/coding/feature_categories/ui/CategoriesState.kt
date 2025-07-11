@@ -1,6 +1,7 @@
 package com.coding.feature_categories.ui
 
 import com.coding.core.util.UiText
+import com.coding.core_ui.model.CategoryUi
 
 data class CategoriesState(
     val searchQuery: String = "",

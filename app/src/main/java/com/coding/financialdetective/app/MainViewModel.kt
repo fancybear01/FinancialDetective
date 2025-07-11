@@ -1,4 +1,4 @@
-package com.coding.financialdetective
+package com.coding.financialdetective.app
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,8 +56,12 @@ class MainViewModel @Inject constructor(
     var onTopBarActionClick by mutableStateOf<(() -> Unit)?>(null)
         private set
 
-    override fun setTopBarAction(action: (() -> Unit)?) {
+    private val _isTopBarActionEnabled = MutableStateFlow(false)
+    override val isTopBarActionEnabled: StateFlow<Boolean> = _isTopBarActionEnabled.asStateFlow()
+
+    override fun setTopBarAction(enabled: Boolean, action: (() -> Unit)?) {
         onTopBarActionClick = action
+        _isTopBarActionEnabled.value = enabled && action != null
     }
 
     override fun navigateBack() {

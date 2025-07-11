@@ -1,4 +1,4 @@
-package com.coding.feature_categories.ui
+package com.coding.core_ui.model
 
 import com.coding.core.domain.model.categories_models.CategoryType
 

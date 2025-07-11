@@ -31,13 +31,16 @@ import com.coding.core.domain.model.transactions_models.TransactionType
 import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.di.daggerViewModel
+import com.coding.core_ui.navigation.LocalNavController
 import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
-import com.coding.feature_transactions.ui.model.TransactionUi
+import com.coding.core_ui.model.TransactionUi
+import com.coding.core_ui.model.mapper.toListItemModel
 import kotlinx.coroutines.flow.drop
 
 @Composable
 fun TransactionsScreen(
     viewModel: TransactionsViewModel,
+    onTransactionClick: (transactionId: String) -> Unit,
     onRetry: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,9 +73,7 @@ fun TransactionsScreen(
                 onTotalClick = {
                     // TODO()
                 },
-                onTransactionClick = { transaction ->
-                    // TODO()
-                },
+                onTransactionClick = onTransactionClick,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -85,7 +86,7 @@ private fun TransactionsContent(
     transactions: List<TransactionUi>,
     currency: String,
     onTotalClick: () -> Unit,
-    onTransactionClick: (TransactionUi) -> Unit,
+    onTransactionClick: (transactionId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -114,6 +115,7 @@ private fun TransactionsContent(
                 val model = transaction.toListItemModel(showDate = false)
                 ListItem(
                     model = model,
+                    onClick = { onTransactionClick(transaction.id) },
                     modifier = Modifier
                         .defaultMinSize(minHeight = 70.dp),
                     containerColor = MaterialTheme.colorScheme.surface
@@ -169,8 +171,13 @@ fun ExpensesScreen() {
                 }
         }
 
+        val navController = LocalNavController.current
+
         TransactionsScreen(
             viewModel = viewModel,
+            onTransactionClick = { transactionId ->
+                navController.navigate("expense_details?transactionId=$transactionId")
+            },
             onRetry = {
                 viewModel.retry(account.currency)
             }
@@ -224,8 +231,13 @@ fun IncomesScreen() {
                 }
         }
 
+        val navController = LocalNavController.current
+
         TransactionsScreen(
             viewModel = viewModel,
+            onTransactionClick = { transactionId ->
+                navController.navigate("income_details?transactionId=$transactionId")
+            },
             onRetry = {
                 viewModel.retry(account.currency)
             }

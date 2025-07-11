@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,9 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -51,6 +47,7 @@ import com.coding.core_ui.common.list_item.ListItem
 import com.coding.core_ui.common.list_item.ListItemModel
 import com.coding.core_ui.common.list_item.TrailInfo
 import com.coding.core.domain.model.account_models.Currency
+import com.coding.core_ui.common.components.CustomEditFieldDialog
 import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.di.daggerViewModel
@@ -111,21 +108,19 @@ fun EditAccountScreen() {
             }
         }
 
-        LaunchedEffect(state.hasChanges) {
+        DisposableEffect(state.hasChanges) {
             if (state.hasChanges) {
-                mainViewModel.setTopBarAction {
+                mainViewModel.setTopBarAction(enabled = true) {
                     scope.launch {
                         viewModel.saveChanges()
                     }
                 }
             } else {
-                mainViewModel.setTopBarAction(null)
+                mainViewModel.setTopBarAction(enabled = false, action = null)
             }
-        }
 
-        DisposableEffect(Unit) {
             onDispose {
-                mainViewModel.setTopBarAction(null)
+                mainViewModel.setTopBarAction(enabled = false, action = null)
             }
         }
 
@@ -152,7 +147,7 @@ fun EditAccountScreen() {
                 )
 
                 if (showNameDialog) {
-                    EditFieldDialog(
+                    CustomEditFieldDialog(
                         title = "Название счета",
                         initialValue = state.accountName,
                         onDismiss = { showNameDialog = false },
@@ -163,7 +158,7 @@ fun EditAccountScreen() {
                     )
                 }
                 if (showBalanceDialog) {
-                    EditFieldDialog(
+                    CustomEditFieldDialog(
                         title = "Баланс",
                         initialValue = state.balance,
                         keyboardType = KeyboardType.Decimal,
@@ -263,39 +258,6 @@ fun EditAccountContent(
         )
 
     }
-}
-
-@Composable
-fun EditFieldDialog(
-    title: String,
-    initialValue: String,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
-    var text by remember { mutableStateOf(initialValue) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(text) }) {
-                Text("Сохранить")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Отмена")
-            }
-        }
-    )
 }
 
 @Composable

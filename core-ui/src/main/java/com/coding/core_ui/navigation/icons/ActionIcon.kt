@@ -45,4 +45,14 @@ sealed class ActionIcon(
         iconResId = R.drawable.ic_confirm,
         routeResId = R.string.account_route
     )
+
+    data object IncomesDetailAction : ActionIcon(
+        iconResId = R.drawable.ic_confirm,
+        routeResId = R.string.account_route
+    )
+
+    data object TransactionDetailsConfirmAction : ActionIcon(
+        iconResId = R.drawable.ic_confirm,
+        routeResId = -1
+    )
 }

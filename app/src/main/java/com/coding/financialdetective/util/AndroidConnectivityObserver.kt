@@ -1,4 +1,4 @@
-package com.coding.financialdetective.data.remote.connectivity
+package com.coding.financialdetective.util
 
 import android.content.Context
 import android.net.ConnectivityManager

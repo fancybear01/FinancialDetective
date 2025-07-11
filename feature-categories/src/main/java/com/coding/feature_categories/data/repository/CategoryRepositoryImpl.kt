@@ -17,4 +17,8 @@ class CategoryRepositoryImpl @Inject constructor(
             dtoList.map { it.toDomain() }
         }
     }
+
+    override suspend fun getCategoriesByType(isIncome: Boolean): Result<List<Category>, NetworkError> {
+        return remoteDataSource.getCategoriesByType(isIncome).map { it.map { dto -> dto.toDomain() } }
+    }
 }

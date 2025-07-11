@@ -10,27 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
-import com.coding.core_ui.navigation.currentRouteAsState
-import com.coding.core_ui.navigation.getScreen
-import com.coding.core_ui.navigation.screens
 
 @Composable
-fun AppFloatingActionButton(navController: NavController) {
-    val currentDestination = navController.currentRouteAsState()
-
-    val currentScreen = getScreen(currentDestination)
-
-    val action = currentScreen.action
-
-    if (currentScreen in screens && action != null) {
-        FloatingActionButton(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
-            modifier = Modifier.clip(CircleShape),
-            onClick = {}
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add")
-        }
+fun AppFloatingActionButton(
+    onClick: () -> Unit
+) {
+    FloatingActionButton(
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = Color.White,
+        modifier = Modifier.clip(CircleShape),
+        onClick = onClick
+    ) {
+        Icon(Icons.Default.Add, contentDescription = "Add")
     }
 }

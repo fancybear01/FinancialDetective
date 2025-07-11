@@ -26,7 +26,10 @@ sealed class Screen(
         titleResId = R.string.expenses_header,
         action = ActionIcon.ExpensesAction,
         bottomNavigationIcon = BottomNavigationIcon.ExpensesIcon,
-        relatedRoutesResIds = listOf(R.string.expenses_history_route)
+        relatedRoutesResIds = listOf(
+            R.string.expenses_history_route,
+            R.string.expense_details_route,
+        ),
     )
 
     data object Incomes : Screen(
@@ -34,7 +37,10 @@ sealed class Screen(
         titleResId = R.string.incomes_header,
         action = ActionIcon.IncomesAction,
         bottomNavigationIcon = BottomNavigationIcon.IncomesIcon,
-        relatedRoutesResIds = listOf(R.string.incomes_history_route)
+        relatedRoutesResIds = listOf(
+            R.string.incomes_history_route,
+            R.string.income_details_route,
+        )
     )
 
     data object Account : Screen(
@@ -78,18 +84,33 @@ sealed class Screen(
         backNavigationIcon = BackNavigationIcon.EditAccountBack
     )
 
+    data object ExpenseDetails : Screen(
+        routeResId = R.string.expense_details_route,
+        titleResId = R.string.expense_details_title,
+        action = ActionIcon.TransactionDetailsConfirmAction,
+        backNavigationIcon = BackNavigationIcon.CancelAction
+    )
+    data object IncomeDetails : Screen(
+        routeResId = R.string.income_details_route,
+        titleResId = R.string.income_details_title,
+        action = ActionIcon.TransactionDetailsConfirmAction,
+        backNavigationIcon = BackNavigationIcon.CancelAction
+    )
 }
 
 fun getScreen(route: String): Screen {
-    return when (route) {
-        "expenses" -> Screen.Expenses
-        "incomes" -> Screen.Incomes
-        "account" -> Screen.Account
-        "categories" -> Screen.Categories
-        "settings" -> Screen.Settings
-        "history/false" -> Screen.ExpensesHistory
-        "history/true" -> Screen.IncomesHistory
-        "edit_account" -> Screen.EditAccount
+    val baseRoute = route.substringBefore('?')
+    return when {
+        baseRoute == "history/false" -> Screen.ExpensesHistory
+        baseRoute == "history/true" -> Screen.IncomesHistory
+        baseRoute == "expenses" -> Screen.Expenses
+        baseRoute == "incomes" -> Screen.Incomes
+        baseRoute == "account" -> Screen.Account
+        baseRoute == "categories" -> Screen.Categories
+        baseRoute == "settings" -> Screen.Settings
+        baseRoute == "edit_account" -> Screen.EditAccount
+        baseRoute.startsWith("expense_details") -> Screen.ExpenseDetails
+        baseRoute.startsWith("income_details") -> Screen.IncomeDetails
         else -> Screen.Expenses
     }
 }

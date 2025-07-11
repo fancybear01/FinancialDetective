@@ -7,6 +7,8 @@ import com.coding.core.data.util.onSuccess
 import com.coding.core_ui.util.toUiText
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
 import com.coding.core.domain.repository.CategoryRepository
+import com.coding.core_ui.model.CategoryUi
+import com.coding.core_ui.model.mapper.toUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

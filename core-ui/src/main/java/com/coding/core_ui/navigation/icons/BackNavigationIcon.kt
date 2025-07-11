@@ -30,4 +30,14 @@ sealed class BackNavigationIcon(
         iconResId = R.drawable.ic_cancel,
         routeResId = R.string.account_route
     )
+
+    data object DefaultBack : BackNavigationIcon(
+        iconResId = R.drawable.left_arrow,
+        routeResId = -1
+    )
+
+    data object CancelAction : BackNavigationIcon(
+        iconResId = R.drawable.ic_cancel,
+        routeResId = -1
+    )
 }
