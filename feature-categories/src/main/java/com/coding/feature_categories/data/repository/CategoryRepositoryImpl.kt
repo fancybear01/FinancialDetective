@@ -7,18 +7,41 @@ import com.coding.core.domain.repository.CategoryRepository
 import com.coding.core.data.util.Result
 import com.coding.core.data.util.map
 import com.coding.core.data.mapper.toDomain
+import com.coding.core.data.mapper.toEntity
+import com.coding.core.data.remote.connectivity.ConnectivityObserver
+import com.coding.core.data.util.onSuccess
+import com.coding.feature_categories.data.local.source.CategoryLocalDataSource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CategoryRepositoryImpl @Inject constructor(
-    private val remoteDataSource: CategoryRemoteDataSource
+    private val remoteDataSource: CategoryRemoteDataSource,
+    private val localDataSource: CategoryLocalDataSource,
+    private val connectivityObserver: ConnectivityObserver
 ) : CategoryRepository {
-    override suspend fun getCategories(): Result<List<Category>, NetworkError> {
-        return remoteDataSource.getCategories().map { dtoList ->
-            dtoList.map { it.toDomain() }
+
+    override fun getCategoriesStream(): Flow<List<Category>> {
+        return localDataSource.getCategoriesStream().map { entities ->
+            entities.map { it.toDomain() }
         }
     }
 
-    override suspend fun getCategoriesByType(isIncome: Boolean): Result<List<Category>, NetworkError> {
-        return remoteDataSource.getCategoriesByType(isIncome).map { it.map { dto -> dto.toDomain() } }
+    override fun getCategoriesStreamByType(isIncome: Boolean): Flow<List<Category>> {
+        return localDataSource.getCategoriesStreamByType(isIncome).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun syncCategories(): Result<Unit, NetworkError> {
+        if (!connectivityObserver.isConnected.first()) {
+            return Result.Success(Unit)
+        }
+
+        return remoteDataSource.getCategories().onSuccess { dtoList ->
+            val entities = dtoList.map { it.toEntity() }
+            localDataSource.upsertCategories(entities)
+        }.map { }
     }
 }

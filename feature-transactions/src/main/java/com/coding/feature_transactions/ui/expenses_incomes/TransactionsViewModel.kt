@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -41,91 +44,64 @@ class TransactionsViewModel @AssistedInject constructor(
     private var lastUsedCurrency: String? = null
 
     init {
-        observeConnectivity()
-    }
-
-    private fun observeConnectivity() {
         viewModelScope.launch {
-            connectivityObserver.isConnected
-                .drop(1)
-                .debounce(1000)
-                .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry()
-                    }
-                }
-        }
-    }
-
-    private fun loadTransactions(accountId: String, currency: String) {
-        this.lastUsedCurrency = currency
-
-        viewModelScope.launch {
-
-            val today = LocalDate.now().toString()
-            var transactions = emptyList<Transaction>()
-
-            repository
-                .getTransactionsForPeriod(accountId, today, today)
-                .onSuccess { items ->
-                    transactions = items
-                }
-                .onError { networkError ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = networkError.toUiText()
-                        )
-                    }
-                    return@launch
-                }
-            when (transactionType) {
-                TransactionType.EXPENSE -> {
-                    val expenses = transactions.filter { it.category.type == CategoryType.EXPENSE }
-                    val total = expenses.sumOf { it.amount }
-                    val uiModels = expenses.map { it.toUiModel() }
-
-                    _state.update {
-                        it.copy(
-                            totalAmount = total,
-                            transactions = uiModels,
-                            isLoading = false
-                        )
-                    }
-                }
-
-                TransactionType.INCOME -> {
-                    val incomes = transactions.filter { it.category.type == CategoryType.INCOME }
-                    val total = incomes.sumOf { it.amount }
-                    val uiModels = incomes.map { it.toUiModel() }
-
-                    _state.update {
-                        it.copy(
-                            totalAmount = total,
-                            transactions = uiModels,
-                            isLoading = false
-                        )
-                    }
-                }
+            if (accountId.isNotBlank()) {
+                observeTransactions()
+                syncTransactions()
+                observeConnectivity()
             }
         }
     }
 
-    private fun retry() {
-        lastUsedCurrency?.let { currency ->
-            loadTransactions(accountId, currency)
+    private fun observeConnectivity() {
+        connectivityObserver.isConnected
+            .drop(1).filter { it }
+            .debounce(1000)
+            .onEach { syncTransactions() }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observeTransactions() {
+        val today = LocalDate.now().toString()
+        val startDate = today
+        val endDate = today
+
+        repository.getTransactionsStream(accountId, startDate, endDate)
+            .onEach { transactions ->
+                val filteredByType = transactions.filter {
+                    it.category.type == if (transactionType == TransactionType.INCOME) CategoryType.INCOME else CategoryType.EXPENSE
+                }
+
+                val total = filteredByType.sumOf { it.amount }
+                val uiModels = filteredByType.map { it.toUiModel() }
+
+                _state.update {
+                    it.copy(
+                        totalAmount = total,
+                        transactions = uiModels,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun syncTransactions() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val today = LocalDate.now().toString()
+            repository.syncTransactionsForPeriod(accountId, today, today)
+                .onError { networkError ->
+                    if (state.value.transactions.isEmpty()) {
+                        _state.update { it.copy(error = networkError.toUiText()) }
+                    }
+                }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
-    fun retry(currency: String) {
-        refresh(currency)
-    }
-
-    fun refresh(currency: String) {
-        _state.update {
-            it.copy(isLoading = true, currency = currency)
-        }
-
-        loadTransactions(accountId, currency)
+    fun onRefresh() {
+        syncTransactions()
     }
 }

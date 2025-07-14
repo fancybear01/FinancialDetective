@@ -25,6 +25,9 @@ import com.coding.core_ui.common.list_item.ListItem
 import com.coding.core_ui.common.list_item.ListItemModel
 import com.coding.core_ui.common.list_item.TrailInfo
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -44,8 +47,7 @@ import com.coding.core_ui.model.mapper.toListItemModel
 fun MyHistoryScreen() {
     val mainViewModel = LocalMainViewModel.current
 
-    val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-    val account = currentAccount
+    val account = mainViewModel.currentAccount.collectAsStateWithLifecycle().value
 
     val navController = LocalNavController.current
     val navBackStackEntry = navController.currentBackStackEntry
@@ -75,11 +77,8 @@ fun MyHistoryScreen() {
             factory = myHistoryViewModelFactory
         )
 
-        LaunchedEffect(key1 = account.id, key2 = account.currency) {
-            viewModel.onAccountUpdated(account.currency)
-        }
-
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
@@ -108,31 +107,33 @@ fun MyHistoryScreen() {
             )
         }
 
-        when {
-            state.isLoading -> {
+        val onRefresh = {
+            viewModel.onRefresh()
+        }
+
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (state.error != null && state.listItems.isEmpty()) {
+                FullScreenError(
+                    errorMessage = state.error!!.asString(context),
+                    onRetryClick = onRefresh
+                )
+            }
+            else if (state.listItems.isEmpty() && isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-
-            state.error != null -> {
-                FullScreenError(
-                    errorMessage = state.error!!.asString(context),
-                    onRetryClick = {
-                        val newCurrencyCode = currentAccount?.currency ?: ""
-                        viewModel.retry(newCurrencyCode)
-                    }
-                )
-            }
-
-            else -> {
+            else {
                 MyHistoryContent(
                     state = state,
                     onStartDateClick = { showStartDatePicker = true },
                     onEndDateClick = { showEndDatePicker = true },
                     onTransactionClick = { transactionId ->
-                        val route = if (isIncome) "income_details" else "expense_details"
-                        navController.navigate("$route?transactionId=$transactionId")
+                        navController.navigate("transaction_details?transactionId=$transactionId&isIncome=$isIncome")
                     },
                     modifier = Modifier.fillMaxSize()
                 )

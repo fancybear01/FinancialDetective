@@ -1,4 +1,4 @@
-package com.coding.core.data.dto.account_dto
+package com.coding.core.data.remote.dto.account_dto
 
 import kotlinx.serialization.Serializable
 

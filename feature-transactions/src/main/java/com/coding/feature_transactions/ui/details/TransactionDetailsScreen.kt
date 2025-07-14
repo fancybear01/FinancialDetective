@@ -57,6 +57,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.DisposableEffect
+import com.coding.core.domain.model.account_models.AccountBrief
 import com.coding.core_ui.common.components.TimePickerDialog
 import com.coding.core_ui.model.mapper.toListItemModel
 import com.coding.core_ui.model.mapper.toUiModel
@@ -100,8 +101,14 @@ fun TransactionDetailsScreen(
             factory = transactionDetailsViewModelFactory
         )
 
-        LaunchedEffect(key1 = Unit) {
-            viewModel.setInitialAccount(account)
+        LaunchedEffect(key1 = account) {
+            val accountBrief = AccountBrief(
+                id = account.id,
+                name = account.name,
+                balance = account.balance,
+                currency = account.currency
+            )
+            viewModel.setInitialAccount(accountBrief)
         }
 
         val state by viewModel.state.collectAsStateWithLifecycle()

@@ -1,11 +1,11 @@
 package com.coding.feature_transactions.data.remote.source
 
-import com.coding.core.data.dto.transactions_dto.TransactionRequestDto
+import com.coding.core.data.remote.dto.transactions_dto.TransactionRequestDto
 import com.coding.core.data.remote.service.constructUrl
 import com.coding.core.data.remote.service.safeCallWithRetry
 import com.coding.core.data.util.NetworkError
 import com.coding.core.data.util.Result
-import com.coding.core.data.dto.transactions_dto.TransactionResponseDto
+import com.coding.core.data.remote.dto.transactions_dto.TransactionResponseDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -39,7 +39,7 @@ class TransactionRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun createTransaction(request: TransactionRequestDto): Result<Unit, NetworkError> {
+    suspend fun createTransaction(request: TransactionRequestDto): Result<TransactionResponseDto, NetworkError> {
         return safeCallWithRetry {
             httpClient.post(constructUrl("transactions")) {
                 contentType(ContentType.Application.Json)
@@ -48,7 +48,7 @@ class TransactionRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun updateTransaction(id: Int, request: TransactionRequestDto): Result<Unit, NetworkError> {
+    suspend fun updateTransaction(id: Int, request: TransactionRequestDto): Result<TransactionResponseDto, NetworkError> {
         return safeCallWithRetry {
             httpClient.put(constructUrl("transactions/$id")) {
                 contentType(ContentType.Application.Json)

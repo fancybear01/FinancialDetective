@@ -3,36 +3,39 @@ package com.coding.core.domain.repository
 import com.coding.core.data.util.NetworkError
 import com.coding.core.data.util.Result
 import com.coding.core.domain.model.transactions_models.Transaction
+import kotlinx.coroutines.flow.Flow
 import java.time.ZonedDateTime
 
 /**
  * Репозиторий для работы с транзакциями (доходами/расходами).
  */
 interface TransactionRepository {
-    suspend fun getTransactionsForPeriod(
-        accountId: String,
-        startDate: String,
-        endDate: String
-    ): Result<List<Transaction>, NetworkError>
+
+    // Методы для UI-слоя
+    fun getTransactionsStream(accountId: String, startDate: String, endDate: String): Flow<List<Transaction>>
 
     suspend fun getTransactionById(id: Int): Result<Transaction, NetworkError>
 
     suspend fun createTransaction(
-        accountId: Int,
-        categoryId: Int,
-        transactionDate: ZonedDateTime,
-        amount: Double,
-        comment: String
+        accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
+        amount: Double, comment: String
     ): Result<Unit, NetworkError>
 
     suspend fun updateTransaction(
-        id: Int,
-        accountId: Int,
-        categoryId: Int,
-        transactionDate: ZonedDateTime,
-        amount: Double,
-        comment: String
+        id: Int, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
+        amount: Double, comment: String
     ): Result<Unit, NetworkError>
 
     suspend fun deleteTransaction(id: Int): Result<Unit, NetworkError>
+
+    // Методы для фоновой синхронизации (WorkManager)
+    suspend fun syncTransactionsForPeriod(
+        accountId: String, startDate: String, endDate: String
+    ): Result<Unit, NetworkError>
+
+    suspend fun syncOfflineCreations()
+
+    suspend fun syncOfflineUpdates()
+
+    suspend fun syncOfflineDeletions()
 }

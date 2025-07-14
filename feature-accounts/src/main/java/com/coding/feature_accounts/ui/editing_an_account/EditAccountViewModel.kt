@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,6 +48,9 @@ class EditAccountViewModel @AssistedInject constructor(
     private val _state = MutableStateFlow(EditAccountState())
     val state: StateFlow<EditAccountState> = _state.asStateFlow()
 
+    private val _saveSuccessEvent = Channel<Unit>()
+    val saveSuccessEvent = _saveSuccessEvent.receiveAsFlow()
+
     private var originalAccount: AccountResponse? = null
 
     init {
@@ -53,20 +59,35 @@ class EditAccountViewModel @AssistedInject constructor(
     }
 
     private fun observeConnectivity() {
-        viewModelScope.launch {
-            connectivityObserver.isConnected
-                .drop(1)
-                .debounce(1000)
-                .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry()
-                    }
-                }
-        }
+        connectivityObserver.isConnected
+            .drop(1).debounce(1000)
+            .filter { it && state.value.error != null }
+            .onEach { retry() }
+            .launchIn(viewModelScope)
     }
 
-    fun retry() {
-        loadAccount()
+    private fun loadAccountForEditing() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            repository.getAccountById(accountId)
+                .onSuccess { accountResponse ->
+                    originalAccount = accountResponse
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            accountName = accountResponse.name,
+                            balance = formatNumberWithSpaces(accountResponse.balance),
+                            rawBalance = accountResponse.balance,
+                            selectedCurrency = Currency.fromCode(accountResponse.currency),
+                            currencySymbol = Currency.fromCode(accountResponse.currency).symbol,
+                            hasChanges = false
+                        )
+                    }
+                }
+                .onError { error ->
+                    _state.update { it.copy(isLoading = false, error = error.toUiText()) }
+                }
+        }
     }
 
     private fun loadAccount() {
@@ -137,25 +158,29 @@ class EditAccountViewModel @AssistedInject constructor(
         return result
     }
 
-    private val _saveSuccessEvent = Channel<Unit>()
-    val saveSuccessEvent = _saveSuccessEvent.receiveAsFlow()
-
-    suspend fun saveChanges() {
+    fun saveChanges() {
         if (!state.value.hasChanges) return
+        val original = originalAccount ?: return
 
         val currentState = state.value
         _state.update { it.copy(isLoading = true) }
 
-        repository.updateAccount(
-            accountId = accountId,
-            name = currentState.accountName,
-            balance = currentState.rawBalance,
-            currency = currentState.selectedCurrency.code
-        ).onSuccess {
-            _state.update { it.copy(isLoading = false, hasChanges = false) }
-            _saveSuccessEvent.send(Unit)
-        }.onError { error ->
-            _state.update { it.copy(error = error.toUiText(), isLoading = false) }
+        viewModelScope.launch {
+            repository.updateAccount(
+                accountId = accountId,
+                name = currentState.accountName,
+                balance = currentState.rawBalance,
+                currency = currentState.selectedCurrency.code
+            ).onSuccess {
+                _state.update { it.copy(isLoading = false, hasChanges = false) }
+                _saveSuccessEvent.send(Unit)
+            }.onError { error ->
+                _state.update { it.copy(isLoading = false, error = error.toUiText()) }
+            }
         }
+    }
+
+    fun retry() {
+        loadAccountForEditing()
     }
 }

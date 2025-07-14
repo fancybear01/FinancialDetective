@@ -1,4 +1,4 @@
-package com.coding.core.data.dto.transactions_dto
+package com.coding.core.data.remote.dto.transactions_dto
 
 import kotlinx.serialization.Serializable
 

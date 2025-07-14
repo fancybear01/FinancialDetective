@@ -1,24 +1,32 @@
 package com.coding.feature_transactions.ui.my_history
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.util.onError
-import com.coding.core.data.util.onSuccess
 import com.coding.core.util.formatNumberWithSpaces
-import com.coding.core_ui.util.toUiText
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
 import com.coding.core.domain.model.categories_models.CategoryType
+import com.coding.core.domain.model.transactions_models.Transaction
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core_ui.model.mapper.toUiModel
+import com.coding.core_ui.util.toUiText
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -36,110 +44,79 @@ class MyHistoryViewModel @AssistedInject constructor(
         fun create(accountId: String, isIncome: Boolean): MyHistoryViewModel
     }
 
-    private val categoryTypeToLoad = if (isIncome) {
-        CategoryType.INCOME
-    } else {
-        CategoryType.EXPENSE
+    private val categoryTypeToLoad = if (isIncome) CategoryType.INCOME else CategoryType.EXPENSE
+
+    private val _startDate = MutableStateFlow(LocalDate.now().withDayOfMonth(1))
+    private val _endDate = MutableStateFlow(LocalDate.now())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val transactionsFromDb: Flow<List<Transaction>> = combine(_startDate, _endDate) { start, end ->
+        start.toString() to end.toString()
+    }.flatMapLatest { (start, end) ->
+        repository.getTransactionsStream(accountId, start, end)
     }
 
-    private val _state = MutableStateFlow(MyHistoryState())
-    val state = _state.asStateFlow()
+    val state: StateFlow<MyHistoryState> = combine(
+        transactionsFromDb,
+        _startDate,
+        _endDate
+    ) { transactions, startDate, endDate ->
+        val filtered = transactions.filter { it.category.type == categoryTypeToLoad }
+        val total = filtered.sumOf { it.amount }
+        val listItems = filtered.map { it.toUiModel() }
+
+        MyHistoryState(
+            listItems = listItems,
+            totalAmount = formatNumberWithSpaces(total),
+            periodStart = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+            periodEnd = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+            startDate = startDate,
+            endDate = endDate,
+            isLoading = false
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyHistoryState())
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
     init {
-        val today = LocalDate.now()
-        val startOfMonth = today.withDayOfMonth(1)
-        _state.update { it.copy(startDate = startOfMonth, endDate = today) }
+        syncData()
         observeConnectivity()
     }
 
-    fun onAccountUpdated(currencyCode: String) {
-        loadData(newCurrency = currencyCode)
+    private fun syncData() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            repository.syncTransactionsForPeriod(
+                accountId,
+                _startDate.value.toString(),
+                _endDate.value.toString()
+            ).onError {
+
+            }
+            _isLoading.value = false
+        }
+    }
+
+    private fun observeConnectivity() {
+        connectivityObserver.isConnected
+            .drop(1).filter { it }
+            .debounce(1000)
+            .onEach { syncData() }
+            .launchIn(viewModelScope)
     }
 
     fun updateStartDate(newStartDate: LocalDate) {
-        loadData(newStartDate = newStartDate)
+        _startDate.value = newStartDate
+        syncData()
     }
 
     fun updateEndDate(newEndDate: LocalDate) {
-        loadData(newEndDate = newEndDate)
+        _endDate.value = newEndDate
+        syncData()
     }
 
-    fun retry(currencyCode: String) {
-        loadData(newCurrency = currencyCode)
-    }
-
-    private fun loadData(
-        newStartDate: LocalDate = state.value.startDate,
-        newEndDate: LocalDate = state.value.endDate,
-        newCurrency: String = state.value.currencyCode
-    ) {
-        if (newCurrency.isBlank()) {
-            return
-        }
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                    startDate = newStartDate,
-                    endDate = newEndDate,
-                    currencyCode = newCurrency
-                )
-            }
-
-            val currentState = state.value
-
-            repository
-                .getTransactionsForPeriod(
-                    accountId,
-                    currentState.startDate.toString(),
-                    currentState.endDate.toString()
-                )
-                .onSuccess { transactions ->
-                    val sortedTransactions = transactions
-                        .filter { it.category.type == categoryTypeToLoad }
-                        .sortedByDescending { it.transactionDate }
-
-                    val total = sortedTransactions.sumOf { it.amount }
-                    val listItems = sortedTransactions.map { it.toUiModel() }
-
-                    val startFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
-                    val endFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
-                    val formattedStart = currentState.startDate.format(startFormatter)
-                    val formattedEnd = currentState.endDate.format(endFormatter)
-
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            listItems = listItems,
-                            totalAmount = formatNumberWithSpaces(total),
-                            periodStart = formattedStart,
-                            periodEnd = formattedEnd
-                        )
-                    }
-                }
-                .onError { networkError ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = networkError.toUiText()
-                        )
-                    }
-                }
-        }
-    }
-
-
-    private fun observeConnectivity() {
-        viewModelScope.launch {
-            connectivityObserver.isConnected
-                .drop(1)
-                .debounce(1000)
-                .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry(state.value.currencyCode)
-                    }
-                }
-        }
+    fun onRefresh() {
+        syncData()
     }
 }

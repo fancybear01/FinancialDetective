@@ -127,59 +127,39 @@ private fun TransactionsContent(
 
 @Composable
 fun ExpensesScreen() {
-
     val mainViewModel = LocalMainViewModel.current
+    val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-
     val account = currentAccount
 
     if (account != null) {
-        val context = LocalContext.current
-
-        val transactionFeatureComponent = remember(account.id) {
-            DaggerTransactionFeatureComponent.factory()
-                .create(context.appDependencies)
+        val transactionFeatureComponent = remember {
+            DaggerTransactionFeatureComponent.factory().create(context.appDependencies)
         }
-
         val transactionsViewModelFactory = remember(account.id) {
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return transactionFeatureComponent
-                        .transactionsViewModelFactory()
+                    return transactionFeatureComponent.transactionsViewModelFactory()
                         .create(account.id, TransactionType.EXPENSE) as T
                 }
             }
         }
-
         val viewModel: TransactionsViewModel = daggerViewModel(
             key = "expenses_${account.id}",
             factory = transactionsViewModelFactory
         )
 
-        LaunchedEffect(Unit) {
-
-            viewModel.refresh(account.currency)
-
-            snapshotFlow { mainViewModel.currentAccount.value to mainViewModel.accountUpdateTrigger.value }
-                .drop(1)
-                .collect { (newAccount, _) ->
-                    if (newAccount != null) {
-                        viewModel.refresh(newAccount.currency)
-                    }
-                }
-        }
-
-        val navController = LocalNavController.current
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
-                navController.navigate("expense_details?transactionId=$transactionId")
+                navController.navigate("transaction_details?transactionId=$transactionId&isIncome=false")
             },
             onRetry = {
-                viewModel.retry(account.currency)
+                viewModel.onRefresh()
             }
         )
     }
@@ -187,60 +167,36 @@ fun ExpensesScreen() {
 
 @Composable
 fun IncomesScreen() {
-
     val mainViewModel = LocalMainViewModel.current
+    val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-
     val account = currentAccount
 
     if (account != null) {
-        val context = LocalContext.current
-
-        val transactionFeatureComponent = remember(account.id) {
-            DaggerTransactionFeatureComponent.factory()
-                .create(context.appDependencies)
+        val transactionFeatureComponent = remember {
+            DaggerTransactionFeatureComponent.factory().create(context.appDependencies)
         }
-
         val transactionsViewModelFactory = remember(account.id) {
             object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return transactionFeatureComponent
-                        .transactionsViewModelFactory()
+                    return transactionFeatureComponent.transactionsViewModelFactory()
                         .create(account.id, TransactionType.INCOME) as T
                 }
             }
         }
-
         val viewModel: TransactionsViewModel = daggerViewModel(
-            key = "expenses_${account.id}",
+            key = "incomes_${account.id}",
             factory = transactionsViewModelFactory
         )
-
-        LaunchedEffect(Unit) {
-
-            viewModel.refresh(account.currency)
-
-            snapshotFlow { mainViewModel.currentAccount.value to mainViewModel.accountUpdateTrigger.value }
-                .drop(1)
-                .collect { (newAccount, _) ->
-                    if (newAccount != null) {
-                        viewModel.refresh(newAccount.currency)
-                    }
-                }
-        }
-
-        val navController = LocalNavController.current
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
-                navController.navigate("income_details?transactionId=$transactionId")
+                navController.navigate("transaction_details?transactionId=$transactionId&isIncome=true")
             },
-            onRetry = {
-                viewModel.retry(account.currency)
-            }
+            onRetry = { viewModel.onRefresh() }
         )
     }
 }

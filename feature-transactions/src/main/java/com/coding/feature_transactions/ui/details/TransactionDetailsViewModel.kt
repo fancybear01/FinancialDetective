@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.util.onError
 import com.coding.core.data.util.onSuccess
-import com.coding.core.domain.model.account_models.Account
 import com.coding.core.domain.model.account_models.AccountBrief
 import com.coding.core.domain.model.categories_models.Category
 import com.coding.core.domain.repository.CategoryRepository
@@ -16,6 +15,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -40,10 +41,13 @@ class TransactionDetailsViewModel @AssistedInject constructor(
 
     init {
         _state.update { it.copy(isIncome = isIncome, isEditing = transactionId != -1) }
+
         if (transactionId != -1) {
             loadTransactionDetails()
         }
-        loadAvailableCategories()
+
+        observeAvailableCategories()
+        syncCategories()
     }
 
     private fun loadTransactionDetails() {
@@ -51,37 +55,53 @@ class TransactionDetailsViewModel @AssistedInject constructor(
             _state.update { it.copy(isLoading = true) }
             transactionRepository.getTransactionById(transactionId)
                 .onSuccess { transaction ->
-                    _state.update { it.copy(
-                        transactionId = transaction.id,
-                        selectedAccount = transaction.account,
-                        selectedCategory = transaction.category,
-                        amount = transaction.amount,
-                        date = transaction.transactionDate.toLocalDate(),
-                        time = transaction.transactionDate.toLocalTime(),
-                        comment = transaction.comment,
-                        currencyCode = transaction.account.currency,
-                        isLoading = false
-                    )}
-                }.onError { networkError ->
                     _state.update {
                         it.copy(
-                            isLoading = false,
-                            error = networkError.toUiText()
+                            transactionId = transaction.id.toInt(),
+                            selectedAccount = transaction.account,
+                            selectedCategory = transaction.category,
+                            amount = transaction.amount,
+                            date = transaction.transactionDate.toLocalDate(),
+                            time = transaction.transactionDate.toLocalTime(),
+                            comment = transaction.comment,
+                            currencyCode = transaction.account.currency,
+                            isLoading = false
                         )
                     }
+                    validateForm()
+                }.onError { networkError ->
+                    _state.update { it.copy(isLoading = false, error = networkError.toUiText()) }
                 }
         }
     }
 
-    private fun loadAvailableCategories() {
-        viewModelScope.launch {
-            categoryRepository.getCategoriesByType(isIncome)
-                .onSuccess { categories ->
-                    _state.update { it.copy(availableCategories = categories) }
-                    if (!state.value.isEditing && categories.isNotEmpty()) {
-                        _state.update { it.copy(selectedCategory = categories.first()) }
-                    }
+    private fun observeAvailableCategories() {
+        categoryRepository.getCategoriesStreamByType(isIncome)
+            .onEach { categories ->
+                _state.update { it.copy(availableCategories = categories) }
+                if (!state.value.isEditing && state.value.selectedCategory == null && categories.isNotEmpty()) {
+                    _state.update { it.copy(selectedCategory = categories.first()) }
+                    validateForm()
                 }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun syncCategories() {
+        viewModelScope.launch {
+            categoryRepository.syncCategories()
+        }
+    }
+
+    fun setInitialAccount(account: AccountBrief) {
+        if (!state.value.isEditing && state.value.selectedAccount == null) {
+            _state.update {
+                it.copy(
+                    selectedAccount = account,
+                    currencyCode = account.currency
+                )
+            }
+            validateForm()
         }
     }
 
@@ -109,22 +129,6 @@ class TransactionDetailsViewModel @AssistedInject constructor(
     fun onCommentChanged(newComment: String) {
         _state.update { it.copy(comment = newComment) }
         validateForm()
-    }
-
-    fun setInitialAccount(account: Account) {
-        if (!state.value.isEditing && state.value.selectedAccount == null) {
-            _state.update {
-                it.copy(
-                    selectedAccount = AccountBrief(
-                        id = account.id,
-                        name = account.name,
-                        balance = account.balance,
-                        currency = account.currency
-                    ),
-                    currencyCode = account.currency
-                )
-            }
-        }
     }
 
     fun saveTransaction() {
@@ -193,5 +197,6 @@ class TransactionDetailsViewModel @AssistedInject constructor(
         if (transactionId != -1) {
             loadTransactionDetails()
         }
+        syncCategories()
     }
 }

@@ -14,6 +14,7 @@ import com.coding.core.domain.model.account_models.Account
 import com.coding.core.domain.repository.AccountRepository
 import com.coding.core_ui.navigation.MainViewModelContract
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -33,26 +37,32 @@ class MainViewModel @Inject constructor(
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel(), MainViewModelContract {
 
-    val isConnected = connectivityObserver
-        .isConnected
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            false
-        )
+    // Состояния для UI
+    val isConnected = connectivityObserver.isConnected.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = false
+    )
 
     private val _currentAccount = MutableStateFlow<Account?>(null)
     override val currentAccount: StateFlow<Account?> = _currentAccount.asStateFlow()
 
     private val _isReady = MutableStateFlow(false)
-    val isReady = _isReady.asStateFlow()
+    val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+
+    // Каналы для одноразовых событий
     private val _eventChannel = Channel<UiEvent>()
-    val events = _eventChannel.receiveAsFlow()
+    val events: Flow<UiEvent> = _eventChannel.receiveAsFlow()
 
     private val _navigationChannel = Channel<NavigationEvent>()
-    val navigationEvents = _navigationChannel.receiveAsFlow()
+    val navigationEvents: Flow<NavigationEvent> = _navigationChannel.receiveAsFlow()
 
+
+    // Управление TopBar
     var onTopBarActionClick by mutableStateOf<(() -> Unit)?>(null)
         private set
 
@@ -64,74 +74,49 @@ class MainViewModel @Inject constructor(
         _isTopBarActionEnabled.value = enabled && action != null
     }
 
-    override fun navigateBack() {
-        viewModelScope.launch {
-            _navigationChannel.send(NavigationEvent.NavigateBack)
-        }
+
+    // Инициализация и логика
+    init {
+        observeAccounts()
+
+        forceRefreshAccounts()
+
+        observeConnectivity()
     }
 
-    private var initialLoadDone = false
+    private fun observeAccounts() {
+        repository.getAccountsStream()
+            .onEach { accounts ->
+                val firstAccount = accounts.firstOrNull()
+                if (_currentAccount.value?.id != firstAccount?.id) {
+                    _currentAccount.value = firstAccount
+                }
+                _isReady.value = true
+            }
+            .launchIn(viewModelScope)
+    }
 
-    init {
-        val instanceId = System.identityHashCode(this)
-        loadAccounts()
-        _isReady.value = true
-
+    private fun observeConnectivity() {
         viewModelScope.launch {
             isConnected
                 .drop(1)
+                .filter { it }
                 .debounce(1000)
-                .collect { connected ->
-                    if (connected) {
-                        loadAccounts(true)
-                    }
+                .collect {
+                    forceRefreshAccounts()
                 }
         }
     }
 
-    fun loadAccounts(isForceRefresh: Boolean = false) {
-        if (currentAccount.value != null && !isForceRefresh && initialLoadDone) {
-            return
-        }
 
+    fun forceRefreshAccounts() {
         viewModelScope.launch {
-            repository
-                .getAccounts()
-                .onSuccess { accounts ->
-                    _currentAccount.value = accounts.firstOrNull()
-                    if (isForceRefresh) {
-                        triggerAccountUpdate()
-                    }
-                }
-                .onError { error ->
-                    _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
-                }
-            initialLoadDone = true
+            _isLoading.value = true
+            repository.syncAccounts().onError { error ->
+                _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
+            }
+            _isLoading.value = false
         }
-    }
-
-    override fun onAccountManuallyUpdated(
-        accountId: String,
-        newName: String,
-        newBalance: Double,
-        newCurrencyCode: String
-    ) {
-        val current = _currentAccount.value
-        if (current?.id == accountId) {
-            _currentAccount.value = current.copy(
-                name = newName,
-                balance = newBalance,
-                currency = newCurrencyCode
-            )
-            triggerAccountUpdate()
-        }
-    }
-
-    private val _accountUpdateTrigger = MutableStateFlow(0)
-    override val accountUpdateTrigger: StateFlow<Int> = _accountUpdateTrigger.asStateFlow()
-
-    fun triggerAccountUpdate() {
-        _accountUpdateTrigger.value++
     }
 }
 

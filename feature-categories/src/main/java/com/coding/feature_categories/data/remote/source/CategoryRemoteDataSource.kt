@@ -6,7 +6,7 @@ import com.coding.core.data.util.NetworkError
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import com.coding.core.data.util.Result
-import com.coding.core.data.dto.categoties_dto.CategoryDto
+import com.coding.core.data.remote.dto.categoties_dto.CategoryDto
 import javax.inject.Inject
 
 class CategoryRemoteDataSource @Inject constructor(
