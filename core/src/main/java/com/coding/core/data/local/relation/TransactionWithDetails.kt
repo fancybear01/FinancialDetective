@@ -12,10 +12,10 @@ data class TransactionWithDetails(
         parentColumn = "accountId",
         entityColumn = "accountId"
     )
-    val account: AccountEntity,
+    val account: AccountEntity?,
     @Relation(
         parentColumn = "categoryId",
         entityColumn = "categoryId"
     )
-    val category: CategoryEntity
+    val category: CategoryEntity?
 )

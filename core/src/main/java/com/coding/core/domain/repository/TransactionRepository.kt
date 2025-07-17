@@ -11,7 +11,6 @@ import java.time.ZonedDateTime
  */
 interface TransactionRepository {
 
-    // Методы для UI-слоя
     fun getTransactionsStream(accountId: String, startDate: String, endDate: String): Flow<List<Transaction>>
 
     suspend fun getTransactionById(id: Int): Result<Transaction, NetworkError>
@@ -28,14 +27,13 @@ interface TransactionRepository {
 
     suspend fun deleteTransaction(id: Int): Result<Unit, NetworkError>
 
-    // Методы для фоновой синхронизации (WorkManager)
     suspend fun syncTransactionsForPeriod(
         accountId: String, startDate: String, endDate: String
     ): Result<Unit, NetworkError>
 
-    suspend fun syncOfflineCreations()
-
-    suspend fun syncOfflineUpdates()
+    suspend fun syncOfflineCreationsAndUpdates()
 
     suspend fun syncOfflineDeletions()
+
+    suspend fun syncAllPending()
 }

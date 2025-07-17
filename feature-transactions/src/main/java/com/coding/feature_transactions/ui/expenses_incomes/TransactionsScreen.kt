@@ -32,9 +32,9 @@ import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.di.daggerViewModel
 import com.coding.core_ui.navigation.LocalNavController
-import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
 import com.coding.core_ui.model.TransactionUi
 import com.coding.core_ui.model.mapper.toListItemModel
+import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
 import kotlinx.coroutines.flow.drop
 
 @Composable
@@ -152,6 +152,9 @@ fun ExpensesScreen() {
             factory = transactionsViewModelFactory
         )
 
+        LaunchedEffect(key1 = account.id) {
+            viewModel.startObserving()
+        }
 
         TransactionsScreen(
             viewModel = viewModel,
@@ -190,6 +193,10 @@ fun IncomesScreen() {
             key = "incomes_${account.id}",
             factory = transactionsViewModelFactory
         )
+
+        LaunchedEffect(key1 = account.id) {
+            viewModel.startObserving()
+        }
 
         TransactionsScreen(
             viewModel = viewModel,

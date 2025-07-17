@@ -1,5 +1,6 @@
 package com.coding.feature_transactions.ui.expenses_incomes
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.util.onError
@@ -14,6 +15,7 @@ import com.coding.core_ui.model.mapper.toUiModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 class TransactionsViewModel @AssistedInject constructor(
     private val repository: TransactionRepository,
@@ -41,21 +44,53 @@ class TransactionsViewModel @AssistedInject constructor(
     private val _state = MutableStateFlow(TransactionsState())
     val state: StateFlow<TransactionsState> = _state.asStateFlow()
 
-    private var lastUsedCurrency: String? = null
+    private var isObserving = false
+    private var connectivityJob: Job? = null
+
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing = _isSyncing.asStateFlow()
+
+    private var syncJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            if (accountId.isNotBlank()) {
-                observeTransactions()
-                syncTransactions()
-                observeConnectivity()
+        observeTransactions()
+        sync(isInitial = true)
+        observeConnectivity()
+    }
+
+    fun startObserving() {
+        if (isObserving) return
+        isObserving = true
+
+        observeTransactions()
+        sync()
+        observeConnectivity()
+    }
+
+    private fun sync(isInitial: Boolean = false) {
+        syncJob?.cancel()
+
+        syncJob = viewModelScope.launch {
+            if (!isInitial) {
+                _isSyncing.value = true
             }
+
+            repository.syncAllPending()
+
+            val now = LocalDate.now()
+            val startDate = now.withDayOfMonth(1).toString()
+            val endDate = now.with(TemporalAdjusters.lastDayOfMonth()).toString()
+            repository.syncTransactionsForPeriod(accountId, startDate, endDate)
+
+            _isSyncing.value = false
         }
     }
 
     private fun observeConnectivity() {
-        connectivityObserver.isConnected
-            .drop(1).filter { it }
+        connectivityJob?.cancel()
+        connectivityJob = connectivityObserver.isConnected
+            .drop(1)
+            .filter { it }
             .debounce(1000)
             .onEach { syncTransactions() }
             .launchIn(viewModelScope)
@@ -90,8 +125,10 @@ class TransactionsViewModel @AssistedInject constructor(
     private fun syncTransactions() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val today = LocalDate.now().toString()
-            repository.syncTransactionsForPeriod(accountId, today, today)
+            val now = LocalDate.now()
+            val startDate = now.withDayOfMonth(1).toString()
+            val endDate = now.with(TemporalAdjusters.lastDayOfMonth()).toString()
+            repository.syncTransactionsForPeriod(accountId, startDate, endDate)
                 .onError { networkError ->
                     if (state.value.transactions.isEmpty()) {
                         _state.update { it.copy(error = networkError.toUiText()) }
@@ -102,6 +139,6 @@ class TransactionsViewModel @AssistedInject constructor(
     }
 
     fun onRefresh() {
-        syncTransactions()
+        sync()
     }
 }

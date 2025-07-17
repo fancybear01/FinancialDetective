@@ -26,7 +26,7 @@ fun TransactionResponseDto.toDomain(): Transaction {
 
 fun TransactionResponseDto.toEntity(isSynced: Boolean): TransactionEntity {
     return TransactionEntity(
-        remoteId = this.id,
+        id = this.id,
         accountId = this.account.id,
         categoryId = this.category.id,
         amount = this.amount.toDoubleOrNull() ?: 0.0,
@@ -39,9 +39,12 @@ fun TransactionResponseDto.toEntity(isSynced: Boolean): TransactionEntity {
     )
 }
 
-fun TransactionWithDetails.toDomain(): Transaction {
+fun TransactionWithDetails.toDomain(): Transaction? {
+    if (this.account == null || this.category == null) {
+        return null
+    }
     return Transaction(
-        id = this.transaction.remoteId?.toString() ?: "local_${this.transaction.localId}",
+        id = this.transaction.id.toString(),
         amount = this.transaction.amount,
         comment = this.transaction.comment,
         transactionDate = parseZonedDateTimeSafe(this.transaction.transactionDate),

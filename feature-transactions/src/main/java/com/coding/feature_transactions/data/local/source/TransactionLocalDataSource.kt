@@ -1,5 +1,6 @@
 package com.coding.feature_transactions.data.local.source
 
+import android.util.Log
 import com.coding.core.data.local.dao.TransactionDao
 import com.coding.core.data.local.entity.TransactionEntity
 import com.coding.core.data.local.relation.TransactionWithDetails
@@ -11,45 +12,53 @@ import javax.inject.Inject
 class TransactionLocalDataSource @Inject constructor(private val transactionDao: TransactionDao) {
 
     fun getTransactionsStream(accountId: String, startDate: String, endDate: String): Flow<List<TransactionWithDetails>> {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: getTransactionsStream called for accountId=$accountId, startDate=$startDate, endDate=$endDate")
         return transactionDao.getTransactionsForPeriod(accountId, startDate, endDate)
     }
 
-    suspend fun upsertTransactions(transactions: List<TransactionEntity>) {
+    suspend fun upsertAll(transactions: List<TransactionEntity>) {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: upsertAll called with ${transactions.size} items.")
         transactionDao.upsertAll(transactions)
     }
 
-    suspend fun insertOrUpdate(transaction: TransactionEntity) {
+    suspend fun upsert(transaction: TransactionEntity) {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: upsert(single) called for remoteId=${transaction.id}, localId=${transaction.localId}")
         transactionDao.upsert(transaction)
     }
 
-    suspend fun getUnsyncedTransactions(): List<TransactionEntity> {
-        return transactionDao.getUnsynced()
+    suspend fun setSynced(localId: Long, remoteId: Int) {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: setSynced called for localId=$localId, remoteId=$remoteId")
+        transactionDao.setSynced(localId, remoteId)
     }
 
-    suspend fun markAsUpdated(
-        remoteId: Int, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
-        amount: Double, comment: String, timestamp: Long
-    ) {
-        transactionDao.markAsUpdated(
-            remoteId = remoteId,
-            accountId = accountId,
-            categoryId = categoryId,
-            transactionDate = transactionDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-            amount = amount,
-            comment = comment,
-            timestamp = timestamp
-        )
+    suspend fun getByRemoteId(remoteId: Int): TransactionEntity? {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: getByRemoteId called with remoteId = $remoteId")
+        return transactionDao.getByRemoteId(remoteId)
     }
 
-    suspend fun markAsDeleted(remoteId: Int, timestamp: Long) {
-        transactionDao.markAsDeleted(remoteId, timestamp)
+    suspend fun getUnsyncedCreationsOrUpdates(): List<TransactionEntity> {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: getUnsyncedCreationsOrUpdates called")
+        return transactionDao.getUnsyncedCreationsOrUpdates()
     }
 
-    suspend fun deleteLocalTransaction(localId: Long) {
-        transactionDao.deleteByLocalId(localId)
+    suspend fun getUnsyncedDeletions(): List<TransactionEntity> {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: getUnsyncedDeletions called")
+        return transactionDao.getUnsyncedDeletions()
     }
 
-    suspend fun deleteSyncedTransactions(remoteIds: List<Int>) {
-        transactionDao.deleteSynced(remoteIds)
+    suspend fun markAsDeleted(remoteId: Int) {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: markAsDeleted called")
+        transactionDao.markAsDeleted(remoteId)
+    }
+
+    suspend fun deletePermanently(remoteId: Int) {
+        Log.d("DB_WRITE", "LOCAL_SOURCE: deletePermanently called")
+        transactionDao.deletePermanently(remoteId)
+    }
+
+    suspend fun deleteByRemoteIds(remoteIds: List<Int>) {
+        if (remoteIds.isNotEmpty()) {
+            transactionDao.deleteByRemoteIds(remoteIds)
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.coding.core.util.UiEvent
 import com.coding.core_ui.util.toUiText
 import com.coding.core.domain.model.account_models.Account
 import com.coding.core.domain.repository.AccountRepository
+import com.coding.core.domain.repository.CategoryRepository
 import com.coding.core_ui.navigation.MainViewModelContract
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +34,8 @@ import javax.inject.Inject
  * Основная view model приложения.
  */
 class MainViewModel @Inject constructor(
-    private val repository: AccountRepository,
+    private val accountRepository: AccountRepository,
+    private val categoryRepository: CategoryRepository,
     private val connectivityObserver: ConnectivityObserver
 ) : ViewModel(), MainViewModelContract {
 
@@ -79,13 +81,13 @@ class MainViewModel @Inject constructor(
     init {
         observeAccounts()
 
-        forceRefreshAccounts()
+        forceRefreshData()
 
         observeConnectivity()
     }
 
     private fun observeAccounts() {
-        repository.getAccountsStream()
+        accountRepository.getAccountsStream()
             .onEach { accounts ->
                 val firstAccount = accounts.firstOrNull()
                 if (_currentAccount.value?.id != firstAccount?.id) {
@@ -103,16 +105,29 @@ class MainViewModel @Inject constructor(
                 .filter { it }
                 .debounce(1000)
                 .collect {
-                    forceRefreshAccounts()
+                    forceRefreshData()
                 }
         }
     }
 
 
-    fun forceRefreshAccounts() {
+//    fun forceRefreshAccounts() {
+//        viewModelScope.launch {
+//            _isLoading.value = true
+//            repository.syncAccounts().onError { error ->
+//                _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
+//            }
+//            _isLoading.value = false
+//        }
+//    }
+
+
+    private fun forceRefreshData() {
         viewModelScope.launch {
             _isLoading.value = true
-            repository.syncAccounts().onError { error ->
+            accountRepository.syncAccounts().onError { error ->
+                _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText())) }
+            categoryRepository.syncCategories().onError { error ->
                 _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
             }
             _isLoading.value = false

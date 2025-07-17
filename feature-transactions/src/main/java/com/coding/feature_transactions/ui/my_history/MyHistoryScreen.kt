@@ -107,33 +107,32 @@ fun MyHistoryScreen() {
             )
         }
 
-        val onRefresh = {
-            viewModel.onRefresh()
-        }
 
-        PullToRefreshBox(
-            isRefreshing = isLoading,
-            onRefresh = onRefresh,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (state.error != null && state.listItems.isEmpty()) {
-                FullScreenError(
-                    errorMessage = state.error!!.asString(context),
-                    onRetryClick = onRefresh
-                )
-            }
-            else if (state.listItems.isEmpty() && isLoading) {
+
+        when {
+            state.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-            else {
+
+            state.error != null -> {
+                FullScreenError(
+                    errorMessage = state.error!!.asString(context),
+                    onRetryClick = {
+                        viewModel.onRefresh()
+                    }
+                )
+            }
+
+            else -> {
                 MyHistoryContent(
                     state = state,
                     onStartDateClick = { showStartDatePicker = true },
                     onEndDateClick = { showEndDatePicker = true },
                     onTransactionClick = { transactionId ->
-                        navController.navigate("transaction_details?transactionId=$transactionId&isIncome=$isIncome")
+                        val route = if (isIncome) "income_details" else "expense_details"
+                        navController.navigate("$route?transactionId=$transactionId")
                     },
                     modifier = Modifier.fillMaxSize()
                 )
