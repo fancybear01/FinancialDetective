@@ -1,6 +1,13 @@
 package com.coding.feature_transactions.data.repository
 
 import android.util.Log
+import androidx.lifecycle.asFlow
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.coding.core.data.local.entity.TransactionEntity
 import com.coding.core.data.util.NetworkError
 import com.coding.core.data.util.Result
@@ -9,6 +16,7 @@ import com.coding.core.data.mapper.toDomain
 import com.coding.core.data.mapper.toEntity
 import com.coding.core.data.mapper.toRequestDto
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
+import com.coding.core.data.sync.SyncWorker
 import com.coding.core.data.util.onSuccess
 import com.coding.feature_transactions.data.remote.source.TransactionRemoteDataSource
 import com.coding.core.domain.model.transactions_models.Transaction
@@ -17,8 +25,6 @@ import com.coding.feature_transactions.data.local.source.TransactionLocalDataSou
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -27,7 +33,8 @@ import javax.inject.Inject
 class TransactionRepositoryImpl @Inject constructor(
     private val remoteDataSource: TransactionRemoteDataSource,
     private val localDataSource: TransactionLocalDataSource,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val workManager: WorkManager
 ) : TransactionRepository {
 
     override fun getTransactionsStream(
@@ -58,6 +65,21 @@ class TransactionRepositoryImpl @Inject constructor(
             isDeleted = false
         )
         localDataSource.upsert(newTransaction)
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "sync_pending_transactions",
+            ExistingWorkPolicy.KEEP,
+            syncRequest
+        )
+
         return Result.Success(Unit)
     }
 
@@ -92,14 +114,15 @@ class TransactionRepositoryImpl @Inject constructor(
 
         return remoteDataSource.getTransactionsForPeriod(accountId, startDate, endDate)
             .onSuccess { dtoList ->
-                if (dtoList.isEmpty()) return@onSuccess
-
                 val serverEntities = dtoList.map { it.toEntity(isSynced = true) }
+                if (serverEntities.isEmpty()) return@onSuccess
 
-                val remoteIds = dtoList.mapNotNull { it.id }
+                val remoteIds = serverEntities.mapNotNull { it.id }
 
+                Log.d("SYNC_TEST", "syncTransactionsForPeriod before deleteByRemoteIds, remoteIds = $remoteIds")
                 localDataSource.deleteByRemoteIds(remoteIds)
 
+                Log.d("SYNC_TEST", "syncTransactionsForPeriod before upsertAll")
                 localDataSource.upsertAll(serverEntities)
 
             }.map {}
@@ -143,5 +166,42 @@ class TransactionRepositoryImpl @Inject constructor(
 
         syncOfflineCreationsAndUpdates()
         syncOfflineDeletions()
+    }
+
+    override suspend fun syncAllData(accountId: String): Result<Unit, NetworkError> {
+        if (!connectivityObserver.isConnected.first()) return Result.Success(Unit)
+
+        localDataSource.getUnsyncedCreationsOrUpdates().forEach { localTransaction ->
+            val request = localTransaction.toRequestDto()
+
+            val remoteId = localTransaction.id
+
+            val result = if (remoteId != null) {
+                remoteDataSource.updateTransaction(remoteId, request)
+            } else {
+                remoteDataSource.createTransaction(request)
+            }
+
+            result.onSuccess { responseDto ->
+                responseDto.id?.let { newRemoteId ->
+                    localDataSource.setSynced(localTransaction.localId, newRemoteId)
+                }
+            }
+        }
+
+        return remoteDataSource.getAllTransactionsForAccount(accountId)
+            .onSuccess { dtoList ->
+                localDataSource.deleteAllForAccount(accountId)
+                localDataSource.upsertAll(dtoList.map { it.toEntity(isSynced = true) })
+            }.map {}
+    }
+
+    override fun getSyncWorkInfo(): Flow<WorkInfo?> {
+        return workManager
+            .getWorkInfosForUniqueWorkLiveData("sync_pending_transactions")
+            .asFlow()
+            .map { workInfoList ->
+                workInfoList.firstOrNull()
+            }
     }
 }

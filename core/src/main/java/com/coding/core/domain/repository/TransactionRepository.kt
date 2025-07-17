@@ -1,5 +1,6 @@
 package com.coding.core.domain.repository
 
+import androidx.work.WorkInfo
 import com.coding.core.data.util.NetworkError
 import com.coding.core.data.util.Result
 import com.coding.core.domain.model.transactions_models.Transaction
@@ -36,4 +37,8 @@ interface TransactionRepository {
     suspend fun syncOfflineDeletions()
 
     suspend fun syncAllPending()
+
+    suspend fun syncAllData(accountId: String): Result<Unit, NetworkError>
+
+    fun getSyncWorkInfo(): Flow<WorkInfo?>
 }

@@ -62,4 +62,8 @@ class TransactionRemoteDataSource @Inject constructor(
             httpClient.delete(constructUrl("transactions/$id"))
         }
     }
+
+    suspend fun getAllTransactionsForAccount(accountId: String): Result<List<TransactionResponseDto>, NetworkError> {
+        return safeCallWithRetry { httpClient.get(constructUrl("transactions/account/$accountId")) }
+    }
 }

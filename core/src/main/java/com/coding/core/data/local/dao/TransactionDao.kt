@@ -50,4 +50,7 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE id = :remoteId")
     suspend fun deletePermanently(remoteId: Int)
+
+    @Query("DELETE FROM transactions WHERE accountId = :accountId")
+    suspend fun deleteAllForAccount(accountId: String)
 }

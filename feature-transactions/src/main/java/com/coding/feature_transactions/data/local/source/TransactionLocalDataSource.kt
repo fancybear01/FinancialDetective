@@ -61,4 +61,8 @@ class TransactionLocalDataSource @Inject constructor(private val transactionDao:
             transactionDao.deleteByRemoteIds(remoteIds)
         }
     }
+
+    suspend fun deleteAllForAccount(accountId: String) {
+        transactionDao.deleteAllForAccount(accountId)
+    }
 }
