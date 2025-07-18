@@ -1,6 +1,5 @@
 package com.coding.feature_transactions.data.repository
 
-import android.util.Log
 import androidx.lifecycle.asFlow
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
@@ -16,11 +15,11 @@ import com.coding.core.data.mapper.toDomain
 import com.coding.core.data.mapper.toEntity
 import com.coding.core.data.mapper.toRequestDto
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
-import com.coding.core.data.sync.SyncWorker
 import com.coding.core.data.util.onSuccess
 import com.coding.feature_transactions.data.remote.source.TransactionRemoteDataSource
 import com.coding.core.domain.model.transactions_models.Transaction
 import com.coding.core.domain.repository.TransactionRepository
+import com.coding.core.util.SyncWorker
 import com.coding.feature_transactions.data.local.source.TransactionLocalDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -66,29 +65,27 @@ class TransactionRepositoryImpl @Inject constructor(
         )
         localDataSource.upsert(newTransaction)
 
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(constraints)
-            .build()
-
-        workManager.enqueueUniqueWork(
-            "sync_pending_transactions",
-            ExistingWorkPolicy.KEEP,
-            syncRequest
-        )
+        enqueueSyncWork()
 
         return Result.Success(Unit)
     }
 
     override suspend fun updateTransaction(
-        id: Int, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
+        id: String, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
         amount: Double, comment: String
     ): Result<Unit, NetworkError> {
-        val localTransaction = localDataSource.getByRemoteId(id)
-            ?: return Result.Error(NetworkError.NOT_FOUND)
+
+        val localTransaction = if (id.startsWith("local_")) {
+            val localId = id.removePrefix("local_").toLongOrNull() ?: return Result.Error(NetworkError.BAD_REQUEST)
+            localDataSource.getByLocalId(localId)?.transaction
+        } else {
+            val remoteId = id.toIntOrNull() ?: return Result.Error(NetworkError.BAD_REQUEST)
+            localDataSource.getByRemoteId(remoteId)
+        }
+
+        if (localTransaction == null) {
+            return Result.Error(NetworkError.NOT_FOUND)
+        }
 
         val updatedTransaction = localTransaction.copy(
             accountId = accountId,
@@ -96,14 +93,29 @@ class TransactionRepositoryImpl @Inject constructor(
             amount = amount,
             transactionDate = transactionDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             comment = comment,
+            updatedAt = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             isSynced = false
         )
         localDataSource.upsert(updatedTransaction)
+        enqueueSyncWork()
         return Result.Success(Unit)
     }
 
-    override suspend fun deleteTransaction(id: Int): Result<Unit, NetworkError> {
-        localDataSource.markAsDeleted(id)
+    override suspend fun deleteTransaction(id: String): Result<Unit, NetworkError> {
+        if (id.startsWith("local_")) {
+            val localId = id.removePrefix("local_").toLongOrNull()
+                ?: return Result.Error(NetworkError.BAD_REQUEST)
+
+            localDataSource.deleteByLocalId(localId)
+
+        } else {
+            val remoteId = id.toIntOrNull()
+                ?: return Result.Error(NetworkError.BAD_REQUEST)
+
+            localDataSource.markAsDeleted(remoteId)
+            enqueueSyncWork()
+        }
+
         return Result.Success(Unit)
     }
 
@@ -114,15 +126,17 @@ class TransactionRepositoryImpl @Inject constructor(
 
         return remoteDataSource.getTransactionsForPeriod(accountId, startDate, endDate)
             .onSuccess { dtoList ->
-                val serverEntities = dtoList.map { it.toEntity(isSynced = true) }
+                if (dtoList.isEmpty()) return@onSuccess
+                val locallyDeletedIds = localDataSource.getUnsyncedDeletions().mapNotNull { it.id }.toSet()
+                val serverEntities = dtoList
+                    .filter { it.id !in locallyDeletedIds }
+                    .map { it.toEntity(isSynced = true) }
+
                 if (serverEntities.isEmpty()) return@onSuccess
 
                 val remoteIds = serverEntities.mapNotNull { it.id }
 
-                Log.d("SYNC_TEST", "syncTransactionsForPeriod before deleteByRemoteIds, remoteIds = $remoteIds")
                 localDataSource.deleteByRemoteIds(remoteIds)
-
-                Log.d("SYNC_TEST", "syncTransactionsForPeriod before upsertAll")
                 localDataSource.upsertAll(serverEntities)
 
             }.map {}
@@ -203,5 +217,35 @@ class TransactionRepositoryImpl @Inject constructor(
             .map { workInfoList ->
                 workInfoList.firstOrNull()
             }
+    }
+
+    override suspend fun getLocalTransactionById(localId: Long): Result<Transaction, NetworkError> {
+        val transactionWithDetails = localDataSource.getByLocalId(localId)
+        return if (transactionWithDetails != null) {
+            val transaction = transactionWithDetails.toDomain()
+            if (transaction != null) {
+                Result.Success(transaction)
+            } else {
+                Result.Error(NetworkError.NOT_FOUND)
+            }
+        } else {
+            Result.Error(NetworkError.NOT_FOUND)
+        }
+    }
+
+    private fun enqueueSyncWork() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "sync_pending_transactions",
+            ExistingWorkPolicy.REPLACE,
+            syncRequest
+        )
     }
 }

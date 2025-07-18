@@ -1,16 +1,14 @@
 package com.coding.feature_transactions.ui.expenses_incomes
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,8 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -39,16 +35,11 @@ import com.coding.core_ui.navigation.LocalNavController
 import com.coding.core_ui.model.TransactionUi
 import com.coding.core_ui.model.mapper.toListItemModel
 import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
-import kotlinx.coroutines.flow.drop
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun TransactionsScreen(
     viewModel: TransactionsViewModel,
     onTransactionClick: (transactionId: String) -> Unit,
-    lastSyncText: String,
     onRetry: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -73,15 +64,10 @@ fun TransactionsScreen(
         else -> {
             val currencySymbol = Currency.fromCode(state.currency).symbol
 
-
             TransactionsContent(
                 totalAmount = state.totalAmount,
                 transactions = state.transactions,
                 currency = currencySymbol,
-                lastSyncText = lastSyncText,
-                onTotalClick = {
-                    // TODO()
-                },
                 onTransactionClick = onTransactionClick,
                 modifier = Modifier.fillMaxSize()
             )
@@ -94,12 +80,10 @@ private fun TransactionsContent(
     totalAmount: Double,
     transactions: List<TransactionUi>,
     currency: String,
-    lastSyncText: String,
-    onTotalClick: () -> Unit,
     onTransactionClick: (transactionId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
 
         ListItem(
             model = ListItemModel(
@@ -115,47 +99,21 @@ private fun TransactionsContent(
                 .defaultMinSize(minHeight = 56.dp)
         )
 
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
         ) {
-            if (transactions.isEmpty()) {
-                Text(
-                    text = "Транзакций за этот период нет\n\n$lastSyncText",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontStyle = FontStyle.Italic,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.fillMaxWidth()
+            items(
+                items = transactions,
+                key = { transaction -> transaction.id }
+            ) { transaction ->
+                val model = transaction.toListItemModel(showDate = false)
+                ListItem(
+                    model = model,
+                    onClick = { onTransactionClick(transaction.id) },
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 70.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
-            } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(
-                            items = transactions,
-                            key = { transaction -> transaction.id }
-                        ) { transaction ->
-                            val model = transaction.toListItemModel(showDate = false)
-                            ListItem(
-                                model = model,
-                                onClick = { onTransactionClick(transaction.id) },
-                                modifier = Modifier.defaultMinSize(minHeight = 70.dp),
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = lastSyncText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontStyle = FontStyle.Italic,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
             }
         }
     }
@@ -188,26 +146,16 @@ fun ExpensesScreen() {
             factory = transactionsViewModelFactory
         )
 
-        LaunchedEffect(key1 = account.id) {
-            viewModel.startObserving()
-        }
-
-        val lastSyncTimestamp by viewModel.lastSyncTime.collectAsStateWithLifecycle()
-
-        val lastSyncText = if (lastSyncTimestamp > 0) {
-            val date = Date(lastSyncTimestamp)
-            val format = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-            "Последняя синхронизация: ${format.format(date)}"
-        } else {
-            "Еще не синхронизировалось"
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
         }
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
-                navController.navigate("transaction_details?transactionId=$transactionId&isIncome=false")
+                Log.d("NAV_DEBUG", "Navigating with transactionId: '$transactionId'")
+                navController.navigate("expense_details?transactionId=$transactionId")
             },
-            lastSyncText = lastSyncText,
             onRetry = {
                 viewModel.onRefresh()
             }
@@ -241,26 +189,15 @@ fun IncomesScreen() {
             factory = transactionsViewModelFactory
         )
 
-        LaunchedEffect(key1 = account.id) {
-            viewModel.startObserving()
-        }
-
-        val lastSyncTimestamp by viewModel.lastSyncTime.collectAsStateWithLifecycle()
-
-        val lastSyncText = if (lastSyncTimestamp > 0) {
-            val date = Date(lastSyncTimestamp)
-            val format = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-            "Последняя синхронизация: ${format.format(date)}"
-        } else {
-            "Еще не синхронизировалось"
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
         }
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
-                navController.navigate("transaction_details?transactionId=$transactionId&isIncome=true")
+                navController.navigate("income_details?transactionId=$transactionId")
             },
-            lastSyncText = lastSyncText,
             onRetry = { viewModel.onRefresh() }
         )
     }

@@ -25,9 +25,6 @@ import com.coding.core_ui.common.list_item.ListItem
 import com.coding.core_ui.common.list_item.ListItemModel
 import com.coding.core_ui.common.list_item.TrailInfo
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -77,8 +74,11 @@ fun MyHistoryScreen() {
             factory = myHistoryViewModelFactory
         )
 
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
+        }
+
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }

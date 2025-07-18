@@ -1,6 +1,5 @@
 package com.coding.core.data.local.dao
 
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -53,4 +52,14 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE accountId = :accountId")
     suspend fun deleteAllForAccount(accountId: String)
+
+    @Transaction
+    @Query("SELECT * FROM transactions WHERE localId = :localId LIMIT 1")
+    suspend fun getByLocalId(localId: Long): TransactionWithDetails?
+
+    @Update
+    suspend fun update(transaction: TransactionEntity)
+
+    @Query("DELETE FROM transactions WHERE localId = :localId")
+    suspend fun deleteByLocalId(localId: Long)
 }

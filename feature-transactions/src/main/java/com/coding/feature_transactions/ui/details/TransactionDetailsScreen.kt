@@ -1,13 +1,18 @@
 package com.coding.feature_transactions.ui.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,6 +61,10 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.DisposableEffect
 import com.coding.core.domain.model.account_models.AccountBrief
 import com.coding.core_ui.common.components.TimePickerDialog
@@ -65,7 +74,7 @@ import com.coding.core_ui.model.mapper.toUiModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailsScreen(
-    transactionId: Int,
+    transactionId: String?,
     isIncome: Boolean
 ) {
     val mainViewModel = LocalMainViewModel.current
@@ -82,9 +91,19 @@ fun TransactionDetailsScreen(
                 .create(context.appDependencies)
         }
 
-        val viewModelKey =
-            if (transactionId != -1) "transaction_detail_$transactionId" else "transaction_detail_new_$isIncome"
+        val idForViewModel = remember(transactionId) {
+            if (transactionId != null && !transactionId.startsWith("local_")) {
+                transactionId.toIntOrNull() ?: -1
+            } else {
+                -1
+            }
+        }
 
+        val viewModelKey = if (idForViewModel != -1) {
+            "transaction_detail_$idForViewModel"
+        } else {
+            "transaction_detail_new_$isIncome"
+        }
         val transactionDetailsViewModelFactory = remember(transactionId, isIncome) {
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -347,6 +366,26 @@ fun TransactionsDetailContent(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = if (state.isSynced) Icons.Default.CloudDone else Icons.Default.CloudUpload,
+                contentDescription = "Sync Status",
+                tint = if (state.isSynced) Color.Green else MaterialTheme.colorScheme.outline
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (state.isSynced) "Синхронизировано" else "Ожидает синхронизации",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         if (state.isEditing) {
             Button(

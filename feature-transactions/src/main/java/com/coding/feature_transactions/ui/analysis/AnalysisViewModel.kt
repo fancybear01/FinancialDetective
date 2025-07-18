@@ -1,17 +1,12 @@
-package com.coding.feature_transactions.ui.my_history
+package com.coding.feature_transactions.ui.analysis
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.util.onError
-import com.coding.core.util.formatNumberWithSpaces
-import com.coding.core.data.remote.connectivity.ConnectivityObserver
-import com.coding.core.domain.model.account_models.Account
+import com.coding.core.domain.model.categories_models.CategoryAnalysisItem
 import com.coding.core.domain.model.categories_models.CategoryType
 import com.coding.core.domain.model.transactions_models.Transaction
 import com.coding.core.domain.repository.TransactionRepository
-import com.coding.core.util.UiText
-import com.coding.core_ui.model.mapper.toUiModel
-import com.coding.core_ui.util.toUiText
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -22,36 +17,33 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MyHistoryViewModel @AssistedInject constructor(
+
+class AnalysisViewModel @AssistedInject constructor(
     private val repository: TransactionRepository,
     @Assisted private val accountId: String,
     @Assisted private val isIncome: Boolean,
-    private val connectivityObserver: ConnectivityObserver
+    // ...
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(accountId: String, isIncome: Boolean): MyHistoryViewModel
+        fun create(accountId: String, isIncome: Boolean): AnalysisViewModel
     }
 
     private val categoryTypeToLoad = if (isIncome) CategoryType.INCOME else CategoryType.EXPENSE
 
     private val _startDate = MutableStateFlow(LocalDate.now().withDayOfMonth(1))
     private val _endDate = MutableStateFlow(LocalDate.now())
-    private val _currencyCode = MutableStateFlow("RUB")
-    private val _error = MutableStateFlow<UiText?>(null)
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val transactionsFromDb: Flow<List<Transaction>> = combine(_startDate, _endDate) { start, end ->
@@ -60,37 +52,37 @@ class MyHistoryViewModel @AssistedInject constructor(
         repository.getTransactionsStream(accountId, start, end)
     }
 
-    val state: StateFlow<MyHistoryState> = combine(
-        transactionsFromDb,
-        _startDate,
-        _endDate,
-        _currencyCode,
-        _error
-    ) { transactions, startDate, endDate, currencyCode, error ->
+    val state: StateFlow<AnalysisState> = combine(
+        transactionsFromDb, _startDate, _endDate
+    ) { transactions, startDate, endDate ->
         val filtered = transactions.filter { it.category.type == categoryTypeToLoad }
-        val total = filtered.sumOf { it.amount }
-        val listItems = filtered.map { it.toUiModel() }
+        val periodTotal = filtered.sumOf { it.amount }
 
-        MyHistoryState(
-            listItems = listItems,
-            totalAmount = formatNumberWithSpaces(total),
-            periodStart = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
-            periodEnd = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+        val categoryItems = filtered
+            .groupBy { it.category }
+            .map { (category, transactionList) ->
+                val categoryTotal = transactionList.sumOf { it.amount }
+                val percentage = if (periodTotal > 0) (categoryTotal / periodTotal).toFloat() * 100 else 0f
+                CategoryAnalysisItem(
+                    category = category,
+                    totalAmount = categoryTotal,
+                    percentage = percentage
+                )
+            }
+            .sortedByDescending { it.totalAmount }
+        val noData = categoryItems.isEmpty()
+        AnalysisState(
             startDate = startDate,
             endDate = endDate,
-            currencyCode = currencyCode,
-            error = error,
-            isLoading = false
+            periodStartText = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+            periodEndText = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+            totalAmount = periodTotal,
+            categoryItems = categoryItems,
+            currencyCode = transactions.firstOrNull()?.account?.currency ?: "RUB",
+            isLoading = false,
+            noDataForAnalysis = noData
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MyHistoryState())
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-
-    init {
-        syncData()
-        observeConnectivity()
-    }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AnalysisState())
 
     private fun syncData() {
         viewModelScope.launch {
@@ -99,19 +91,11 @@ class MyHistoryViewModel @AssistedInject constructor(
                 accountId,
                 _startDate.value.toString(),
                 _endDate.value.toString()
-            ).onError { networkError ->
-                _error.value = networkError.toUiText()
+            ).onError {
+
             }
             _isLoading.value = false
         }
-    }
-
-    private fun observeConnectivity() {
-        connectivityObserver.isConnected
-            .drop(1).filter { it }
-            .debounce(1000)
-            .onEach { syncData() }
-            .launchIn(viewModelScope)
     }
 
     fun updateStartDate(newStartDate: LocalDate) {
@@ -122,10 +106,6 @@ class MyHistoryViewModel @AssistedInject constructor(
     fun updateEndDate(newEndDate: LocalDate) {
         _endDate.value = newEndDate
         syncData()
-    }
-
-    fun updateAccount(account: Account) {
-        _currencyCode.value = account.currency
     }
 
     fun onRefresh() {

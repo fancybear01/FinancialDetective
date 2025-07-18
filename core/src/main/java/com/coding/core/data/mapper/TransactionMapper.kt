@@ -44,7 +44,7 @@ fun TransactionWithDetails.toDomain(): Transaction? {
         return null
     }
     return Transaction(
-        id = this.transaction.id.toString(),
+        id = this.transaction.id?.toString() ?: "local_${this.transaction.localId}",
         amount = this.transaction.amount,
         comment = this.transaction.comment,
         transactionDate = parseZonedDateTimeSafe(this.transaction.transactionDate),

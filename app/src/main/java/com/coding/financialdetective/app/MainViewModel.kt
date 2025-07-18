@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
-import com.coding.core.data.util.onSuccess
 import com.coding.core.data.util.onError
 import com.coding.core.util.UiEvent
 import com.coding.core_ui.util.toUiText
@@ -90,7 +89,11 @@ class MainViewModel @Inject constructor(
         accountRepository.getAccountsStream()
             .onEach { accounts ->
                 val firstAccount = accounts.firstOrNull()
-                if (_currentAccount.value?.id != firstAccount?.id) {
+                val current = _currentAccount.value
+                if (current == null && firstAccount != null ||
+                    current?.id != firstAccount?.id ||
+                    (current != null && firstAccount != null && current != firstAccount)
+                ) {
                     _currentAccount.value = firstAccount
                 }
                 _isReady.value = true
@@ -109,18 +112,6 @@ class MainViewModel @Inject constructor(
                 }
         }
     }
-
-
-//    fun forceRefreshAccounts() {
-//        viewModelScope.launch {
-//            _isLoading.value = true
-//            repository.syncAccounts().onError { error ->
-//                _eventChannel.send(UiEvent.ShowSnackbar(error.toUiText()))
-//            }
-//            _isLoading.value = false
-//        }
-//    }
-
 
     private fun forceRefreshData() {
         viewModelScope.launch {

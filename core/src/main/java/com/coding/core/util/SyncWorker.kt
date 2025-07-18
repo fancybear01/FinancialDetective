@@ -1,13 +1,10 @@
-package com.coding.core.data.sync
+package com.coding.core.util
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core.preferences.PreferencesManager
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 
 class SyncWorker(
     appContext: Context,
@@ -22,7 +19,11 @@ class SyncWorker(
             preferencesManager.lastSyncTimestamp = System.currentTimeMillis()
             Result.success()
         } catch (e: Exception) {
-            Result.retry()
+            if (runAttemptCount < 5) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
         }
     }
 }

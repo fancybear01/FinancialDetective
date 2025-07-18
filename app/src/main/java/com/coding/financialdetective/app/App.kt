@@ -2,6 +2,7 @@ package com.coding.financialdetective.app
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -35,6 +36,7 @@ import com.coding.core_ui.navigation.getScreen
 import com.coding.feature_accounts.ui.editing_an_account.EditAccountScreen
 import com.coding.feature_categories.ui.CategoriesScreen
 import com.coding.feature_settings.ui.SettingsScreen
+import com.coding.feature_transactions.ui.analysis.AnalysisScreen
 import com.coding.feature_transactions.ui.details.TransactionDetailsScreen
 import com.coding.feature_transactions.ui.expenses_incomes.ExpensesScreen
 import com.coding.feature_transactions.ui.expenses_incomes.IncomesScreen
@@ -68,12 +70,12 @@ fun AppNavHost(
             route = "expense_details?transactionId={transactionId}",
             arguments = listOf(
                 navArgument("transactionId") {
-                    type = NavType.IntType
-                    defaultValue = -1
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) { backStackEntry ->
-            val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: -1
+            val transactionId = backStackEntry.arguments?.getString("transactionId")
             TransactionDetailsScreen(transactionId, false)
         }
 
@@ -81,13 +83,21 @@ fun AppNavHost(
             route = "income_details?transactionId={transactionId}",
             arguments = listOf(
                 navArgument("transactionId") {
-                    type = NavType.IntType
-                    defaultValue = -1
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) { backStackEntry ->
-            val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: -1
+            val transactionId = backStackEntry.arguments?.getString("transactionId")
             TransactionDetailsScreen(transactionId, true)
+        }
+
+        composable(
+            route = "analysis/{isIncome}",
+            arguments = listOf(navArgument("isIncome") { type = NavType.BoolType })
+        ) { backStackEntry ->
+            val isIncome = backStackEntry.arguments?.getBoolean("isIncome") ?: false
+            AnalysisScreen(isIncome = isIncome)
         }
     }
 }
@@ -133,7 +143,11 @@ fun App(mainViewModel: MainViewModel) {
                         val currentScreen = getScreen(currentRoute)
                         val onTopBarAction = mainViewModel.onTopBarActionClick
                         val isActionEnabled by mainViewModel.isTopBarActionEnabled.collectAsState()
-
+                        val topBarContainerColor = if (currentScreen is Screen.Analysis) {
+                            MaterialTheme.colorScheme.surface
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        }
                         val actionRoute =
                             if (
                                 currentScreen !is Screen.EditAccount &&
@@ -149,14 +163,20 @@ fun App(mainViewModel: MainViewModel) {
                             if (onTopBarAction != null) {
                                 onTopBarAction.invoke()
                             } else {
-                                actionRoute?.let { route ->
-                                    navController.navigate(route)
+                                if (currentScreen is Screen.ExpensesHistory || currentScreen is Screen.IncomesHistory) {
+                                    val isIncome = currentScreen is Screen.IncomesHistory
+                                    navController.navigate("analysis/$isIncome")
+                                } else {
+                                    actionRoute?.let { route ->
+                                        navController.navigate(route)
+                                    }
                                 }
                             }
                         }
 
                         AppTopBar(
                             currentScreen = currentScreen,
+                            containerColor = topBarContainerColor,
                             onNavigateUp = { navController.navigateUp() },
                             onActionClick = onActionClick,
                             isActionEnabled = if (

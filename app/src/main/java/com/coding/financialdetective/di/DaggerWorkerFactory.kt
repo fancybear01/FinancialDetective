@@ -4,15 +4,14 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.coding.core.data.sync.SyncWorker
+import com.coding.core.util.SyncWorker
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core.preferences.PreferencesManager
 import javax.inject.Inject
-import javax.inject.Provider
 
 class DaggerWorkerFactory @Inject constructor(
-    private val transactionRepositoryProvider: Provider<TransactionRepository>,
-    private val preferencesManagerProvider: Provider<PreferencesManager>
+    private val transactionRepository: TransactionRepository,
+    private val preferencesManager: PreferencesManager
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -25,8 +24,8 @@ class DaggerWorkerFactory @Inject constructor(
                 SyncWorker(
                     appContext,
                     workerParameters,
-                    transactionRepositoryProvider.get(),
-                    preferencesManagerProvider.get()
+                    transactionRepository,
+                    preferencesManager
                 )
             else -> null
         }

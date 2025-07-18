@@ -22,11 +22,11 @@ interface TransactionRepository {
     ): Result<Unit, NetworkError>
 
     suspend fun updateTransaction(
-        id: Int, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
+        id: String, accountId: Int, categoryId: Int, transactionDate: ZonedDateTime,
         amount: Double, comment: String
     ): Result<Unit, NetworkError>
 
-    suspend fun deleteTransaction(id: Int): Result<Unit, NetworkError>
+    suspend fun deleteTransaction(id: String): Result<Unit, NetworkError>
 
     suspend fun syncTransactionsForPeriod(
         accountId: String, startDate: String, endDate: String
@@ -41,4 +41,6 @@ interface TransactionRepository {
     suspend fun syncAllData(accountId: String): Result<Unit, NetworkError>
 
     fun getSyncWorkInfo(): Flow<WorkInfo?>
+
+    suspend fun getLocalTransactionById(localId: Long): Result<Transaction, NetworkError>
 }

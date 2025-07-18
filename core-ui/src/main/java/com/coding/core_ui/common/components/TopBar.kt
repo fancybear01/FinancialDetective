@@ -9,10 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
+import androidx.compose.ui.graphics.Color
 import com.coding.core_ui.navigation.Screen
-import com.coding.core_ui.navigation.currentRouteAsState
-import com.coding.core_ui.navigation.getScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,7 +18,8 @@ fun AppTopBar(
     currentScreen: Screen,
     onNavigateUp: () -> Unit,
     onActionClick: () -> Unit,
-    isActionEnabled: Boolean
+    isActionEnabled: Boolean,
+    containerColor: Color = MaterialTheme.colorScheme.primary
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -30,7 +29,7 @@ fun AppTopBar(
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = containerColor,
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         title = {

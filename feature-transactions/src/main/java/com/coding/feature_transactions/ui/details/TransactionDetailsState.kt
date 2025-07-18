@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class TransactionDetailsState(
-    val transactionId: Int? = null,
+    val transactionId: String? = null,
     val selectedAccount: AccountBrief? = null,
     val selectedCategory: Category? = null,
     val amount: Double = 0.0,
@@ -22,5 +22,6 @@ data class TransactionDetailsState(
     val error: UiText? = null,
     val availableCategories: List<Category> = emptyList(),
     val finishScreen: Boolean = false,
-    val isFormValid: Boolean = false
+    val isFormValid: Boolean = false,
+    val isSynced: Boolean = false
 )

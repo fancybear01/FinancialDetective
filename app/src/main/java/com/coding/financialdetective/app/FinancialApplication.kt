@@ -4,37 +4,36 @@ import android.app.Application
 import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.coding.core.data.sync.SyncWorker
+import com.coding.core.util.SyncWorker
 import com.coding.core_ui.di.AppDependenciesProvider
 import com.coding.financialdetective.di.AppComponent
 import com.coding.financialdetective.di.DaggerAppComponent
 import com.coding.financialdetective.di.DaggerWorkerFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 class FinancialApplication : Application(), AppDependenciesProvider, Configuration.Provider {
     override val dependencies: AppComponent by lazy {
-        DaggerAppComponent.factory().create(applicationContext).also {
-            it.inject(this)
-        }
+        DaggerAppComponent.factory().create(applicationContext)
     }
 
-    @Inject
-    lateinit var workerFactory: DaggerWorkerFactory
+    override val workManagerConfiguration: Configuration
+        get() {
+            val factory = DaggerWorkerFactory(
+                dependencies.transactionRepository(),
+                dependencies.preferencesManager()
+            )
+            return Configuration.Builder()
+                .setWorkerFactory(factory)
+                .build()
+        }
 
     override fun onCreate() {
         super.onCreate()
         setupPeriodicSync()
     }
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
 
     private fun setupPeriodicSync() {
         val constraints = Constraints.Builder()
