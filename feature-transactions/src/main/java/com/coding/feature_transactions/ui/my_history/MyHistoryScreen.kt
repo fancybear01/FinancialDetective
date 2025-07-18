@@ -44,8 +44,7 @@ import com.coding.core_ui.model.mapper.toListItemModel
 fun MyHistoryScreen() {
     val mainViewModel = LocalMainViewModel.current
 
-    val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-    val account = currentAccount
+    val account = mainViewModel.currentAccount.collectAsStateWithLifecycle().value
 
     val navController = LocalNavController.current
     val navBackStackEntry = navController.currentBackStackEntry
@@ -75,8 +74,8 @@ fun MyHistoryScreen() {
             factory = myHistoryViewModelFactory
         )
 
-        LaunchedEffect(key1 = account.id, key2 = account.currency) {
-            viewModel.onAccountUpdated(account.currency)
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
         }
 
         val state by viewModel.state.collectAsStateWithLifecycle()
@@ -108,6 +107,8 @@ fun MyHistoryScreen() {
             )
         }
 
+
+
         when {
             state.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -119,8 +120,7 @@ fun MyHistoryScreen() {
                 FullScreenError(
                     errorMessage = state.error!!.asString(context),
                     onRetryClick = {
-                        val newCurrencyCode = currentAccount?.currency ?: ""
-                        viewModel.retry(newCurrencyCode)
+                        viewModel.onRefresh()
                     }
                 )
             }

@@ -5,7 +5,7 @@ import com.coding.core.domain.model.categories_models.Category
 import java.time.ZonedDateTime
 
 data class Transaction(
-    val id: Int,
+    val id: String,
     val account: AccountBrief,
     val category: Category,
     val amount: Double,

@@ -8,7 +8,7 @@ import com.coding.core_ui.navigation.icons.BackNavigationIcon
 import com.coding.core_ui.navigation.icons.BottomNavigationIcon
 
 sealed class Screen(
-    val routeResId: Int,
+    val routeResId: Int = -1,
     val titleResId: Int,
     val action: ActionIcon? = null,
     val bottomNavigationIcon: BottomNavigationIcon? = null,
@@ -29,6 +29,7 @@ sealed class Screen(
         relatedRoutesResIds = listOf(
             R.string.expenses_history_route,
             R.string.expense_details_route,
+            R.string.analysis_route_expenses
         ),
     )
 
@@ -40,6 +41,7 @@ sealed class Screen(
         relatedRoutesResIds = listOf(
             R.string.incomes_history_route,
             R.string.income_details_route,
+            R.string.analysis_route_incomes
         )
     )
 
@@ -96,21 +98,33 @@ sealed class Screen(
         action = ActionIcon.TransactionDetailsConfirmAction,
         backNavigationIcon = BackNavigationIcon.CancelAction
     )
+
+    data class Analysis(val isIncome: Boolean) : Screen(
+        titleResId = R.string.analysis_header,
+        backNavigationIcon = BackNavigationIcon.DefaultBack
+    )
 }
 
-fun getScreen(route: String): Screen {
+fun getScreen(route: String?): Screen {
+    if (route == null) return Screen.Expenses
+    if (route.startsWith("history/")) {
+        val isIncome = route.substringAfter("history/") == "true"
+        return if (isIncome) Screen.IncomesHistory else Screen.ExpensesHistory
+    }
+    if (route.startsWith("analysis/")) {
+        val isIncome = route.substringAfter("analysis/") == "true"
+        return Screen.Analysis(isIncome)
+    }
     val baseRoute = route.substringBefore('?')
-    return when {
-        baseRoute == "history/false" -> Screen.ExpensesHistory
-        baseRoute == "history/true" -> Screen.IncomesHistory
-        baseRoute == "expenses" -> Screen.Expenses
-        baseRoute == "incomes" -> Screen.Incomes
-        baseRoute == "account" -> Screen.Account
-        baseRoute == "categories" -> Screen.Categories
-        baseRoute == "settings" -> Screen.Settings
-        baseRoute == "edit_account" -> Screen.EditAccount
-        baseRoute.startsWith("expense_details") -> Screen.ExpenseDetails
-        baseRoute.startsWith("income_details") -> Screen.IncomeDetails
+    return when (baseRoute) {
+        "expenses" -> Screen.Expenses
+        "incomes" -> Screen.Incomes
+        "account" -> Screen.Account
+        "categories" -> Screen.Categories
+        "settings" -> Screen.Settings
+        "edit_account" -> Screen.EditAccount
+        "expense_details" -> Screen.ExpenseDetails
+        "income_details" -> Screen.IncomeDetails
         else -> Screen.Expenses
     }
 }

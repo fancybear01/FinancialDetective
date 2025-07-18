@@ -1,4 +1,4 @@
-package com.coding.core.data.dto.categoties_dto
+package com.coding.core.data.remote.dto.categoties_dto
 
 import kotlinx.serialization.Serializable
 

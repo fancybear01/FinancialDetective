@@ -1,7 +1,7 @@
-package com.coding.core.data.dto.transactions_dto
+package com.coding.core.data.remote.dto.transactions_dto
 
-import com.coding.core.data.dto.account_dto.AccountBriefDto
-import com.coding.core.data.dto.categoties_dto.CategoryDto
+import com.coding.core.data.remote.dto.account_dto.AccountBriefDto
+import com.coding.core.data.remote.dto.categoties_dto.CategoryDto
 import kotlinx.serialization.Serializable
 
 @Serializable

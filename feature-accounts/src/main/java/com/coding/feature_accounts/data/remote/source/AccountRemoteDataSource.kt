@@ -3,9 +3,9 @@ package com.coding.feature_accounts.data.remote.source
 import com.coding.core.data.remote.service.constructUrl
 import com.coding.core.data.remote.service.safeCallWithRetry
 import com.coding.core.data.util.NetworkError
-import com.coding.core.data.dto.account_dto.AccountDto
+import com.coding.core.data.remote.dto.account_dto.AccountDto
 import com.coding.core.data.util.Result
-import com.coding.core.data.dto.account_dto.AccountResponseDto
+import com.coding.core.data.remote.dto.account_dto.AccountResponseDto
 import kotlinx.serialization.Serializable
 import java.util.Locale
 import javax.inject.Inject

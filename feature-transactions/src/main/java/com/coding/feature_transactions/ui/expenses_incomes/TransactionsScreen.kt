@@ -1,5 +1,6 @@
 package com.coding.feature_transactions.ui.expenses_incomes
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -12,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,10 +32,9 @@ import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.di.daggerViewModel
 import com.coding.core_ui.navigation.LocalNavController
-import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
 import com.coding.core_ui.model.TransactionUi
 import com.coding.core_ui.model.mapper.toListItemModel
-import kotlinx.coroutines.flow.drop
+import com.coding.feature_transactions.di.DaggerTransactionFeatureComponent
 
 @Composable
 fun TransactionsScreen(
@@ -65,14 +64,10 @@ fun TransactionsScreen(
         else -> {
             val currencySymbol = Currency.fromCode(state.currency).symbol
 
-
             TransactionsContent(
                 totalAmount = state.totalAmount,
                 transactions = state.transactions,
                 currency = currencySymbol,
-                onTotalClick = {
-                    // TODO()
-                },
                 onTransactionClick = onTransactionClick,
                 modifier = Modifier.fillMaxSize()
             )
@@ -85,7 +80,6 @@ private fun TransactionsContent(
     totalAmount: Double,
     transactions: List<TransactionUi>,
     currency: String,
-    onTotalClick: () -> Unit,
     onTransactionClick: (transactionId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,59 +121,43 @@ private fun TransactionsContent(
 
 @Composable
 fun ExpensesScreen() {
-
     val mainViewModel = LocalMainViewModel.current
+    val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-
     val account = currentAccount
 
     if (account != null) {
-        val context = LocalContext.current
-
-        val transactionFeatureComponent = remember(account.id) {
-            DaggerTransactionFeatureComponent.factory()
-                .create(context.appDependencies)
+        val transactionFeatureComponent = remember {
+            DaggerTransactionFeatureComponent.factory().create(context.appDependencies)
         }
-
         val transactionsViewModelFactory = remember(account.id) {
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return transactionFeatureComponent
-                        .transactionsViewModelFactory()
+                    return transactionFeatureComponent.transactionsViewModelFactory()
                         .create(account.id, TransactionType.EXPENSE) as T
                 }
             }
         }
-
         val viewModel: TransactionsViewModel = daggerViewModel(
             key = "expenses_${account.id}",
             factory = transactionsViewModelFactory
         )
 
-        LaunchedEffect(Unit) {
-
-            viewModel.refresh(account.currency)
-
-            snapshotFlow { mainViewModel.currentAccount.value to mainViewModel.accountUpdateTrigger.value }
-                .drop(1)
-                .collect { (newAccount, _) ->
-                    if (newAccount != null) {
-                        viewModel.refresh(newAccount.currency)
-                    }
-                }
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
         }
-
-        val navController = LocalNavController.current
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
+                Log.d("NAV_DEBUG", "Navigating with transactionId: '$transactionId'")
                 navController.navigate("expense_details?transactionId=$transactionId")
             },
             onRetry = {
-                viewModel.retry(account.currency)
+                viewModel.onRefresh()
             }
         )
     }
@@ -187,60 +165,40 @@ fun ExpensesScreen() {
 
 @Composable
 fun IncomesScreen() {
-
     val mainViewModel = LocalMainViewModel.current
+    val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
-
     val account = currentAccount
 
     if (account != null) {
-        val context = LocalContext.current
-
-        val transactionFeatureComponent = remember(account.id) {
-            DaggerTransactionFeatureComponent.factory()
-                .create(context.appDependencies)
+        val transactionFeatureComponent = remember {
+            DaggerTransactionFeatureComponent.factory().create(context.appDependencies)
         }
-
         val transactionsViewModelFactory = remember(account.id) {
             object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return transactionFeatureComponent
-                        .transactionsViewModelFactory()
+                    return transactionFeatureComponent.transactionsViewModelFactory()
                         .create(account.id, TransactionType.INCOME) as T
                 }
             }
         }
-
         val viewModel: TransactionsViewModel = daggerViewModel(
-            key = "expenses_${account.id}",
+            key = "incomes_${account.id}",
             factory = transactionsViewModelFactory
         )
 
-        LaunchedEffect(Unit) {
-
-            viewModel.refresh(account.currency)
-
-            snapshotFlow { mainViewModel.currentAccount.value to mainViewModel.accountUpdateTrigger.value }
-                .drop(1)
-                .collect { (newAccount, _) ->
-                    if (newAccount != null) {
-                        viewModel.refresh(newAccount.currency)
-                    }
-                }
+        LaunchedEffect(key1 = account) {
+            viewModel.updateAccount(account)
         }
-
-        val navController = LocalNavController.current
 
         TransactionsScreen(
             viewModel = viewModel,
             onTransactionClick = { transactionId ->
                 navController.navigate("income_details?transactionId=$transactionId")
             },
-            onRetry = {
-                viewModel.retry(account.currency)
-            }
+            onRetry = { viewModel.onRefresh() }
         )
     }
 }

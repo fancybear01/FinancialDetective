@@ -1,6 +1,6 @@
 package com.coding.core.data.mapper
 
-import com.coding.core.data.dto.account_dto.StatItemDto
+import com.coding.core.data.remote.dto.account_dto.StatItemDto
 import com.coding.core.domain.model.account_models.StatItem
 
 fun StatItemDto.toDomain(): StatItem {

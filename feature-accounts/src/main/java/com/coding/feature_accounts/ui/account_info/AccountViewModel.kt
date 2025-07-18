@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -39,58 +42,57 @@ class AccountViewModel @AssistedInject constructor(
     private val _state = MutableStateFlow(AccountState())
     val state: StateFlow<AccountState> = _state.asStateFlow()
 
+    private val refreshTrigger = MutableStateFlow(0)
+
     init {
-        loadAccountById()
+        observeForUpdates()
         observeConnectivity()
     }
 
-    private fun observeConnectivity() {
+    private fun observeForUpdates() {
         viewModelScope.launch {
-            connectivityObserver.isConnected
-                .drop(1)
-                .debounce(1000)
-                .collect { connected ->
-                    if (connected && state.value.error != null) {
-                        retry()
-                    }
-                }
+            refreshTrigger.collect {
+                loadAccountDetails()
+            }
         }
     }
 
-    private fun loadAccountById() {
+    private fun observeConnectivity() {
+        connectivityObserver.isConnected
+            .drop(1).debounce(1000)
+            .filter { it && state.value.error != null }
+            .onEach { retry() }
+            .launchIn(viewModelScope)
+    }
+
+    private fun loadAccountDetails() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            repository
-                .getAccountById(accountId)
+            repository.getAccountById(accountId)
                 .onSuccess { accountResponse ->
-                    val account = accountResponse.toUiModel()
+                    val accountUiModel = accountResponse.toUiModel()
                     _state.update {
                         it.copy(
-                            accountName = account.name,
-                            balance = account.balance,
-                            currency = account.currency,
+                            accountName = accountUiModel.name,
+                            balance = accountUiModel.balance,
+                            currency = accountUiModel.currency,
                             isLoading = false,
                             error = null
                         )
                     }
                 }
                 .onError { networkError ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = networkError.toUiText()
-                        )
-                    }
+                    _state.update { it.copy(isLoading = false, error = networkError.toUiText()) }
                 }
         }
     }
 
     fun retry() {
-        loadAccountById()
+        loadAccountDetails()
     }
 
     fun refresh() {
-        loadAccountById()
+        refreshTrigger.value++
     }
 }

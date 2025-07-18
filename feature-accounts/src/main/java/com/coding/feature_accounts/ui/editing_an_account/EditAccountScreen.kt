@@ -51,6 +51,7 @@ import com.coding.core_ui.common.components.CustomEditFieldDialog
 import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.di.daggerViewModel
+import com.coding.core_ui.navigation.LocalNavController
 import com.coding.feature_accounts.R
 import com.coding.feature_accounts.di.DaggerAccountFeatureComponent
 import kotlinx.coroutines.launch
@@ -59,6 +60,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditAccountScreen() {
     val mainViewModel = LocalMainViewModel.current
+    val navController = LocalNavController.current
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
     val accountId = currentAccount?.id
@@ -98,25 +100,15 @@ fun EditAccountScreen() {
 
         LaunchedEffect(Unit) {
             viewModel.saveSuccessEvent.collect {
-                mainViewModel.onAccountManuallyUpdated(
-                    accountId = accountId,
-                    newName = state.accountName,
-                    newBalance = state.rawBalance,
-                    newCurrencyCode = state.selectedCurrency.code
-                )
-                mainViewModel.navigateBack()
+                navController.popBackStack()
             }
         }
 
         DisposableEffect(state.hasChanges) {
-            if (state.hasChanges) {
-                mainViewModel.setTopBarAction(enabled = true) {
-                    scope.launch {
-                        viewModel.saveChanges()
-                    }
+            mainViewModel.setTopBarAction(enabled = state.hasChanges) {
+                scope.launch {
+                    viewModel.saveChanges()
                 }
-            } else {
-                mainViewModel.setTopBarAction(enabled = false, action = null)
             }
 
             onDispose {

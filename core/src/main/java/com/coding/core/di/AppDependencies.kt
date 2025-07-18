@@ -5,6 +5,7 @@ import com.coding.core.data.remote.connectivity.ConnectivityObserver
 import com.coding.core.domain.repository.AccountRepository
 import com.coding.core.domain.repository.CategoryRepository
 import com.coding.core.domain.repository.TransactionRepository
+import com.coding.core.preferences.PreferencesManager
 import io.ktor.client.HttpClient
 
 interface AppDependencies {
@@ -14,4 +15,5 @@ interface AppDependencies {
     fun transactionRepository(): TransactionRepository
     fun categoryRepository(): CategoryRepository
     fun viewModelFactory(): ViewModelProvider.Factory
+    fun preferencesManager(): PreferencesManager
 }

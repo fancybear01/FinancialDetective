@@ -36,8 +36,6 @@ fun AccountScreen() {
 
     val currentAccount by mainViewModel.currentAccount.collectAsStateWithLifecycle()
 
-    val updateTrigger by mainViewModel.accountUpdateTrigger.collectAsStateWithLifecycle()
-
     val accountId = currentAccount?.id
 
     if (accountId != null) {
@@ -64,8 +62,10 @@ fun AccountScreen() {
             factory = accountViewModelFactory
         )
 
-        LaunchedEffect(accountId, updateTrigger) {
-            accountViewModel.refresh()
+        LaunchedEffect(currentAccount?.updatedAt) {
+            if (currentAccount != null) {
+                accountViewModel.refresh()
+            }
         }
 
         val state by accountViewModel.state.collectAsStateWithLifecycle()

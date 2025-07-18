@@ -16,7 +16,7 @@ import java.util.Locale
 fun Transaction.toUiModel(): TransactionUi {
     val currency = Currency.fromCode(this.account.currency)
     return TransactionUi(
-        id = this.id.toString(),
+        id = this.id,
         categoryName = this.category.name,
         categoryEmoji = this.category.emoji,
         currency = currency.symbol,
