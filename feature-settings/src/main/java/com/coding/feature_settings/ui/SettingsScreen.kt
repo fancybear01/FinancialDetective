@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.core_ui.common.list_item.ContentInfo
 import com.coding.core_ui.common.list_item.ListItemModel
 import com.coding.core_ui.common.list_item.TrailInfo
@@ -20,13 +21,8 @@ import com.coding.feature_settings.R
 fun SettingsScreen() {
     val dependencies = LocalContext.current.appDependencies
 
-    val viewModelFactory = dependencies.viewModelFactory()
-
-    val viewModel: SettingsViewModel = daggerViewModel(
-        factory = viewModelFactory
-    )
-
-    val state by viewModel.state.collectAsState()
+    val viewModel: SettingsViewModel = daggerViewModel(factory = dependencies.viewModelFactory())
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LazyColumn {
         item {
@@ -36,11 +32,11 @@ fun SettingsScreen() {
                     trail = TrailInfo.Switch(
                         isSwitched = state.isDarkTheme,
                         onSwitch = { isEnabled ->
-                            viewModel.onAutoThemeToggled(isEnabled)
+                            viewModel.onThemeToggled(isEnabled)
                         }
                     )
                 ),
-                onClick = {},
+                onClick = null,
                 modifier = Modifier
                     .defaultMinSize(minHeight = 56.dp)
             )

@@ -7,6 +7,8 @@ import com.coding.feature_categories.data.repository.CategoryRepositoryImpl
 import com.coding.core.domain.repository.CategoryRepository
 import com.coding.feature_transactions.data.repository.TransactionRepositoryImpl
 import com.coding.core.domain.repository.TransactionRepository
+import com.coding.core.domain.repository.UserPreferencesRepository
+import com.coding.financialdetective.util.UserPreferencesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
@@ -23,4 +25,8 @@ abstract class DataModule {
     @Binds
     @AppScope
     abstract fun bindCategoryRepository(impl: CategoryRepositoryImpl): CategoryRepository
+
+    @Binds
+    @AppScope
+    abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 }

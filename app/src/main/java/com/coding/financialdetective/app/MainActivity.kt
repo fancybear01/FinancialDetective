@@ -8,10 +8,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coding.core_ui.theme.FinancialDetectiveTheme
+import com.coding.feature_settings.ui.SettingsViewModel
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
@@ -21,8 +24,10 @@ class MainActivity : ComponentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels { viewModelFactory }
 
+    private val settingsViewModel: SettingsViewModel by viewModels { viewModelFactory }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as FinancialApplication).dependencies.inject(this)
+        (application as FinancialApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen().apply {
@@ -55,7 +60,11 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            FinancialDetectiveTheme {
+            val settingsState by settingsViewModel.state.collectAsStateWithLifecycle()
+
+            FinancialDetectiveTheme(
+                darkTheme = settingsState.isDarkTheme
+            ) {
                 App(mainViewModel = mainViewModel)
             }
         }

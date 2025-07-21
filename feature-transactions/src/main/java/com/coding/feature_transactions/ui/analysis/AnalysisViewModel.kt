@@ -1,12 +1,20 @@
 package com.coding.feature_transactions.ui.analysis
 
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coding.core.data.util.onError
+import com.coding.core.domain.model.account_models.Currency
 import com.coding.core.domain.model.categories_models.CategoryAnalysisItem
 import com.coding.core.domain.model.categories_models.CategoryType
 import com.coding.core.domain.model.transactions_models.Transaction
 import com.coding.core.domain.repository.TransactionRepository
+import com.coding.core.util.UiText
+import com.coding.core.util.formatNumberWithSpaces
+import com.coding.core_ui.util.generateRandomColors
+import com.coding.core_ui.util.toUiText
+import com.coding.feature_charts.ChartLegendItem
+import com.coding.feature_charts.PieChartData
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -45,6 +53,8 @@ class AnalysisViewModel @AssistedInject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    private val _error = MutableStateFlow<UiText?>(null)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val transactionsFromDb: Flow<List<Transaction>> = combine(_startDate, _endDate) { start, end ->
         start.toString() to end.toString()
@@ -53,8 +63,8 @@ class AnalysisViewModel @AssistedInject constructor(
     }
 
     val state: StateFlow<AnalysisState> = combine(
-        transactionsFromDb, _startDate, _endDate
-    ) { transactions, startDate, endDate ->
+        transactionsFromDb, _startDate, _endDate, _error
+    ) { transactions, startDate, endDate, error ->
         val filtered = transactions.filter { it.category.type == categoryTypeToLoad }
         val periodTotal = filtered.sumOf { it.amount }
 
@@ -71,6 +81,16 @@ class AnalysisViewModel @AssistedInject constructor(
             }
             .sortedByDescending { it.totalAmount }
         val noData = categoryItems.isEmpty()
+        val colors = generateRandomColors(categoryItems.size)
+        val chartData = categoryItems.mapIndexed { index, item ->
+            PieChartData(value = item.totalAmount.toFloat(), color = colors[index])
+        }
+        val chartLegend = categoryItems.mapIndexed { index, item ->
+            ChartLegendItem(
+                color = colors[index],
+                label = item.category.name
+            )
+        }
         AnalysisState(
             startDate = startDate,
             endDate = endDate,
@@ -79,8 +99,10 @@ class AnalysisViewModel @AssistedInject constructor(
             totalAmount = periodTotal,
             categoryItems = categoryItems,
             currencyCode = transactions.firstOrNull()?.account?.currency ?: "RUB",
-            isLoading = false,
-            noDataForAnalysis = noData
+            noDataForAnalysis = noData,
+            chartData = chartData,
+            chartLegend = chartLegend,
+            error = error
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AnalysisState())
 
@@ -91,8 +113,8 @@ class AnalysisViewModel @AssistedInject constructor(
                 accountId,
                 _startDate.value.toString(),
                 _endDate.value.toString()
-            ).onError {
-
+            ).onError { networkError ->
+                _error.value = networkError.toUiText()
             }
             _isLoading.value = false
         }

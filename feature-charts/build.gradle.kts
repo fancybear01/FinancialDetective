@@ -2,12 +2,10 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.jetbrainsKotlinSerialization)
-    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.coding.feature_transactions"
+    namespace = "com.coding.feature_charts"
     compileSdk = 35
 
     defaultConfig {
@@ -36,43 +34,20 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
+    }
 }
 
 dependencies {
 
-    implementation(project(":core"))
-    implementation(project(":core-ui"))
-    implementation(project(":feature-charts"))
-
-    // Ktor
-    implementation(libs.bundles.ktor)
-
-    // Dagger
-    implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
-
-    // Compose
     implementation(platform(libs.androidx.compose.bom))
+
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
     debugImplementation(libs.androidx.ui.tooling)
 
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
-    implementation(libs.kotlinx.coroutines.core)
-
-    implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
-    implementation(libs.material3)
-
-    implementation(libs.androidx.work.runtime.ktx)
-
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.core.ktx)
 }

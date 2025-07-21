@@ -2,6 +2,8 @@ package com.coding.feature_transactions.ui.analysis
 
 import com.coding.core.domain.model.categories_models.CategoryAnalysisItem
 import com.coding.core.util.UiText
+import com.coding.feature_charts.ChartLegendItem
+import com.coding.feature_charts.PieChartData
 import java.time.LocalDate
 
 data class AnalysisState(
@@ -12,7 +14,8 @@ data class AnalysisState(
     val totalAmount: Double = 0.0,
     val categoryItems: List<CategoryAnalysisItem> = emptyList(),
     val currencyCode: String = "",
-    val isLoading: Boolean = true,
     val error: UiText? = null,
-    val noDataForAnalysis: Boolean = false
+    val noDataForAnalysis: Boolean = false,
+    val chartData: List<PieChartData> = emptyList(),
+    val chartLegend: List<ChartLegendItem> = emptyList()
 )
