@@ -28,14 +28,18 @@ import com.coding.core.util.UiEvent
 import com.coding.core_ui.common.components.AppBottomNavigationBar
 import com.coding.core_ui.common.components.AppFloatingActionButton
 import com.coding.core_ui.common.components.AppTopBar
+import com.coding.core_ui.di.appDependencies
+import com.coding.core_ui.di.daggerViewModel
 import com.coding.core_ui.navigation.Screen
 import com.coding.core_ui.navigation.LocalMainViewModel
 import com.coding.core_ui.navigation.LocalNavController
 import com.coding.core_ui.navigation.currentRouteAsState
 import com.coding.core_ui.navigation.getScreen
+import com.coding.core_ui.util.rememberHapticFeedbackManager
 import com.coding.feature_accounts.ui.editing_an_account.EditAccountScreen
 import com.coding.feature_categories.ui.CategoriesScreen
 import com.coding.feature_settings.ui.SettingsScreen
+import com.coding.feature_settings.ui.SettingsViewModel
 import com.coding.feature_transactions.ui.analysis.AnalysisScreen
 import com.coding.feature_transactions.ui.details.TransactionDetailsScreen
 import com.coding.feature_transactions.ui.expenses_incomes.ExpensesScreen
@@ -113,6 +117,15 @@ fun App(mainViewModel: MainViewModel) {
 
             val context = LocalContext.current
 
+            val dependencies = LocalContext.current.appDependencies
+            val settingsViewModel: SettingsViewModel = daggerViewModel(factory = dependencies.viewModelFactory())
+            val settingsState by settingsViewModel.state.collectAsStateWithLifecycle()
+
+            val hapticManager = rememberHapticFeedbackManager(
+                isEnabled = settingsState.hapticsEnabled,
+                effect = settingsState.hapticEffect
+            )
+
             LaunchedEffect(key1 = navController) {
                 launch {
                     mainViewModel.events.collect { event ->
@@ -174,11 +187,21 @@ fun App(mainViewModel: MainViewModel) {
                             }
                         }
 
+                        val onActionClickWithHaptics: () -> Unit = {
+                            hapticManager.performHapticFeedback()
+                            onActionClick()
+                        }
+
+                        val onNavigateUpWithHaptics: () -> Unit = {
+                            hapticManager.performHapticFeedback()
+                            navController.navigateUp()
+                        }
+
                         AppTopBar(
                             currentScreen = currentScreen,
                             containerColor = topBarContainerColor,
-                            onNavigateUp = { navController.navigateUp() },
-                            onActionClick = onActionClick,
+                            onNavigateUp = onNavigateUpWithHaptics,
+                            onActionClick = onActionClickWithHaptics,
                             isActionEnabled = if (
                                 currentScreen is Screen.EditAccount ||
                                 currentScreen is Screen.ExpenseDetails ||
@@ -192,7 +215,7 @@ fun App(mainViewModel: MainViewModel) {
                         ConnectionError(!isConnected)
                     }
                 },
-                bottomBar = { AppBottomNavigationBar(navController) },
+                bottomBar = { AppBottomNavigationBar(navController, hapticManager) },
                 floatingActionButton = {
                     val currentRoute = navController.currentRouteAsState()
                     val currentScreen = getScreen(currentRoute)

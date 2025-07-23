@@ -12,9 +12,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.coding.core_ui.navigation.currentRouteAsState
 import com.coding.core_ui.navigation.screens
+import com.coding.core_ui.util.HapticFeedbackManager
 
 @Composable
-fun AppBottomNavigationBar(navController: NavController) {
+fun AppBottomNavigationBar(
+    navController: NavController,
+    hapticManager: HapticFeedbackManager
+) {
     val currentDestination = navController.currentRouteAsState()
 
     NavigationBar  {
@@ -51,6 +55,7 @@ fun AppBottomNavigationBar(navController: NavController) {
                     unselectedIconColor = MaterialTheme.colorScheme.outline
                 ),
                 onClick = {
+                    hapticManager.performHapticFeedback()
                     navController.navigate(screenRoute) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true

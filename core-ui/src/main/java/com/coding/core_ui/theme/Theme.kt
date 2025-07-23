@@ -4,6 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.coding.core.domain.repository.ColorSchemeSetting
+import com.coding.core_ui.util.getAppColorScheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = Green,
@@ -37,9 +39,10 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun FinancialDetectiveTheme(
     darkTheme: Boolean,
+    colorSchemeSetting: ColorSchemeSetting,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = getAppColorScheme(scheme = colorSchemeSetting, isDark = darkTheme)
 
     MaterialTheme(
         colorScheme = colorScheme,
