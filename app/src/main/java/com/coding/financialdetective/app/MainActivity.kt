@@ -1,15 +1,18 @@
 package com.coding.financialdetective.app
 
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.OvershootInterpolator
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.coding.core.domain.repository.UserPreferencesRepository
 import com.coding.core_ui.theme.FinancialDetectiveTheme
+import com.coding.feature_security.ui.auth.PinCodeAuthScreen
 import com.coding.feature_settings.ui.SettingsCommand
 import com.coding.feature_settings.ui.SettingsViewModel
 import kotlinx.coroutines.flow.first
@@ -88,12 +92,23 @@ class MainActivity : BaseActivity() {
 
         setContent {
             val settingsState by settingsViewModel.state.collectAsStateWithLifecycle()
-
             FinancialDetectiveTheme(
                 darkTheme = settingsState.isDarkTheme,
                 colorSchemeSetting = settingsState.colorScheme
             ) {
-                App(mainViewModel = mainViewModel)
+                val authState by mainViewModel.authState.collectAsStateWithLifecycle()
+
+                when (authState) {
+                    AuthState.LOADING -> {
+                        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+                    }
+                    AuthState.UNAUTHENTICATED -> {
+                        PinCodeAuthScreen(onPinCorrect = mainViewModel::onPinAuthenticated)
+                    }
+                    AuthState.AUTHENTICATED -> {
+                        App(mainViewModel = mainViewModel)
+                    }
+                }
             }
         }
     }

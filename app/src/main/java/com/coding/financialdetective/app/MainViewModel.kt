@@ -12,6 +12,7 @@ import com.coding.core_ui.util.toUiText
 import com.coding.core.domain.model.account_models.Account
 import com.coding.core.domain.repository.AccountRepository
 import com.coding.core.domain.repository.CategoryRepository
+import com.coding.core.domain.repository.SecurityRepository
 import com.coding.core_ui.navigation.MainViewModelContract
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -35,7 +37,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val securityRepository: SecurityRepository
 ) : ViewModel(), MainViewModelContract {
 
     // Состояния для UI
@@ -75,6 +78,9 @@ class MainViewModel @Inject constructor(
         _isTopBarActionEnabled.value = enabled && action != null
     }
 
+    private val _authState = MutableStateFlow<AuthState>(AuthState.LOADING)
+    val authState: StateFlow<AuthState> = _authState
+
 
     // Инициализация и логика
     init {
@@ -83,6 +89,8 @@ class MainViewModel @Inject constructor(
         forceRefreshData()
 
         observeConnectivity()
+
+        checkAuthentication()
     }
 
     private fun observeAccounts() {
@@ -124,8 +132,29 @@ class MainViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
+
+    private fun checkAuthentication() {
+        viewModelScope.launch {
+            val pinIsSet = securityRepository.hasPinCode.first()
+            _authState.value = if (pinIsSet) {
+                AuthState.UNAUTHENTICATED
+            } else {
+                AuthState.AUTHENTICATED
+            }
+        }
+    }
+
+    fun onPinAuthenticated() {
+        _authState.value = AuthState.AUTHENTICATED
+    }
 }
 
 sealed class NavigationEvent {
     data object NavigateBack : NavigationEvent()
+}
+
+enum class AuthState {
+    LOADING,
+    UNAUTHENTICATED,
+    AUTHENTICATED
 }

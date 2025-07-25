@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.coding.core.data.remote.connectivity.ConnectivityObserver
 import com.coding.core.domain.repository.AccountRepository
 import com.coding.core.domain.repository.CategoryRepository
+import com.coding.core.domain.repository.SecurityRepository
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core.domain.repository.UserPreferencesRepository
 import com.coding.core.preferences.PreferencesManager
@@ -18,4 +19,5 @@ interface AppDependencies {
     fun viewModelFactory(): ViewModelProvider.Factory
     fun preferencesManager(): PreferencesManager
     fun userPreferencesRepository(): UserPreferencesRepository
+    fun securityRepository(): SecurityRepository
 }

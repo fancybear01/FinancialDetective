@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.coding.feature_transactions"
+    namespace = "com.coding.feature_security"
     compileSdk = 35
 
     defaultConfig {
@@ -42,16 +42,6 @@ dependencies {
 
     implementation(project(":core"))
     implementation(project(":core-ui"))
-    implementation(project(":feature-charts"))
-
-    // Ktor
-    implementation(libs.bundles.ktor)
-
-    // Dagger
-    implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
-
-    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material3)
@@ -70,9 +60,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
-    implementation(libs.material3)
-
-    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.bundles.ktor)
+    // Dagger
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
 
     implementation(libs.androidx.material.icons.extended)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

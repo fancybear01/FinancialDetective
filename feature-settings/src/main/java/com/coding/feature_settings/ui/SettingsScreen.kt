@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,7 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,17 +42,23 @@ import com.coding.core_ui.common.list_item.TrailInfo
 import com.coding.core_ui.common.list_item.ListItem
 import com.coding.core_ui.di.appDependencies
 import com.coding.core_ui.di.daggerViewModel
+import com.coding.core_ui.navigation.LocalNavController
 import com.coding.core_ui.theme.BluePrimary
 import com.coding.core_ui.theme.GreenPrimary
 import com.coding.core_ui.theme.OrangePrimary
 import com.coding.core_ui.theme.PurplePrimary
 import com.coding.feature_settings.R
+import com.coding.feature_settings.BuildConfig
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SettingsScreen() {
     val dependencies = LocalContext.current.appDependencies
     val viewModel: SettingsViewModel = daggerViewModel(factory = dependencies.viewModelFactory())
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     SettingsContent(
         state = state,
@@ -57,8 +66,14 @@ fun SettingsScreen() {
         onColorSchemeChanged = viewModel::onColorSchemeChanged,
         onHapticsToggled = viewModel::onHapticsToggled,
         onHapticEffectChanged = viewModel::onHapticEffectChanged,
-        onLanguageChanged = viewModel::onLanguageChanged
+        onLanguageChanged = viewModel::onLanguageChanged,
+        onAboutClick = { showAboutDialog = true }
     )
+
+
+    if (showAboutDialog) {
+        AboutDialog(onDismiss = { showAboutDialog = false })
+    }
 }
 
 @Composable
@@ -68,11 +83,13 @@ private fun SettingsContent(
     onColorSchemeChanged: (ColorSchemeSetting) -> Unit,
     onHapticsToggled: (Boolean) -> Unit,
     onHapticEffectChanged: (HapticFeedbackEffect) -> Unit,
-    onLanguageChanged: (LanguageSetting) -> Unit
+    onLanguageChanged: (LanguageSetting) -> Unit,
+    onAboutClick: () -> Unit
 ) {
     var showColorDialog by remember { mutableStateOf(false) }
     var showHapticEffectDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    val navController = LocalNavController.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -88,7 +105,7 @@ private fun SettingsContent(
                 ),
                 onClick = null,
                 modifier = Modifier
-                    .defaultMinSize(56.dp)
+                    .defaultMinSize(minHeight = 56.dp)
             )
         }
 
@@ -108,7 +125,7 @@ private fun SettingsContent(
                 ),
                 onClick = { showColorDialog = true },
                 modifier = Modifier
-                    .defaultMinSize(56.dp)
+                    .defaultMinSize(minHeight = 56.dp)
             )
         }
 
@@ -123,7 +140,7 @@ private fun SettingsContent(
                 ),
                 onClick = null,
                 modifier = Modifier
-                    .defaultMinSize(56.dp)
+                    .defaultMinSize(minHeight = 56.dp)
             )
         }
 
@@ -143,7 +160,7 @@ private fun SettingsContent(
                     ),
                     onClick = { showHapticEffectDialog = true },
                     modifier = Modifier
-                        .defaultMinSize(56.dp)
+                        .defaultMinSize(minHeight = 56.dp)
                 )
             }
         }
@@ -160,7 +177,35 @@ private fun SettingsContent(
                     ),
                     trail = TrailInfo.Chevron()
                 ),
-                onClick = { showLanguageDialog = true }
+                onClick = { showLanguageDialog = true },
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 56.dp)
+            )
+        }
+
+        item {
+            ListItem(
+                model = ListItemModel(
+                    content = ContentInfo(title = "О программе"),
+                    trail = TrailInfo.Chevron()
+                ),
+                onClick = onAboutClick,
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 56.dp)
+            )
+        }
+
+        item {
+            ListItem(
+                model = ListItemModel(
+                    content = ContentInfo(title = "Код-пароль"),
+                    trail = TrailInfo.Chevron()
+                ),
+                onClick = {
+                    navController.navigate("security_settings")
+                },
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 56.dp)
             )
         }
     }
@@ -197,6 +242,54 @@ private fun SettingsContent(
             }
         )
     }
+}
+
+@Composable
+private fun AboutDialog(
+    onDismiss: () -> Unit
+) {
+    val appVersion = BuildConfig.VERSION_NAME
+    val buildTime = BuildConfig.BUILD_TIME
+
+    val lastUpdateTime = remember(buildTime) {
+        val date = Date(buildTime)
+        val format = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("ru"))
+        format.format(date)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                painter = painterResource(id = R.drawable.app_money_bag_svgrepo_com),
+                contentDescription = null,
+                modifier = Modifier.size(36.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(text = "Financial Detective")
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Версия $appVersion",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Последнее обновление:\n$lastUpdateTime",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
 }
 
 @Composable

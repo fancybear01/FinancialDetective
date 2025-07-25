@@ -38,6 +38,8 @@ import com.coding.core_ui.navigation.getScreen
 import com.coding.core_ui.util.rememberHapticFeedbackManager
 import com.coding.feature_accounts.ui.editing_an_account.EditAccountScreen
 import com.coding.feature_categories.ui.CategoriesScreen
+import com.coding.feature_security.ui.pincode.PinCodeScreen
+import com.coding.feature_security.ui.settings.SecuritySettingsScreen
 import com.coding.feature_settings.ui.SettingsScreen
 import com.coding.feature_settings.ui.SettingsViewModel
 import com.coding.feature_transactions.ui.analysis.AnalysisScreen
@@ -103,6 +105,8 @@ fun AppNavHost(
             val isIncome = backStackEntry.arguments?.getBoolean("isIncome") ?: false
             AnalysisScreen(isIncome = isIncome)
         }
+        composable("pincode_setup") { PinCodeScreen() }
+        composable("security_settings") { SecuritySettingsScreen() }
     }
 }
 

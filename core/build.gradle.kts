@@ -61,4 +61,7 @@ dependencies {
 
     // datastore
     implementation(libs.androidx.datastore.preferences)
+
+    // security
+    implementation(libs.androidx.security.crypto)
 }

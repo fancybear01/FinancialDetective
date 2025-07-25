@@ -26,6 +26,8 @@ android {
             properties.load(input)
         }
         buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+        versionCode = (project.property("APP_VERSION_CODE") as String).toInt()
+        versionName = project.property("APP_VERSION_NAME") as String
     }
 
     buildTypes {
@@ -63,6 +65,7 @@ dependencies {
     implementation(project(":feature-transactions"))
     implementation(project(":feature-categories"))
     implementation(project(":feature-settings"))
+    implementation(project(":feature-security"))
 
     // Dagger (AppComponent)
     implementation(libs.dagger)
@@ -99,4 +102,7 @@ dependencies {
 
     // datastore
     implementation(libs.androidx.datastore.preferences)
+
+    // security
+    implementation(libs.androidx.security.crypto)
 }

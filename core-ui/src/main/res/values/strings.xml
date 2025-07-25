@@ -12,6 +12,8 @@
     <string name="income_details_route">income_details</string>
     <string name="analysis_route_expenses">analysis/false</string>
     <string name="analysis_route_incomes">analysis/true</string>
+    <string name="pincode_setup_route">pincode_setup</string>
+    <string name="security_settings_route">security_settings</string>
 
     <string name="expenses_header">Expenses today</string>
     <string name="expenses_icon">Expenses</string>
@@ -27,6 +29,8 @@
     <string name="income_details_title">My incomes</string>
     <string name="expense_details_title">My expenses</string>
     <string name="analysis_header">Analysis</string>
+    <string name="pincode_setup_header">Pin code setup</string>
+    <string name="security_settings_header">Password</string>
 
 
     <string name="settings_dark_theme">Dark theme</string>

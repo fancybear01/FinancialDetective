@@ -6,6 +6,7 @@ import com.coding.core.di.AppDependencies
 import com.coding.core.di.AppScope
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core.preferences.PreferencesManager
+import com.coding.feature_security.di.SecurityFeatureComponent
 import com.coding.financialdetective.app.BaseActivity
 import com.coding.financialdetective.app.FinancialApplication
 import com.coding.financialdetective.app.MainActivity
