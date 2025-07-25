@@ -1,6 +1,7 @@
 package com.coding.feature_accounts.ui.account_info
 
 import com.coding.core.util.UiText
+import com.coding.feature_charts.DailyChartData
 
 /**
  * Состояние экрана счёта.
@@ -15,5 +16,7 @@ data class AccountState(
     val currency: String = "₽",
     val currencyCode: String = "RUB",
     val error: UiText? = null,
-    val userMessages: List<String> = emptyList()
+    val userMessages: List<String> = emptyList(),
+    val chartData: List<DailyChartData> = emptyList(), // <-- НОВОЕ ПОЛЕ
+    val isLoadingChart: Boolean = true
 )

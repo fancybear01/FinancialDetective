@@ -42,6 +42,7 @@ dependencies {
 
     implementation(project(":core"))
     implementation(project(":core-ui"))
+    implementation(project(":feature-charts"))
 
     // Ktor
     implementation(libs.bundles.ktor)
@@ -73,5 +74,5 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
 
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material.icons.extended)
 }

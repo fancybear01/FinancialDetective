@@ -58,4 +58,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.work.runtime.ktx)
+
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+
+    // security
+    implementation(libs.androidx.security.crypto)
 }

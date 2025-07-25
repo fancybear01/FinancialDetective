@@ -26,3 +26,15 @@ val DarkMintGreen = Color(0xFF0A3D2C)
 val LightText = Color(0xFFE6E1E5)
 val DarkGrayBackground = Color(0xFF1D1B20)
 val DarkGrayBorder = Color(0xFF49454F)
+
+val GreenPrimary = Color(0xFF2AE881)
+val GreenSecondary = Color(0xFFD4FAE6)
+
+val BluePrimary = Color(0xFF2196F3)
+val BlueSecondary = Color(0xFF64B5F6)
+
+val OrangePrimary = Color(0xFFFF9800)
+val OrangeSecondary = Color(0xFFFFB74D)
+
+val PurplePrimary = Color(0xFF9C27B0)
+val PurpleSecondary = Color(0xFFBA68C8)

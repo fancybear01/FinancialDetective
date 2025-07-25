@@ -4,18 +4,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.coding.core.domain.repository.ColorSchemeSetting
+import com.coding.core_ui.util.getAppColorScheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = Green,
-    onPrimary = White,
+    onPrimary = DarkText,
     secondary = DarkMintGreen,
-    onPrimaryContainer = White,
-    onSecondaryContainer = DarkText,
+    onSecondary = White,
+    onPrimaryContainer = LightText,
+    onSecondaryContainer = LightText,
     surface = DarkGrayBackground,
-    onSurface = White,
-    onSurfaceVariant = NavigationBar,
-    outlineVariant = LightGrayBorder,
-    outline = DarkGrayBorder
+    onSurface = LightText,
+    onSurfaceVariant = LightGray,
+    outlineVariant = DarkGrayBorder,
+    outline = Gray,
+    error = Cancel
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -34,22 +38,11 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun FinancialDetectiveTheme(
-    //darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    darkTheme: Boolean,
+    colorSchemeSetting: ColorSchemeSetting,
     content: @Composable () -> Unit
 ) {
-//    val colorScheme = when {
-//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//            val context = LocalContext.current
-//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//        }
-//
-//        darkTheme -> DarkColorScheme
-//        else -> LightColorScheme
-//    }
-
-    val colorScheme = LightColorScheme
+    val colorScheme = getAppColorScheme(scheme = colorSchemeSetting, isDark = darkTheme)
 
     MaterialTheme(
         colorScheme = colorScheme,

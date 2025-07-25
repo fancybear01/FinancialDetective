@@ -42,6 +42,7 @@ dependencies {
 
     implementation(project(":core"))
     implementation(project(":core-ui"))
+    implementation(project(":feature-charts"))
 
     // Ktor
     implementation(libs.bundles.ktor)

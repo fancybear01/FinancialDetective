@@ -5,10 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.coding.core_ui.common.list_item.LeadInfo
+import com.coding.feature_charts.ChartLegend
+import com.coding.feature_charts.PieChart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +84,7 @@ fun AnalysisScreen(isIncome: Boolean) {
         )
 
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
@@ -109,7 +116,7 @@ fun AnalysisScreen(isIncome: Boolean) {
 
 
         when {
-            state.isLoading -> {
+            isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
@@ -186,6 +193,32 @@ fun AnalysisContent(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            PieChart(
+                                data = state.chartData,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 16.dp)
+                                    .aspectRatio(1f)
+                            )
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            ChartLegend(
+                                items = state.chartLegend,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                     items(items = state.categoryItems, key = { it.category.id }) { item ->
                         ListItem(
                             model = ListItemModel(
@@ -221,6 +254,7 @@ private fun DateSelectorRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
             .defaultMinSize(minHeight = 56.dp)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onClick),

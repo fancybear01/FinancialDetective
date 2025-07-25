@@ -7,9 +7,8 @@ import androidx.work.WorkerParameters
 import com.coding.core.util.SyncWorker
 import com.coding.core.domain.repository.TransactionRepository
 import com.coding.core.preferences.PreferencesManager
-import javax.inject.Inject
 
-class DaggerWorkerFactory @Inject constructor(
+class DaggerWorkerFactory(
     private val transactionRepository: TransactionRepository,
     private val preferencesManager: PreferencesManager
 ) : WorkerFactory() {
@@ -27,7 +26,9 @@ class DaggerWorkerFactory @Inject constructor(
                     transactionRepository,
                     preferencesManager
                 )
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 }

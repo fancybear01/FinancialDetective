@@ -1,12 +1,14 @@
 package com.coding.financialdetective.app
 
 import android.app.Application
+import android.util.Log
 import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.coding.core.di.AppDependencies
 import com.coding.core.util.SyncWorker
 import com.coding.core_ui.di.AppDependenciesProvider
 import com.coding.financialdetective.di.AppComponent
@@ -14,26 +16,33 @@ import com.coding.financialdetective.di.DaggerAppComponent
 import com.coding.financialdetective.di.DaggerWorkerFactory
 import java.util.concurrent.TimeUnit
 
-class FinancialApplication : Application(), AppDependenciesProvider, Configuration.Provider {
-    override val dependencies: AppComponent by lazy {
-        DaggerAppComponent.factory().create(applicationContext)
+class FinancialApplication : Application(), AppDependenciesProvider, Configuration.Provider  {
+
+    internal lateinit var appComponent: AppComponent
+
+    override val dependencies: AppDependencies
+        get() = appComponent
+
+    override fun onCreate() {
+        super.onCreate()
+        appComponent = DaggerAppComponent.factory().create(applicationContext)
+        setupPeriodicSync()
     }
 
     override val workManagerConfiguration: Configuration
         get() {
-            val factory = DaggerWorkerFactory(
-                dependencies.transactionRepository(),
-                dependencies.preferencesManager()
-            )
+            if (!::appComponent.isInitialized) {
+                appComponent = DaggerAppComponent.factory().create(applicationContext)
+            }
+
             return Configuration.Builder()
-                .setWorkerFactory(factory)
+                .setMinimumLoggingLevel(Log.DEBUG)
+                .setWorkerFactory(DaggerWorkerFactory(
+                    appComponent.transactionRepository(),
+                    appComponent.preferencesManager()
+                ))
                 .build()
         }
-
-    override fun onCreate() {
-        super.onCreate()
-        setupPeriodicSync()
-    }
 
     private fun setupPeriodicSync() {
         val constraints = Constraints.Builder()

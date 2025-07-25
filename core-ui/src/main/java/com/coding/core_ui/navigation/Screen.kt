@@ -62,7 +62,11 @@ sealed class Screen(
     data object Settings : Screen(
         routeResId = R.string.settings_route,
         titleResId = R.string.settings_header,
-        bottomNavigationIcon = BottomNavigationIcon.SettingsIcon
+        bottomNavigationIcon = BottomNavigationIcon.SettingsIcon,
+        relatedRoutesResIds = listOf(
+            R.string.pincode_setup_route,
+            R.string.security_settings_route
+        )
     )
 
     data object ExpensesHistory : Screen(
@@ -92,6 +96,7 @@ sealed class Screen(
         action = ActionIcon.TransactionDetailsConfirmAction,
         backNavigationIcon = BackNavigationIcon.CancelAction
     )
+
     data object IncomeDetails : Screen(
         routeResId = R.string.income_details_route,
         titleResId = R.string.income_details_title,
@@ -101,6 +106,18 @@ sealed class Screen(
 
     data class Analysis(val isIncome: Boolean) : Screen(
         titleResId = R.string.analysis_header,
+        backNavigationIcon = BackNavigationIcon.DefaultBack
+    )
+
+    data object PinCodeSetup : Screen(
+        routeResId = R.string.pincode_setup_route,
+        titleResId = R.string.pincode_setup_header,
+        backNavigationIcon = BackNavigationIcon.DefaultBack
+    )
+
+    data object SecuritySettings : Screen(
+        routeResId = R.string.security_settings_route, // ""
+        titleResId = R.string.security_settings_header, // ""
         backNavigationIcon = BackNavigationIcon.DefaultBack
     )
 }
@@ -125,6 +142,8 @@ fun getScreen(route: String?): Screen {
         "edit_account" -> Screen.EditAccount
         "expense_details" -> Screen.ExpenseDetails
         "income_details" -> Screen.IncomeDetails
+        "pincode_setup" -> Screen.PinCodeSetup
+        "security_settings" -> Screen.SecuritySettings
         else -> Screen.Expenses
     }
 }
